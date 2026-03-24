@@ -58,7 +58,7 @@ Les votes ne sont pas stockés dans une base de données classique. Ils sont pub
 
 ### Phase 1 — Fondations
 - [x] Initialiser le projet Next.js + DSFR
-- [ ] Intégrer FranceConnect (sandbox)
+- [x] Intégrer FranceConnect (mock local, en attente d'habilitation pour la sandbox officielle)
 - [ ] Modéliser la base de données (PostgreSQL)
 - [ ] Concevoir le système de blind signatures
 
