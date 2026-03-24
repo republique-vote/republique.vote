@@ -24,7 +24,7 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 ## Stack technique
 
 - **Frontend.** [Next.js](https://nextjs.org) + [DSFR](https://www.systeme-de-design.gouv.fr/) via [`@codegouvfr/react-dsfr`](https://github.com/codegouvfr/react-dsfr)
-- **Base de données.** PostgreSQL pour les données classiques (utilisateurs, scrutins, métadonnées)
+- **Base de données.** PostgreSQL pour les données classiques (utilisateurs, votes, métadonnées)
 - **Authentification.** [FranceConnect](https://franceconnect.gouv.fr/) (sandbox en développement)
 - **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est chiffré, signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central.
 
@@ -60,10 +60,10 @@ Les votes ne sont pas stockés dans une base de données classique. Ils sont pub
 - [x] Initialiser le projet Next.js + DSFR
 - [x] Intégrer FranceConnect (mock local, en attente d'habilitation pour la sandbox officielle)
 - [x] Modéliser la base de données (SQLite en dev, PostgreSQL en prod)
-- [ ] Concevoir le système de blind signatures
+- [x] Concevoir le système de blind signatures
 
 ### Phase 2 — Vote MVP
-- [ ] Créer un scrutin avec N options
+- [ ] Créer un vote avec N options
 - [ ] Implémenter le bulletin board public (log append-only + Merkle tree)
 - [ ] Chiffrement et soumission des votes
 - [ ] Page de résultats en temps réel
@@ -75,7 +75,7 @@ Les votes ne sont pas stockés dans une base de données classique. Ils sont pub
 
 ### Phase 4 — Contenu réel
 - [ ] Intégration de l'API de l'Assemblée Nationale / Sénat
-- [ ] Synchronisation automatique des projets de loi et scrutins
+- [ ] Synchronisation automatique des projets de loi et votes
 - [ ] Notifications aux citoyens
 
 ### Phase 5 — Confiance distribuée

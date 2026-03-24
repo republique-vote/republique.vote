@@ -16,7 +16,7 @@ export default function LoginPage() {
 			<StartDsfrOnHydration />
 			<h1>Se connecter</h1>
 			<p className="fr-text--lead fr-mt-3w">
-				Identifiez-vous pour accéder aux scrutins et voter.
+				Identifiez-vous pour accéder aux votes et participer.
 			</p>
 			<div className="fr-mt-4w">
 				<button
