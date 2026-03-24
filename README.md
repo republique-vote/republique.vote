@@ -59,7 +59,7 @@ Les votes ne sont pas stockés dans une base de données classique. Ils sont pub
 ### Phase 1 — Fondations
 - [x] Initialiser le projet Next.js + DSFR
 - [x] Intégrer FranceConnect (mock local, en attente d'habilitation pour la sandbox officielle)
-- [ ] Modéliser la base de données (PostgreSQL)
+- [x] Modéliser la base de données (SQLite en dev, PostgreSQL en prod)
 - [ ] Concevoir le système de blind signatures
 
 ### Phase 2 — Vote MVP
