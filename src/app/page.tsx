@@ -1,70 +1,49 @@
-//import { ClientComponent } from "#/ui/ClientComponent";
-import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { Summary } from "@codegouvfr/react-dsfr/Summary";
+import { Card } from "@codegouvfr/react-dsfr/Card";
 import { fr } from "@codegouvfr/react-dsfr";
-import { ClientComponent } from "../ui/ClientComponent";
 import { StartDsfrOnHydration } from "../dsfr-bootstrap";
 
 export default function Page() {
-
-    return (
-        <>
-            <StartDsfrOnHydration />
-            <a href="https://github.com/garronej/react-dsfr-next-appdir-demo" target="_blank" rel="noreferrer">Source code of this Next.js App Router demo setup</a>
-            <br/>
-            <br/>
-            <Summary
-                links={[
-                    {
-                        linkProps: {
-                            href: '#'
-                        },
-                        text: 'Titre de l’ancre'
-                    },
-                    {
-                        linkProps: {
-                            href: '#'
-                        },
-                        text: 'Titre de l’ancre'
-                    },
-                    {
-                        linkProps: {
-                            href: '#'
-                        },
-                        text: 'Titre de l’ancre'
-                    }
-                ]}
-            />
-            <Alert
-                className={fr.cx("fr-mt-7v")}
-                closable
-                description="Everything went well"
-                severity="success"
-                title="Message successfully sent"
-            />
-            <Tabs
-                className={fr.cx("fr-mt-7v")}
-                label="Name of the tabs system"
-                tabs={[
-                    {
-                        content: <p>Content of tab1</p>,
-                        iconId: 'fr-icon-add-line',
-                        label: 'Tab 1'
-                    },
-                    {
-                        content: <p>Content of tab2</p>,
-                        iconId: 'fr-icon-ball-pen-fill',
-                        label: 'Tab 2'
-                    },
-                    {
-                        content: <p>Content of tab3</p>,
-                        label: 'Tab 3'
-                    }
-                ]}
-            />
-            <ClientComponent />
-        </>
-    );
-
+	return (
+		<>
+			<StartDsfrOnHydration />
+			<h1>Votez en ligne, vérifiez le dépouillement</h1>
+			<p className={fr.cx("fr-text--lead", "fr-mt-3w")}>
+				republique.vote est une plateforme de vote en ligne transparente
+				pour les citoyens français. Chaque vote est chiffré, publié
+				publiquement et vérifiable par tous.
+			</p>
+			<div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-4w")}>
+				<div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+					<Card
+						title="Transparent"
+						desc="Le dépouillement est vérifiable mathématiquement par n'importe qui, sans se déplacer."
+						enlargeLink
+						linkProps={{
+							href: "#"
+						}}
+					/>
+				</div>
+				<div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+					<Card
+						title="Anonyme"
+						desc="Votre identité est vérifiée via FranceConnect, mais votre vote reste impossible à relier à vous."
+						enlargeLink
+						linkProps={{
+							href: "#"
+						}}
+					/>
+				</div>
+				<div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+					<Card
+						title="Vérifiable"
+						desc="Chaque citoyen peut vérifier que son vote a bien été pris en compte dans le résultat final."
+						enlargeLink
+						linkProps={{
+							href: "#"
+						}}
+					/>
+				</div>
+			</div>
+		</>
+	);
 }
