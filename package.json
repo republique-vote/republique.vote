@@ -1,0 +1,30 @@
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "react-dsfr update-icons",
+    "prebuild": "react-dsfr update-icons",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@codegouvfr/react-dsfr": "^1.29.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.6",
+    "@mui/material-nextjs": "^7.3.6",
+    "next": "16.0.8",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "sass": "^1.95.0",
+    "typescript": "^5.9.3"
+  }
+}
