@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "@/lib/auth-client";
+import { signIn } from "@/services/auth/client";
 import { StartDsfrOnHydration } from "../../dsfr-bootstrap";
 
 export default function LoginPage() {

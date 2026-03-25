@@ -11,12 +11,12 @@ export async function generateKeyPair() {
     modulusLength: 2048,
   });
 
-  const publicKeyBytes = await crypto.subtle.exportKey("spki", publicKey);
-  const privateKeyBytes = await crypto.subtle.exportKey("pkcs8", privateKey);
+  const publicJwk = await crypto.subtle.exportKey("jwk", publicKey);
+  const privateJwk = await crypto.subtle.exportKey("jwk", privateKey);
 
   return {
-    publicKey: Buffer.from(publicKeyBytes).toString("base64"),
-    privateKey: Buffer.from(privateKeyBytes).toString("base64"),
+    publicKey: JSON.stringify(publicJwk),
+    privateKey: JSON.stringify(privateJwk),
   };
 }
 
@@ -40,22 +40,22 @@ export async function getOrCreateKeyPair(pollId: string) {
   return keys;
 }
 
-async function importPrivateKey(privateKeyB64: string) {
-  const keyData = Buffer.from(privateKeyB64, "base64");
+async function importPrivateKey(privateKeyJson: string) {
+  const jwk = JSON.parse(privateKeyJson);
   return crypto.subtle.importKey(
-    "pkcs8",
-    keyData,
+    "jwk",
+    jwk,
     { name: "RSA-PSS", hash: "SHA-384" },
-    false,
+    true,
     ["sign"],
   );
 }
 
-async function importPublicKey(publicKeyB64: string) {
-  const keyData = Buffer.from(publicKeyB64, "base64");
+async function importPublicKey(publicKeyJson: string) {
+  const jwk = JSON.parse(publicKeyJson);
   return crypto.subtle.importKey(
-    "spki",
-    keyData,
+    "jwk",
+    jwk,
     { name: "RSA-PSS", hash: "SHA-384" },
     true,
     ["verify"],
@@ -64,22 +64,28 @@ async function importPublicKey(publicKeyB64: string) {
 
 export async function signBlindedToken(
   blindedMessage: Uint8Array,
-  privateKeyB64: string,
+  privateKeyJson: string,
 ): Promise<Uint8Array> {
-  const privateKey = await importPrivateKey(privateKeyB64);
+  const privateKey = await importPrivateKey(privateKeyJson);
   return suite.blindSign(privateKey, blindedMessage);
 }
 
 export async function verifySignature(
   token: Uint8Array,
   signature: Uint8Array,
-  publicKeyB64: string,
+  publicKeyJson: string,
 ): Promise<boolean> {
   try {
-    const publicKey = await importPublicKey(publicKeyB64);
+    const publicKey = await importPublicKey(publicKeyJson);
     await suite.verify(publicKey, signature, token);
     return true;
   } catch {
     return false;
   }
+}
+
+export async function getPublicKeySpki(publicKeyJson: string): Promise<string> {
+  const publicKey = await importPublicKey(publicKeyJson);
+  const spki = await crypto.subtle.exportKey("spki", publicKey);
+  return Buffer.from(spki).toString("base64");
 }
