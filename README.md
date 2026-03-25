@@ -58,11 +58,16 @@ Cacher les votes voudrait dire cacher les résultats. On fait l'inverse : tout e
 
 **Qu'est-ce qui empêche de tricher ?**
 
-Tous les votes sont écrits dans une liste publique où chaque ligne est liée à la précédente (techniquement : un "Merkle tree"). C'est comme un cahier où on ne peut pas arracher de page. Même si quelqu'un pirate le serveur :
+Imaginez un cahier public posé sur une table, que tout le monde peut lire. À chaque vote, une nouvelle ligne est écrite dans le cahier. Chaque ligne contient un code spécial qui dépend de toutes les lignes précédentes. Si quelqu'un essaie de modifier une ancienne ligne ou d'en arracher une, le code des lignes suivantes ne correspond plus et tout le monde voit qu'il y a eu une fraude.
+
+Ce "cahier" (techniquement : un "Merkle tree") est téléchargeable par n'importe qui. Vous pouvez le vérifier vous-même sur votre ordinateur.
+
+Même si quelqu'un pirate le serveur :
 
 - Impossible d'**inventer** de faux votes (il faudrait un code secret valide, et même le serveur ne peut pas en fabriquer après coup)
-- Impossible d'**effacer** des votes (la liste est publique, tout le monde peut la vérifier)
-- Impossible de **savoir** qui a voté quoi (le code est anonyme)
+- Impossible d'**effacer** des votes (le cahier est public, tout le monde peut le vérifier)
+- Impossible de **modifier** un vote (le code de toutes les lignes suivantes changerait)
+- Impossible de **savoir** qui a voté quoi (le code secret est anonyme)
 
 **Pourquoi je ne peux pas changer mon vote en ligne ?**
 
@@ -108,7 +113,7 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [x] Créer un vote avec N options
 - [x] Soumission anonyme des votes via blind signatures
 - [x] Page de résultats en temps réel (SSE via Redis Pub/Sub)
-- [ ] Implémenter le bulletin board public (log append-only + Merkle tree)
+- [x] Implémenter le bulletin board public (log append-only + Merkle tree)
 
 ### Phase 3 — Transparence & Vérification
 - [ ] Vérification individuelle ("mon vote a bien été compté")

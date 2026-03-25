@@ -9,6 +9,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
+import { CopyableHash } from "@/components/ui/copyable-hash";
 import { StartDsfrOnHydration } from "../../../dsfr-bootstrap";
 
 export default async function PollDetailPage({
@@ -93,6 +94,16 @@ export default async function PollDetailPage({
 				initialHasVoted={hasVoted}
 				initialVoteCount={count}
 			/>
+
+			{p.merkleRoot && (
+				<div className={fr.cx("fr-mt-4w")} style={{ borderTop: "1px solid var(--border-default-grey)", paddingTop: "16px" }}>
+					<CopyableHash
+						label="Empreinte du cahier de vote"
+						tooltip="Ce code est calculé mathématiquement à partir de tous les votes. Il évolue à chaque nouveau vote. Si quelqu'un modifie ou supprime un ancien vote, le calcul ne tombe plus juste et tout le monde peut le vérifier."
+						value={p.merkleRoot}
+					/>
+				</div>
+			)}
 		</>
 	);
 }
