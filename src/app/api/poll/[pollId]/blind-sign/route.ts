@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { poll, blindSignatureRequest } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { auth } from "@/lib/auth";
-import { getOrCreateKeyPair, signBlindedToken } from "@/lib/blind-signature";
+import { auth } from "@/services/auth";
+import { getOrCreateKeyPair, signBlindedToken } from "@/services/blind-signature";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { headers } from "next/headers";
 
@@ -60,11 +60,16 @@ export async function POST(
     return errorResponse("already_requested", 409);
   }
 
-  const keys = await getOrCreateKeyPair(pollId);
-  const blindedMsg = Uint8Array.from(Buffer.from(blindedToken, "base64"));
-  const blindSig = await signBlindedToken(blindedMsg, keys.privateKey);
+  try {
+    const keys = await getOrCreateKeyPair(pollId);
+    const blindedMsg = Uint8Array.from(Buffer.from(blindedToken, "base64"));
+    const blindSig = await signBlindedToken(blindedMsg, keys.privateKey);
 
-  return successResponse({
-    blindSignature: Buffer.from(blindSig).toString("base64"),
-  });
+    return successResponse({
+      blindSignature: Buffer.from(blindSig).toString("base64"),
+    });
+  } catch (err) {
+    console.error("blind-sign error:", err);
+    return errorResponse("blind_sign_failed", 500);
+  }
 }

@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { poll } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getOrCreateKeyPair, getPublicKeySpki } from "@/services/blind-signature";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { getPollResults } from "@/services/poll/results";
 
 export async function GET(
   _request: NextRequest,
@@ -19,9 +19,7 @@ export async function GET(
     return errorResponse("poll_not_found", 404);
   }
 
-  const keys = await getOrCreateKeyPair(pollId);
+  const results = await getPollResults(pollId);
 
-  const publicKeySpki = await getPublicKeySpki(keys.publicKey);
-
-  return successResponse({ publicKey: publicKeySpki });
+  return successResponse(results);
 }

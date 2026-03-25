@@ -2,8 +2,10 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { poll, option, voteRecord } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getOrCreateKeyPair, verifySignature } from "@/lib/blind-signature";
+import { getOrCreateKeyPair, verifySignature } from "@/services/blind-signature";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { emitVoteUpdate } from "@/services/poll/events";
+import { getPollResults } from "@/services/poll/results";
 
 export async function POST(
   request: NextRequest,
@@ -61,6 +63,9 @@ export async function POST(
   } catch {
     return errorResponse("already_voted", 409);
   }
+
+  const results = await getPollResults(pollId);
+  emitVoteUpdate(pollId, results);
 
   return successResponse({ voted: true }, 201);
 }
