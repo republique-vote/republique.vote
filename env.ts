@@ -12,6 +12,7 @@ export const env = createEnv({
     FC_AUTHORIZATION_URL: z.url(),
     FC_TOKEN_URL: z.url(),
     FC_USERINFO_URL: z.url(),
+    REDIS_URL: z.url(),
   },
   experimental__runtimeEnv: {},
   
