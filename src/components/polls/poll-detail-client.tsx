@@ -392,8 +392,9 @@ export function PollDetailClient({
 								.
 							</p>
 							<p className={fr.cx("fr-text--sm")} style={{ color: "var(--text-mention-grey)" }}>
-								Cette action est irréversible. Votre vote sera enregistré de
-								manière anonyme et ne pourra pas être modifié.
+								Cette action est définitive. Votre vote sera enregistré de
+								manière anonyme et ne pourra pas être modifié en ligne.
+								Pour changer votre vote, vous devrez vous rendre en bureau de vote.
 							</p>
 						</confirmVoteModal.Component>
 					</>
