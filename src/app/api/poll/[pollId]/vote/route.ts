@@ -6,6 +6,7 @@ import { getOrCreateKeyPair, verifySignature } from "@/services/blind-signature"
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { emitVoteUpdate } from "@/services/poll/events";
 import { getPollResults } from "@/services/poll/results";
+import { getLastVoteInChain, computeVoteHash, updateMerkleRoot } from "@/services/poll/merkle";
 
 export async function POST(
   request: NextRequest,
@@ -54,12 +55,32 @@ export async function POST(
   }
 
   try {
+    const lastVote = await getLastVoteInChain(pollId);
+    const previousHash = lastVote?.hash || null;
+    const sequence = (lastVote?.sequence || 0) + 1;
+    const createdAt = new Date().toISOString();
+
+    const hash = computeVoteHash(previousHash, {
+      pollId,
+      optionId,
+      blindToken: token,
+      blindSignature: signature,
+      createdAt,
+      sequence,
+    });
+
     await db.insert(voteRecord).values({
       pollId,
       optionId,
       blindToken: token,
       blindSignature: signature,
+      sequence,
+      hash,
+      previousHash,
+      createdAt,
     });
+
+    await updateMerkleRoot(pollId, hash);
   } catch {
     return errorResponse("already_voted", 409);
   }
