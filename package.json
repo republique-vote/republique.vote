@@ -8,7 +8,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "tsx scripts/seed.ts",
+    "redis": "tsx scripts/redis-dev.ts"
   },
   "dependencies": {
     "@cloudflare/blindrsa-ts": "^0.4.5",
@@ -21,9 +23,11 @@
     "better-auth": "^1.5.6",
     "better-sqlite3": "^12.8.0",
     "drizzle-orm": "^0.45.1",
+    "ioredis": "^5.10.1",
     "next": "16.2.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "swr": "^2.4.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -32,7 +36,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",
+    "redis-memory-server": "^0.16.0",
     "sass": "^1.95.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@9.15.9+sha512.68046141893c66fad01c079231128e9afb89ef87e2691d69e4d40eee228988295fd4682181bae55b58418c3a253bde65a505ec7c5f9403ece5cc3cd37dcf2531"
