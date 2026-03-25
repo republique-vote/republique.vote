@@ -23,7 +23,7 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 
 ## Stack technique
 
-- **Frontend.** [Next.js](https://nextjs.org) + [DSFR](https://www.systeme-de-design.gouv.fr/) via [`@codegouvfr/react-dsfr`](https://github.com/codegouvfr/react-dsfr)
+- **Frontend.** [Next.js](https://nextjs.org), basé sur l'[exemple Next App Router](https://github.com/codegouvfr/react-dsfr/tree/main/test/integration/next-appdir) de [`@codegouvfr/react-dsfr`](https://github.com/codegouvfr/react-dsfr) (MIT). Le branding gouvernemental (logo Marianne, font) devra être remplacé par une identité propre avant toute publication (voir roadmap)
 - **Base de données.** PostgreSQL pour les données classiques (utilisateurs, votes, métadonnées)
 - **Authentification.** [FranceConnect](https://franceconnect.gouv.fr/) (sandbox en développement)
 - **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central.
@@ -115,17 +115,21 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [x] Page de résultats en temps réel (SSE via Redis Pub/Sub)
 - [x] Implémenter le bulletin board public (log append-only + Merkle tree)
 
-### Phase 3 — Transparence & Vérification
-- [ ] Vérification individuelle ("mon vote a bien été compté")
-- [ ] Explorateur public du bulletin board
+### Phase 3 — Identité & Publication
+- [ ] Remplacer le branding gouvernemental (logo Marianne, font) par une identité propre
+- [x] Ajouter un disclaimer clair sur chaque page ("Ceci n'est pas un service gouvernemental")
 - [ ] Page "Comment ça marche" (explication du fonctionnement, schémas, choix techniques)
 
-### Phase 4 — Contenu réel
+### Phase 4 — Transparence & Vérification
+- [ ] Vérification individuelle ("mon vote a bien été compté")
+- [ ] Explorateur public du bulletin board
+
+### Phase 5 — Contenu réel
 - [ ] Intégration de l'API de l'Assemblée Nationale / Sénat
 - [ ] Synchronisation automatique des projets de loi et votes
 - [ ] Notifications aux citoyens
 
-### Phase 5 — Confiance distribuée
+### Phase 6 — Confiance distribuée
 - [ ] Dépouillement distribué (plusieurs autorités indépendantes)
 - [ ] Ancrage du Merkle root sur une blockchain publique (optionnel)
 - [ ] Audit de sécurité externe
