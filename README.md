@@ -23,7 +23,7 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 
 ## Stack technique
 
-- **Frontend.** [Next.js](https://nextjs.org), basé sur l'[exemple Next App Router](https://github.com/codegouvfr/react-dsfr/tree/main/test/integration/next-appdir) de [`@codegouvfr/react-dsfr`](https://github.com/codegouvfr/react-dsfr) (MIT). Le branding gouvernemental (logo Marianne, font) devra être remplacé par une identité propre avant toute publication (voir roadmap)
+- **Frontend.** [Next.js](https://nextjs.org) + [Shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/). Design inspiré du [DSFR](https://www.systeme-de-design.gouv.fr/) mais avec des composants libres (Radix + Tailwind) pour des raisons légales. Initialement basé sur le [template Next App Router du DSFR](https://github.com/codegouvfr/react-dsfr/tree/main/test/integration/next-appdir), une migration vers le DSFR officiel serait possible en cas d'habilitation
 - **Base de données.** PostgreSQL pour les données classiques (utilisateurs, votes, métadonnées)
 - **Authentification.** [FranceConnect](https://franceconnect.gouv.fr/) (sandbox en développement)
 - **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central.
@@ -116,7 +116,8 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [x] Implémenter le bulletin board public (log append-only + Merkle tree)
 
 ### Phase 3 — Identité & Publication
-- [ ] Remplacer le branding gouvernemental (logo Marianne, font) par une identité propre
+- [x] Remplacer le DSFR par un design system libre (Shadcn/ui + Tailwind)
+- [x] Retirer le logo Marianne et la font gouvernementale
 - [x] Ajouter un disclaimer clair sur chaque page ("Ceci n'est pas un service gouvernemental")
 - [ ] Page "Comment ça marche" (explication du fonctionnement, schémas, choix techniques)
 
