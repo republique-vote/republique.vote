@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { fr } from "@codegouvfr/react-dsfr";
-import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
 
 export function CopyableHash({
   value,
@@ -24,36 +30,29 @@ export function CopyableHash({
   return (
     <div>
       {label && (
-        <div className={fr.cx("fr-text--sm")} style={{ color: "var(--text-mention-grey)", margin: 0, marginBottom: "8px", display: "flex", alignItems: "center", gap: "4px" }}>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
           {label}
           {tooltip && (
-            <Tooltip kind="hover" title={tooltip} />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="h-3.5 w-3.5 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>{tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
       )}
-      <div style={{ display: "flex", gap: "8px", alignItems: "center", maxWidth: "500px" }}>
-        <input
-          type="text"
+      <div className="flex gap-2 items-center max-w-lg">
+        <Input
           readOnly
           value={value}
-          className={fr.cx("fr-input")}
-          style={{
-            fontFamily: "monospace",
-            fontSize: "0.75rem",
-            color: "var(--text-mention-grey)",
-            flex: 1,
-            textOverflow: "ellipsis",
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-          }}
+          className="font-mono text-xs text-muted-foreground truncate"
         />
-        <button
-          type="button"
-          className={fr.cx("fr-btn", "fr-btn--secondary", "fr-btn--sm")}
-          onClick={handleCopy}
-        >
+        <Button variant="outline" size="sm" onClick={handleCopy}>
           {copied ? "Copié" : "Copier"}
-        </button>
+        </Button>
       </div>
     </div>
   );

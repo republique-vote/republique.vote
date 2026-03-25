@@ -1,58 +1,60 @@
 "use client";
 
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useSession, signOut } from "@/services/auth/client";
-
-const logoutModal = createModal({
-  isOpenedByDefault: false,
-  id: "logout-modal",
-});
+import { Button } from "@/components/ui/button";
+import { UserCircle, LogIn } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function HeaderAuthItem() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   if (isPending) return null;
 
   if (session) {
     return (
-      <>
-        <button
-          className="fr-btn fr-btn--tertiary-no-outline fr-icon-account-circle-line"
-          onClick={() => logoutModal.open()}
-        >
-          {session.user.name}
-        </button>
-        {typeof document !== "undefined" &&
-          createPortal(
-            <logoutModal.Component
-              title="Se déconnecter"
-              size="medium"
-              buttons={[
-                {
-                  children: "Annuler",
-                  priority: "secondary",
-                  doClosesModal: true,
-                },
-                {
-                  children: "Se déconnecter",
-                  onClick: () => signOut({ fetchOptions: { onSuccess: () => router.refresh() } }),
-                },
-              ]}
-            >
-              <p>Êtes-vous sûr de vouloir vous déconnecter ?</p>
-            </logoutModal.Component>,
-            document.body,
-          )}
-      </>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <button className="inline-flex items-center gap-1.5 h-8 px-3 text-sm font-medium text-primary hover:bg-accent rounded-sm transition-colors">
+            <UserCircle className="h-4 w-4" />
+            {session.user.name}
+          </button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Se déconnecter</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir vous déconnecter ?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={() => signOut({ fetchOptions: { onSuccess: () => router.refresh() } })}>
+              Se déconnecter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
-    <Link className="fr-btn fr-btn--tertiary-no-outline fr-icon-account-circle-line" href="/login">
+    <Link href="/login" className="inline-flex items-center gap-1.5 h-8 px-3 text-sm font-medium text-primary hover:bg-accent rounded-sm transition-colors">
+      <LogIn className="h-4 w-4" />
       Se connecter
     </Link>
   );

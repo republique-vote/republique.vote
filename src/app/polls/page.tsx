@@ -1,10 +1,8 @@
-import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
-import { fr } from "@codegouvfr/react-dsfr";
 import { db } from "@/db";
 import { poll, voteRecord } from "@/db/schema";
 import { eq, count } from "drizzle-orm";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { PollListClient } from "@/components/polls/poll-list-client";
-import { StartDsfrOnHydration } from "../../dsfr-bootstrap";
 
 export default async function PollsPage() {
 	const polls = await db
@@ -26,13 +24,19 @@ export default async function PollsPage() {
 
 	return (
 		<>
-			<StartDsfrOnHydration />
-			<Breadcrumb
-				currentPageLabel="Votes"
-				segments={[{ label: "Accueil", linkProps: { href: "/" } }]}
-			/>
-			<h1>Votes</h1>
-			<p className={fr.cx("fr-text--lead")}>
+			<Breadcrumb className="mb-6">
+				<BreadcrumbList>
+					<BreadcrumbItem>
+						<BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+					</BreadcrumbItem>
+					<BreadcrumbSeparator />
+					<BreadcrumbItem>
+						<BreadcrumbPage>Votes</BreadcrumbPage>
+					</BreadcrumbItem>
+				</BreadcrumbList>
+			</Breadcrumb>
+			<h1 className="text-3xl font-bold tracking-tight">Votes</h1>
+			<p className="text-lg text-muted-foreground mt-2">
 				Participez aux votes en cours ou consultez les résultats des votes terminés.
 			</p>
 			<PollListClient polls={polls} />

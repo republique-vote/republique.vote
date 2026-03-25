@@ -1,9 +1,9 @@
 "use client";
 
-import { Card } from "@codegouvfr/react-dsfr/Card";
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { fr } from "@codegouvfr/react-dsfr";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowRight } from "lucide-react";
 
 export interface PollListItem {
 	id: string;
@@ -23,11 +23,11 @@ const STATUS_LABELS: Record<string, string> = {
 	draft: "Brouillon",
 };
 
-const STATUS_SEVERITY: Record<string, "success" | "info" | "warning" | "error" | "new"> = {
+const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline" | "success" | "info" | "warning"> = {
 	open: "success",
 	closed: "info",
 	tallied: "info",
-	draft: "warning",
+	draft: "outline",
 };
 
 function getTimeLabel(poll: PollListItem) {
@@ -48,37 +48,42 @@ function getTimeLabel(poll: PollListItem) {
 
 function PollCards({ polls }: { polls: PollListItem[] }) {
 	if (polls.length === 0) {
-		return <p className={fr.cx("fr-mt-4w")}>Aucun vote pour le moment.</p>;
+		return <p className="mt-6 text-muted-foreground">Aucun vote pour le moment.</p>;
 	}
 
 	return (
-		<div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-4w")}>
+		<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
 			{polls.map((p) => (
-				<div key={p.id} className={fr.cx("fr-col-12", "fr-col-md-6")}>
-					<Card
-						title={p.title}
-						desc={p.description}
-						detail={
-							<>
-								<Badge severity={STATUS_SEVERITY[p.status] || "info"} small>
-									{STATUS_LABELS[p.status] || p.status}
-								</Badge>
-								<span style={{ marginLeft: "8px" }}>
-									{p.voteCount} vote{p.voteCount !== 1 ? "s" : ""}
+				<Link
+					key={p.id}
+					href={`/polls/${p.id}`}
+					className="group block border border-border rounded-sm bg-card hover:border-primary/50 transition-colors"
+				>
+					<div className="p-5">
+						<div className="flex items-center gap-2 mb-3">
+							<Badge variant={STATUS_VARIANT[p.status] || "secondary"} className="text-xs">
+								{STATUS_LABELS[p.status] || p.status}
+							</Badge>
+							<span className="text-xs text-muted-foreground">
+								{p.voteCount} vote{p.voteCount !== 1 ? "s" : ""}
+							</span>
+							{getTimeLabel(p) && (
+								<span className="text-xs text-muted-foreground">
+									· {getTimeLabel(p)}
 								</span>
-								{getTimeLabel(p) && (
-									<span style={{ marginLeft: "8px", color: "var(--text-mention-grey)" }}>
-										· {getTimeLabel(p)}
-									</span>
-								)}
-							</>
-						}
-						enlargeLink
-						linkProps={{
-							href: `/polls/${p.id}`,
-						}}
-					/>
-				</div>
+							)}
+						</div>
+						<h3 className="font-bold text-card-foreground group-hover:text-primary transition-colors leading-snug">
+							{p.title}
+						</h3>
+						<p className="text-sm text-muted-foreground mt-2 leading-relaxed line-clamp-3">
+							{p.description}
+						</p>
+					</div>
+					<div className="border-t border-border px-5 py-3 flex justify-end">
+						<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+					</div>
+				</Link>
 			))}
 		</div>
 	);
@@ -89,22 +94,21 @@ export function PollListClient({ polls }: { polls: PollListItem[] }) {
 	const closedPolls = polls.filter((p) => p.status === "closed" || p.status === "tallied");
 
 	return (
-		<Tabs
-			className={fr.cx("fr-mt-4w")}
-			tabs={[
-				{
-					label: `En cours (${openPolls.length})`,
-					content: <PollCards polls={openPolls} />,
-				},
-				{
-					label: `Terminés (${closedPolls.length})`,
-					content: <PollCards polls={closedPolls} />,
-				},
-				{
-					label: `Tous (${polls.length})`,
-					content: <PollCards polls={polls} />,
-				},
-			]}
-		/>
+		<Tabs defaultValue="open" className="mt-8">
+			<TabsList variant="framed">
+				<TabsTrigger value="open">En cours ({openPolls.length})</TabsTrigger>
+				<TabsTrigger value="closed">Terminés ({closedPolls.length})</TabsTrigger>
+				<TabsTrigger value="all">Tous ({polls.length})</TabsTrigger>
+			</TabsList>
+			<TabsContent value="open" variant="framed">
+				<PollCards polls={openPolls} />
+			</TabsContent>
+			<TabsContent value="closed" variant="framed">
+				<PollCards polls={closedPolls} />
+			</TabsContent>
+			<TabsContent value="all" variant="framed">
+				<PollCards polls={polls} />
+			</TabsContent>
+		</Tabs>
 	);
 }

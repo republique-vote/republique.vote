@@ -1,7 +1,8 @@
 "use client";
 
 import { signIn } from "@/services/auth/client";
-import { StartDsfrOnHydration } from "../../dsfr-bootstrap";
+import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 
 export default function LoginPage() {
 	const handleFranceConnect = () => {
@@ -12,24 +13,21 @@ export default function LoginPage() {
 	};
 
 	return (
-		<>
-			<StartDsfrOnHydration />
-			<h1>Se connecter</h1>
-			<p className="fr-text--lead fr-mt-3w">
+		<div className="max-w-lg">
+			<h1 className="text-3xl font-bold tracking-tight">Se connecter</h1>
+			<p className="text-lg text-muted-foreground mt-3 leading-relaxed">
 				Identifiez-vous pour accéder aux votes et participer.
 			</p>
-			<div className="fr-mt-4w">
-				<button
-					className="fr-btn fr-btn--lg"
-					onClick={handleFranceConnect}
-				>
+			<div className="mt-8 p-6 border border-border rounded-sm bg-card">
+				<Button size="lg" onClick={handleFranceConnect} className="w-full">
+					<LogIn className="mr-2 h-4 w-4" />
 					S&apos;identifier avec FranceConnect
-				</button>
-				<p className="fr-text--sm fr-mt-2w" style={{ color: "#666" }}>
+				</Button>
+				<p className="text-xs text-muted-foreground mt-4 leading-relaxed">
 					En développement, un simulateur FranceConnect sera utilisé avec des
 					comptes de test fictifs.
 				</p>
 			</div>
-		</>
+		</div>
 	);
 }

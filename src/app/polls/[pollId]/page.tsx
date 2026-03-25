@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { fr } from "@codegouvfr/react-dsfr";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { poll, option, blindSignatureRequest } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
@@ -10,7 +9,6 @@ import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { CopyableHash } from "@/components/ui/copyable-hash";
-import { StartDsfrOnHydration } from "../../../dsfr-bootstrap";
 
 export default async function PollDetailPage({
 	params,
@@ -60,23 +58,28 @@ export default async function PollDetailPage({
 
 	return (
 		<>
-			<StartDsfrOnHydration />
-			<Breadcrumb
-				currentPageLabel={p.title}
-				segments={[
-					{ label: "Accueil", linkProps: { href: "/" } },
-					{ label: "Votes", linkProps: { href: "/polls" } },
-				]}
-			/>
-			<div className={fr.cx("fr-mb-4w")}>
-				<Badge
-					severity={isOpen ? "success" : "info"}
-					className={fr.cx("fr-mb-2w")}
-				>
+			<Breadcrumb className="mb-6">
+				<BreadcrumbList>
+					<BreadcrumbItem>
+						<BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+					</BreadcrumbItem>
+					<BreadcrumbSeparator />
+					<BreadcrumbItem>
+						<BreadcrumbLink href="/polls">Votes</BreadcrumbLink>
+					</BreadcrumbItem>
+					<BreadcrumbSeparator />
+					<BreadcrumbItem>
+						<BreadcrumbPage>{p.title}</BreadcrumbPage>
+					</BreadcrumbItem>
+				</BreadcrumbList>
+			</Breadcrumb>
+
+			<div className="mb-6">
+				<Badge variant={isOpen ? "success" : "info"} className="mb-3">
 					{isOpen ? "En cours" : "Terminé"}
 				</Badge>
-				<h1>{p.title}</h1>
-				<p className={fr.cx("fr-text--lead")}>{p.description}</p>
+				<h1 className="text-3xl font-bold tracking-tight">{p.title}</h1>
+				<p className="text-lg text-muted-foreground mt-2">{p.description}</p>
 			</div>
 
 			<PollDetailClient
@@ -96,7 +99,7 @@ export default async function PollDetailPage({
 			/>
 
 			{p.merkleRoot && (
-				<div className={fr.cx("fr-mt-4w")} style={{ borderTop: "1px solid var(--border-default-grey)", paddingTop: "16px" }}>
+				<div className="mt-8 pt-4 border-t">
 					<CopyableHash
 						label="Empreinte du cahier de vote"
 						tooltip="Ce code est calculé mathématiquement à partir de tous les votes. Il évolue à chaque nouveau vote. Si quelqu'un modifie ou supprime un ancien vote, le calcul ne tombe plus juste et tout le monde peut le vérifier."

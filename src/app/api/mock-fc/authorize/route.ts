@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mock FranceConnect - Connexion</title>
   <style>
-    body { font-family: 'Marianne', Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+    body { font-family: system-ui, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
     h1 { color: #000091; font-size: 1.5rem; }
     .banner { background: #f5f5fe; border-left: 4px solid #000091; padding: 12px; margin-bottom: 24px; font-size: 0.9rem; }
     .user-card { border: 1px solid #ddd; padding: 16px; margin: 8px 0; border-radius: 4px; cursor: pointer; transition: background 0.2s; }

@@ -36,7 +36,7 @@ export function PollDetailSkeleton() {
             key={i}
             style={{
               padding: "16px 20px",
-              border: "1px solid var(--border-default-grey)",
+              border: "1px solid hsl(var(--border))",
               borderRadius: "4px",
               display: "flex",
               justifyContent: "space-between",
@@ -61,13 +61,13 @@ export function PollDetailSkeleton() {
 
 export function PollListSkeleton() {
   return (
-    <div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="fr-col-12 fr-col-md-6">
+        <div key={i}>
           <div
             style={{
               padding: "24px",
-              border: "1px solid var(--border-default-grey)",
+              border: "1px solid hsl(var(--border))",
               borderRadius: "4px",
             }}
           >
