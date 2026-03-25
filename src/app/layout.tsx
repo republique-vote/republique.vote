@@ -6,6 +6,8 @@ import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import { fr } from "@codegouvfr/react-dsfr";
 import { getHtmlAttributes, DsfrHead } from "../dsfr-bootstrap/server-only-index";
 import { DsfrProvider } from "../dsfr-bootstrap";
+import { SWRProvider } from "./swr-provider";
+import { HeaderAuthItem } from "@/components/auth/header-auth-item";
 
 export default function RootLayout({ children }: { children: React.ReactNode; }) {
 
@@ -14,8 +16,8 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
 	return (
 		<html {...getHtmlAttributes({ lang })}>
 			<head>
-				<title>republique.vote — Plateforme de vote en ligne transparente</title>
-				<meta name="description" content="Plateforme de vote en ligne transparente pour les citoyens français" />
+				<title>republique.vote — Le vote, partout, pour tous</title>
+				<meta name="description" content="Le vote, partout, pour tous pour les citoyens français" />
 				<DsfrHead
 					preloadFonts={[
 						"Marianne-Regular",
@@ -34,36 +36,23 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
 				<AppRouterCacheProvider>
 					<DsfrProvider lang={lang}>
 						<MuiDsfrThemeProvider>
+						<SWRProvider>
 							<Header
 								brandTop={<>République<br />Française</>}
 								serviceTitle="republique.vote"
-								serviceTagline="Plateforme de vote en ligne transparente"
+								serviceTagline="Le vote, partout, pour tous"
 								homeLinkProps={{
 									href: "/",
 									title: "republique.vote — Accueil"
 								}}
 								quickAccessItems={[
 									headerFooterDisplayItem,
-									{
-										iconId: "fr-icon-account-circle-line",
-										linkProps: {
-											href: "/login"
-										},
-										text: "Se connecter"
-									}
+									<HeaderAuthItem key="auth" />,
 								]}
 							/>
-							<div
-								style={{
-									flex: 1,
-									margin: "auto",
-									maxWidth: 1000,
-									...fr.spacing("padding", {
-										topBottom: "10v"
-									})
-								}}>
+							<main className="fr-container" style={{ flex: 1, ...fr.spacing("padding", { topBottom: "10v" }) }}>
 								{children}
-							</div>
+							</main>
 							<Footer
 								brandTop={<>République<br />Française</>}
 								homeLinkProps={{
@@ -83,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
 									}
 								]}
 							/>
+						</SWRProvider>
 						</MuiDsfrThemeProvider>
 					</DsfrProvider>
 				</AppRouterCacheProvider>
