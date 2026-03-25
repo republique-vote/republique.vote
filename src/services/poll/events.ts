@@ -1,4 +1,4 @@
-import { getPublisher, getSubscriber } from "./redis";
+import { getPublisher, getSubscriber } from "@/services/redis";
 
 const CHANNEL_PREFIX = "poll-results:";
 
