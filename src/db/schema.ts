@@ -10,6 +10,7 @@ export const poll = sqliteTable("poll", {
   endDate: text("end_date").notNull(),
   sourceUrl: text("source_url"),
   sourceRef: text("source_ref"),
+  merkleRoot: text("merkle_root"),
   createdAt: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
 });
 
@@ -43,6 +44,9 @@ export const voteRecord = sqliteTable("vote_record", {
   optionId: text("option_id").notNull().references(() => option.id),
   blindToken: text("blind_token").notNull(),
   blindSignature: text("blind_signature").notNull(),
+  sequence: integer("sequence").notNull(),
+  hash: text("hash").notNull(),
+  previousHash: text("previous_hash"),
   createdAt: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
 }, (table) => [
   unique().on(table.pollId, table.blindToken),
