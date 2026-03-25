@@ -26,7 +26,7 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 - **Frontend.** [Next.js](https://nextjs.org) + [DSFR](https://www.systeme-de-design.gouv.fr/) via [`@codegouvfr/react-dsfr`](https://github.com/codegouvfr/react-dsfr)
 - **Base de données.** PostgreSQL pour les données classiques (utilisateurs, votes, métadonnées)
 - **Authentification.** [FranceConnect](https://franceconnect.gouv.fr/) (sandbox en développement)
-- **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est chiffré, signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central.
+- **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central.
 
 ## Architecture
 
@@ -34,25 +34,67 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 
 **FranceConnect** pour vérifier l'identité du citoyen (identité certifiée par l'État).
 
-### Anonymat + Transparence : vote vérifiable de bout en bout (E2E)
+### Concept
 
-Le gros défi du vote électronique : prouver que le décompte est correct **sans** pouvoir relier un vote à une personne.
+Tout le monde peut vérifier que les résultats sont bons, mais personne ne peut savoir qui a voté quoi.
 
-1. **Inscription.** FranceConnect authentifie le citoyen, puis le système lui délivre un **jeton cryptographique anonyme** via un mécanisme de "blind signature". Le système sait qu'un citoyen éligible a reçu un jeton, mais **ne peut pas relier le jeton à l'identité**.
+**Comment ça marche :**
 
-2. **Vote.** Le citoyen utilise son jeton anonyme pour voter. Le vote est chiffré et publié sur le **bulletin board public** (registre ouvert, consultable par tous).
+1. **Vous vous connectez.** Vous prouvez qui vous êtes avec FranceConnect (le même système que pour les impôts ou la CAF). Le système sait que vous avez le droit de voter.
 
-3. **Dépouillement.** Les votes sont déchiffrés collectivement (via plusieurs autorités indépendantes) et le résultat est publié. **N'importe qui** peut vérifier mathématiquement que le décompte correspond aux votes chiffrés.
+2. **Vous recevez un code secret.** Le système vous donne un code secret unique (techniquement : une "blind signature"). Ce code prouve que vous avez le droit de voter, mais il est **impossible de savoir à qui il appartient**. Imaginez : on vérifie votre identité à l'entrée, puis on vous donne un code sans nom. Une fois que vous l'avez, plus aucun lien entre vous et ce code. Tout ça se passe automatiquement en arrière-plan quand vous cliquez sur "Voter".
 
-4. **Vérification individuelle.** Chaque votant peut vérifier que son vote a bien été comptabilisé, sans pouvoir prouver à un tiers pour qui il a voté.
+3. **Vous votez.** Vous utilisez votre code secret pour envoyer votre choix. Votre vote est affiché publiquement sur une liste ouverte que tout le monde peut voir. Les résultats bougent en direct.
 
-### Sécurité des votes
+4. **Vous vérifiez.** Après avoir voté, vous pouvez vérifier que votre vote est bien dans la liste. Mais vous ne pouvez pas prouver à quelqu'un d'autre ce que vous avez voté (donc personne ne peut vous forcer à voter d'une certaine façon).
 
-Les votes ne sont pas stockés dans une base de données classique. Ils sont publiés sur un **log append-only** où chaque entrée est hashée avec la précédente (Merkle tree). Même en cas de compromission du serveur :
+**Pourquoi tout le monde voit les résultats en direct ?**
 
-- Les votes sont **chiffrés** (illisibles sans les clés de dépouillement)
-- Impossible d'en **ajouter** de faux (pas de blind signature valide)
-- Impossible d'en **supprimer** (le registre est public et vérifiable par tous)
+Parce que c'est tout le principe. Pas de comptage secret dans une salle fermée. Pas de "faites-nous confiance". Tout est visible, tout le temps, par tout le monde.
+
+**Pourquoi les votes ne sont pas cachés ?**
+
+Cacher les votes voudrait dire cacher les résultats. On fait l'inverse : tout est ouvert. Ce qui est protégé, c'est votre identité, pas votre choix. On sait qu'il y a un vote "Pour", mais on ne sait pas que c'est vous.
+
+**Qu'est-ce qui empêche de tricher ?**
+
+Tous les votes sont écrits dans une liste publique où chaque ligne est liée à la précédente (techniquement : un "Merkle tree"). C'est comme un cahier où on ne peut pas arracher de page. Même si quelqu'un pirate le serveur :
+
+- Impossible d'**inventer** de faux votes (il faudrait un code secret valide, et même le serveur ne peut pas en fabriquer après coup)
+- Impossible d'**effacer** des votes (la liste est publique, tout le monde peut la vérifier)
+- Impossible de **savoir** qui a voté quoi (le code est anonyme)
+
+**Pourquoi je ne peux pas changer mon vote en ligne ?**
+
+Pour retrouver votre ancien vote et le remplacer, le système devrait pouvoir relier votre identité à votre vote. Ça casserait l'anonymat. Donc le vote en ligne est **définitif**. Si vous voulez changer d'avis, vous pouvez aller voter en bureau de vote (ou en mairie sur une borne) : le vote physique écrase le vote en ligne.
+
+### Et si quelqu'un me force à voter ?
+
+C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'a résolu avec une solution 100% en ligne. Mais une solution existe.
+
+**Le principe : le vote en bureau de vote annule toujours le vote en ligne.**
+
+1. Vous pouvez voter en ligne quand vous voulez pendant la période de vote
+2. Le jour du vote, si vous allez au bureau de vote, votre vote physique **écrase tout** ce que vous avez fait en ligne
+3. Si vous n'allez pas au bureau de vote, votre dernier vote en ligne compte
+
+**Pourquoi ça protège :**
+
+| Situation | Ce qui se passe |
+|-----------|----------------|
+| Quelqu'un vous force à voter en ligne devant lui | Vous allez au bureau de vote, vous votez ce que VOUS voulez dans l'isoloir. Le vote physique écrase le vote en ligne. |
+| On vous force à voter à la dernière seconde en ligne | Le vote physique a lieu APRÈS la clôture en ligne. Vous pouvez encore tout annuler au bureau de vote. |
+| On vous demande une preuve de votre vote | Vous montrez votre vote en ligne. Mais l'autre personne sait que vous avez pu aller au bureau de vote et voter autre chose. Votre "preuve" ne vaut rien. |
+| Quelqu'un vous paie pour voter | Vous prenez l'argent, vous montrez votre vote en ligne, puis vous allez voter ce que vous voulez au bureau de vote. |
+| Quelqu'un vous séquestre | C'est un crime (séquestration). Ça relève de la police, pas de la technologie. Aucun système de vote ne peut protéger contre ça. |
+
+**C'est la même approche que l'Estonie** (vote en ligne depuis 2005, 44% des votants) **et la Norvège** (essais 2011-2013).
+
+La leçon de la Norvège : le plus important, c'est que **tout le monde sache** que le vote physique écrase le vote en ligne. Si le personne qui vous force ne le sait pas, ça ne le dissuade pas. C'est pourquoi on l'affiche clairement partout sur le site.
+
+**Limite honnête :** pour les votes purement consultatifs (pas d'élection officielle), il n'y a pas de bureau de vote physique ni de borne en mairie. Dans ce cas, le vote en ligne est définitif et il n'existe pas de moyen de le modifier. C'est une limite assumée : l'anonymat du vote impose que personne (même le système) ne puisse relier un vote à une personne.
+
+**À terme :** des bornes de vote (tablettes) pourraient être installées dans les mairies, avec un isoloir physique. Le vote sur ces bornes serait définitif, complètement anonyme, et écraserait tout vote en ligne précédent. C'est un système différent de l'app en ligne, mais complémentaire.
 
 ## Roadmap
 
@@ -63,15 +105,15 @@ Les votes ne sont pas stockés dans une base de données classique. Ils sont pub
 - [x] Concevoir le système de blind signatures
 
 ### Phase 2 — Vote MVP
-- [ ] Créer un vote avec N options
+- [x] Créer un vote avec N options
+- [x] Soumission anonyme des votes via blind signatures
+- [x] Page de résultats en temps réel (SSE via Redis Pub/Sub)
 - [ ] Implémenter le bulletin board public (log append-only + Merkle tree)
-- [ ] Chiffrement et soumission des votes
-- [ ] Page de résultats en temps réel
 
 ### Phase 3 — Transparence & Vérification
-- [ ] Dépouillement vérifiable (preuves cryptographiques)
 - [ ] Vérification individuelle ("mon vote a bien été compté")
 - [ ] Explorateur public du bulletin board
+- [ ] Page "Comment ça marche" (explication du fonctionnement, schémas, choix techniques)
 
 ### Phase 4 — Contenu réel
 - [ ] Intégration de l'API de l'Assemblée Nationale / Sénat
