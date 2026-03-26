@@ -128,25 +128,33 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [x] Flux RSS du cahier de vote (chaque vote = une entrée, compatible avec n'importe quel lecteur RSS)
 - [x] Export du registre complet en JSON/CSV
 
-### Phase 5 — Observateurs & Confiance distribuée
+### Phase 5 — Publication & Identité visuelle
+- [x] Ajouter la licence AGPL-3.0 (le code doit rester open source, y compris pour les déploiements SaaS)
+- [ ] Favicon et métadonnées Open Graph
+- [ ] Preuve de vote visuelle (image OG générée via Vercel OG avec numéro, empreinte, date — partageable mais non-prouvante grâce à l'écrasement physique)
+- [ ] Déployer sur Railway/Vercel + configurer republique.vote (DNS, certificat)
+- [ ] PostgreSQL + Redis managés en production
+- [ ] CI/CD (GitHub Actions : lint + build)
+
+### Phase 6 — Observateurs & Confiance distribuée
 - [ ] CLI open source (`npx republique-observer poll-1`) pour surveiller un vote en temps réel et stocker une copie locale
 - [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
 - [ ] App mobile avec notifications push à chaque nouveau vote
 - [ ] Webhook configurable (les médias/assos reçoivent chaque vote en POST sur leur serveur)
 - [ ] Publication automatique du Merkle root sur un repo GitHub public (un commit par vote)
 
-### Phase 6 — Contenu réel
+### Phase 7 — Contenu réel
 - [ ] Intégration de l'API de l'Assemblée Nationale / Sénat
 - [ ] Synchronisation automatique des projets de loi et votes
 - [ ] Notifications aux citoyens
 
-### Phase 7 — Scalabilité
+### Phase 8 — Scalabilité
 - [ ] Exports en streaming (écriture ligne par ligne, pas de chargement mémoire complet)
 - [ ] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
 - [ ] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
 - [ ] Migration SQLite → PostgreSQL pour la production
 
-### Phase 8 — Sécurité & Audit
+### Phase 9 — Sécurité & Audit
 - [ ] Dépouillement distribué (plusieurs autorités indépendantes)
 - [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
 - [ ] Intégration avec un transparency log (Sigsum/Rekor)
@@ -162,4 +170,4 @@ Projet open source porté par [Antoine Kingue](https://github.com/antoinekm).
 
 ## Licence
 
-À définir.
+[AGPL-3.0](LICENSE) — Une plateforme de vote doit être vérifiable par tous. Si quelqu'un déploie sa propre instance de republique.vote, les citoyens doivent pouvoir lire le code qui compte leurs votes. L'AGPL-3.0 garantit que le code reste ouvert, même quand il tourne sur un serveur distant.
