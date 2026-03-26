@@ -123,16 +123,27 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 
 ### Phase 4 — Transparence & Vérification
 - [x] Vérification individuelle ("mon vote a bien été compté")
-- [x] Explorateur public du bulletin board
+- [x] Explorateur public du bulletin board (tableau paginé, vérification client-side via Web Crypto API)
+- [x] Flux SSE public du cahier de vote (chaque vote diffusé en temps réel aux observateurs)
+- [x] Flux RSS du cahier de vote (chaque vote = une entrée, compatible avec n'importe quel lecteur RSS)
+- [ ] Export du registre complet en JSON/CSV
 
-### Phase 5 — Contenu réel
+### Phase 5 — Observateurs & Confiance distribuée
+- [ ] CLI open source (`npx republique-observer poll-1`) pour surveiller un vote en temps réel et stocker une copie locale
+- [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
+- [ ] App mobile avec notifications push à chaque nouveau vote
+- [ ] Webhook configurable (les médias/assos reçoivent chaque vote en POST sur leur serveur)
+- [ ] Publication automatique du Merkle root sur un repo GitHub public (un commit par vote)
+
+### Phase 6 — Contenu réel
 - [ ] Intégration de l'API de l'Assemblée Nationale / Sénat
 - [ ] Synchronisation automatique des projets de loi et votes
 - [ ] Notifications aux citoyens
 
-### Phase 6 — Confiance distribuée
+### Phase 7 — Sécurité & Audit
 - [ ] Dépouillement distribué (plusieurs autorités indépendantes)
-- [ ] Ancrage du Merkle root sur une blockchain publique (optionnel)
+- [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
+- [ ] Intégration avec un transparency log (Sigsum/Rekor)
 - [ ] Audit de sécurité externe
 
 ## Site
