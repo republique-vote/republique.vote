@@ -122,8 +122,8 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [x] Page "Comment ça marche" (explication du fonctionnement, schémas, choix techniques)
 
 ### Phase 4 — Transparence & Vérification
-- [ ] Vérification individuelle ("mon vote a bien été compté")
-- [ ] Explorateur public du bulletin board
+- [x] Vérification individuelle ("mon vote a bien été compté")
+- [x] Explorateur public du bulletin board
 
 ### Phase 5 — Contenu réel
 - [ ] Intégration de l'API de l'Assemblée Nationale / Sénat
