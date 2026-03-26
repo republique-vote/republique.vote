@@ -6,7 +6,20 @@ import { eq, sql, desc } from "drizzle-orm";
 import { verifyChain } from "@/services/poll/merkle";
 import { BoardClient } from "@/components/polls/board-client";
 
+import type { Metadata } from "next";
+
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ pollId: string }> }): Promise<Metadata> {
+	const { pollId } = await params;
+	return {
+		alternates: {
+			types: {
+				"application/rss+xml": `/api/poll/${pollId}/board/feed`,
+			},
+		},
+	};
+}
 
 const PAGE_SIZE = 50;
 

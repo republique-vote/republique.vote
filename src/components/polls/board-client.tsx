@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyableHash } from "@/components/ui/copyable-hash";
@@ -21,7 +21,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	Search,
-	RefreshCw,
+	Rss,
 } from "lucide-react";
 
 interface Vote {
@@ -105,7 +105,7 @@ function HashCell({ value }: { value: string }) {
 	);
 }
 
-export function BoardClient({ poll, options, initialVotes, totalVotes, serverChainValid }: BoardClientProps) {
+export function BoardClient({ poll, options, initialVotes, totalVotes: initialTotalVotes, serverChainValid }: BoardClientProps) {
 	const [verifyState, setVerifyState] = useState<VerifyState>("idle");
 	const [verifiedCount, setVerifiedCount] = useState(0);
 	const [voteStatus, setVoteStatus] = useState<Map<number, "valid" | "invalid">>(new Map());
@@ -117,6 +117,48 @@ export function BoardClient({ poll, options, initialVotes, totalVotes, serverCha
 	const [currentPage, setCurrentPage] = useState(1);
 	const [displayedVotes, setDisplayedVotes] = useState<Vote[]>(initialVotes);
 	const [loadingPage, setLoadingPage] = useState(false);
+	const [totalVotes, setTotalVotes] = useState(initialTotalVotes);
+
+	// SSE live feed
+	const [connected, setConnected] = useState(false);
+	const liveVotesRef = useRef<Vote[]>([]);
+
+	useEffect(() => {
+		const eventSource = new EventSource(`/api/poll/${poll.id}/board/stream`);
+
+		eventSource.onopen = () => setConnected(true);
+
+		eventSource.onmessage = (event) => {
+			const data = JSON.parse(event.data);
+			if (data.type === "vote") {
+				const vote: Vote = {
+					sequence: data.sequence,
+					optionId: data.optionId,
+					blindToken: data.blindToken,
+					blindSignature: data.blindSignature,
+					hash: data.hash,
+					previousHash: data.previousHash,
+					createdAt: data.createdAt,
+				};
+				liveVotesRef.current = [vote, ...liveVotesRef.current];
+				setTotalVotes((c) => c + 1);
+				// Only prepend to displayed votes if on page 1
+				if (currentPage === 1) {
+					setDisplayedVotes((prev) => [vote, ...prev].slice(0, PAGE_SIZE));
+				}
+			}
+		};
+
+		eventSource.onerror = () => {
+			setConnected(false);
+			eventSource.close();
+		};
+
+		return () => {
+			eventSource.close();
+			setConnected(false);
+		};
+	}, [poll.id, currentPage]);
 
 	const pageCount = Math.ceil(totalVotes / PAGE_SIZE);
 	const optionMap = new Map(options.map((o) => [o.id, o.label]));
@@ -133,14 +175,6 @@ export function BoardClient({ poll, options, initialVotes, totalVotes, serverCha
 		}
 		setLoadingPage(false);
 	}, [poll.id]);
-
-	const [refreshing, setRefreshing] = useState(false);
-
-	const handleRefresh = useCallback(async () => {
-		setRefreshing(true);
-		await goToPage(1);
-		setRefreshing(false);
-	}, [goToPage]);
 
 	const handleVerify = useCallback(async () => {
 		setVerifyState("fetching");
@@ -239,14 +273,20 @@ export function BoardClient({ poll, options, initialVotes, totalVotes, serverCha
 						</Badge>
 					)}
 					<Badge variant="info">{totalVotes} vote{totalVotes !== 1 ? "s" : ""}</Badge>
+					{connected ? (
+						<Badge variant="outline" className="text-green-600 border-green-600/30">
+							<span className="h-1.5 w-1.5 rounded-full bg-green-600 mr-1.5 animate-pulse" />
+							En direct
+						</Badge>
+					) : (
+						<Badge variant="outline" className="text-muted-foreground">
+							Déconnecté
+						</Badge>
+					)}
 				</div>
 
 				{/* Actions */}
 				<div className="flex items-center gap-2 mb-6">
-					<Button variant="outline" onClick={handleRefresh} disabled={refreshing || loadingPage}>
-						<RefreshCw className={`h-4 w-4 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
-						Actualiser
-					</Button>
 					<Button variant="outline" onClick={() => setVerifyVoteOpen(true)}>
 						<Search className="h-4 w-4 mr-1.5" />
 						Retrouver mon vote
@@ -266,6 +306,15 @@ export function BoardClient({ poll, options, initialVotes, totalVotes, serverCha
 							<p>Votre navigateur télécharge tous les votes puis recalcule chaque empreinte pour vérifier que personne n&apos;a modifié le cahier. Tout se passe sur votre appareil.</p>
 						</TooltipContent>
 					</Tooltip>
+					<a
+						href={`/api/poll/${poll.id}/board/feed`}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-1.5 px-3 py-2 text-sm border border-border hover:bg-muted transition-colors"
+					>
+						<Rss className="h-4 w-4 text-orange-500" />
+						RSS
+					</a>
 				</div>
 
 				{/* Progress bar */}
