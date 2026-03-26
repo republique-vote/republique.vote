@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
+    "db:reset": "rm -f app.db && npx drizzle-kit push && tsx scripts/seed.ts",
     "redis": "tsx scripts/redis-dev.ts"
   },
   "dependencies": {

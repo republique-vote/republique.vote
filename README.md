@@ -127,7 +127,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 ### Phase 5 — Publication & Identité visuelle
 - [x] Ajouter la licence AGPL-3.0 (le code doit rester open source, y compris pour les déploiements SaaS)
 - [x] Favicon et métadonnées Open Graph
-- [ ] Preuve de vote visuelle (image OG générée via Vercel OG avec numéro, empreinte, date — partageable mais non-prouvante grâce à l'écrasement physique)
+- [x] Preuve de vote visuelle (image générée avec numéro, empreinte, jeton, date — permet de retrouver et vérifier son vote plus tard)
 - [ ] Déployer sur Railway/Vercel + configurer republique.vote (DNS, certificat)
 - [ ] PostgreSQL + Redis managés en production
 - [ ] CI/CD (GitHub Actions : lint + build)
