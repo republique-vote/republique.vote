@@ -95,7 +95,7 @@ export async function POST(
       merkleRoot: hash,
     });
 
-    return successResponse({ voted: true }, 201);
+    return successResponse({ voted: true, sequence, hash, createdAt }, 201);
   } catch {
     return errorResponse("already_voted", 409);
   }
