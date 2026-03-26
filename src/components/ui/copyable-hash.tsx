@@ -44,13 +44,13 @@ export function CopyableHash({
           )}
         </div>
       )}
-      <div className="flex gap-2 items-center max-w-lg">
+      <div className="flex gap-0 items-stretch max-w-lg">
         <Input
           readOnly
           value={value}
-          className="font-mono text-xs text-muted-foreground truncate"
+          className="font-mono text-xs text-muted-foreground truncate rounded-r-none"
         />
-        <Button variant="outline" size="sm" onClick={handleCopy}>
+        <Button variant="outline" onClick={handleCopy} className="rounded-l-none border-l-0 shrink-0">
           {copied ? "Copié" : "Copier"}
         </Button>
       </div>
