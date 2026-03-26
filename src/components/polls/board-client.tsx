@@ -4,7 +4,14 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyableHash } from "@/components/ui/copyable-hash";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { VerifyVoteDialog } from "@/components/polls/verify-vote-dialog";
+import { VoteDetailsCards } from "@/components/polls/vote-details-cards";
 import {
 	Tooltip,
 	TooltipContent,
@@ -22,6 +29,10 @@ import {
 	ChevronRight,
 	Search,
 	Rss,
+	Radio,
+	FileJson,
+	FileSpreadsheet,
+	Eye,
 } from "lucide-react";
 
 interface Vote {
@@ -112,6 +123,9 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 
 	// Vote verification
 	const [verifyVoteOpen, setVerifyVoteOpen] = useState(false);
+
+	// Vote detail dialog
+	const [detailVote, setDetailVote] = useState<Vote | null>(null);
 
 	// Pagination
 	const [currentPage, setCurrentPage] = useState(1);
@@ -286,7 +300,7 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 				</div>
 
 				{/* Actions */}
-				<div className="flex items-center gap-2 mb-6">
+				<div className="flex flex-wrap items-center gap-2 mb-6">
 					<Button variant="outline" onClick={() => setVerifyVoteOpen(true)}>
 						<Search className="h-4 w-4 mr-1.5" />
 						Retrouver mon vote
@@ -306,15 +320,32 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 							<p>Votre navigateur télécharge tous les votes puis recalcule chaque empreinte pour vérifier que personne n&apos;a modifié le cahier. Tout se passe sur votre appareil.</p>
 						</TooltipContent>
 					</Tooltip>
-					<a
-						href={`/api/poll/${poll.id}/board/feed`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-flex items-center gap-1.5 px-3 py-2 text-sm border border-border hover:bg-muted transition-colors"
-					>
-						<Rss className="h-4 w-4 text-orange-500" />
-						RSS
-					</a>
+					<div className="flex items-center gap-2 ml-auto">
+						<Button variant="outline" size="sm" asChild>
+							<a href={`/api/poll/${poll.id}/board/export?format=json`}>
+								<FileJson className="h-3.5 w-3.5 mr-1" />
+								JSON
+							</a>
+						</Button>
+						<Button variant="outline" size="sm" asChild>
+							<a href={`/api/poll/${poll.id}/board/export?format=csv`}>
+								<FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
+								CSV
+							</a>
+						</Button>
+						<Button variant="outline" size="sm" asChild>
+							<a href={`/api/poll/${poll.id}/board/stream`} target="_blank" rel="noopener noreferrer">
+								<Radio className="h-3.5 w-3.5 mr-1" />
+								SSE
+							</a>
+						</Button>
+						<Button variant="outline" size="sm" asChild>
+							<a href={`/api/poll/${poll.id}/board/feed`} target="_blank" rel="noopener noreferrer">
+								<Rss className="h-3.5 w-3.5 mr-1 text-orange-500" />
+								RSS
+							</a>
+						</Button>
+					</div>
 				</div>
 
 				{/* Progress bar */}
@@ -342,7 +373,8 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 				<p className="text-muted-foreground text-center py-12">Aucun vote enregistré pour le moment.</p>
 			) : (
 				<>
-					<div className={`border border-border overflow-x-auto ${loadingPage ? "opacity-50 pointer-events-none" : ""}`}>
+					{/* Desktop table */}
+					<div className={`hidden md:block border border-border overflow-x-auto ${loadingPage ? "opacity-50 pointer-events-none" : ""}`}>
 						<table className="w-full text-sm">
 							<thead>
 								<tr className="border-b border-border bg-muted/50">
@@ -398,6 +430,7 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 											</TooltipContent>
 										</Tooltip>
 									</th>
+									<th className="w-10" />
 								</tr>
 							</thead>
 							<tbody>
@@ -425,13 +458,13 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 													<HashCell value={vote.previousHash} />
 												) : (
 													<Tooltip>
-													<TooltipTrigger asChild>
-														<span className="text-xs text-muted-foreground italic cursor-help border-b border-dotted border-muted-foreground">genèse</span>
-													</TooltipTrigger>
-													<TooltipContent className="max-w-xs">
-														<p>Premier vote du cahier. Son empreinte est calculée à partir de son contenu uniquement, sans empreinte précédente. C&apos;est le point de départ de la chaîne.</p>
-													</TooltipContent>
-												</Tooltip>
+														<TooltipTrigger asChild>
+															<span className="text-xs text-muted-foreground italic cursor-help border-b border-dotted border-muted-foreground">genèse</span>
+														</TooltipTrigger>
+														<TooltipContent className="max-w-xs">
+															<p>Premier vote du cahier. Son empreinte est calculée à partir de son contenu uniquement, sans empreinte précédente. C&apos;est le point de départ de la chaîne.</p>
+														</TooltipContent>
+													</Tooltip>
 												)}
 											</td>
 											<td className="px-3 py-2.5">
@@ -441,8 +474,18 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 												{formatDateShort(vote.createdAt)}
 											</td>
 											<td className="px-3 py-2.5 text-center">
-												{status === "valid" && <CheckCircle className="h-4 w-4 text-green-600 mx-auto" />}
-												{status === "invalid" && <XCircle className="h-4 w-4 text-destructive mx-auto" />}
+												{status === "valid" ? (
+													<CheckCircle className="h-4 w-4 text-green-600 mx-auto" />
+												) : status === "invalid" ? (
+													<XCircle className="h-4 w-4 text-destructive mx-auto" />
+												) : (
+													<ShieldCheck className="h-4 w-4 text-muted-foreground/30 mx-auto" />
+												)}
+											</td>
+											<td className="px-3 py-2.5">
+												<Button variant="ghost" size="icon-sm" onClick={() => setDetailVote(vote)}>
+													<Eye className="h-4 w-4" />
+												</Button>
 											</td>
 										</tr>
 									);
@@ -450,6 +493,54 @@ export function BoardClient({ poll, options, initialVotes, totalVotes: initialTo
 							</tbody>
 						</table>
 					</div>
+
+					{/* Mobile list */}
+					<div className={`md:hidden border border-border divide-y divide-border ${loadingPage ? "opacity-50 pointer-events-none" : ""}`}>
+						{displayedVotes.map((vote) => {
+							const status = voteStatus.get(vote.sequence);
+							return (
+								<div
+									key={vote.sequence}
+									className={`flex items-center justify-between px-3 py-3 ${status === "invalid" ? "bg-destructive/5" : ""}`}
+								>
+									<div className="flex items-center gap-3 min-w-0">
+										<span className="font-bold tabular-nums text-sm">#{vote.sequence}</span>
+										<Badge variant="outline" className="text-xs shrink-0">
+											{optionMap.get(vote.optionId) || vote.optionId}
+										</Badge>
+										<span className="text-xs text-muted-foreground">{formatDateShort(vote.createdAt)}</span>
+										{status === "valid" && <CheckCircle className="h-3.5 w-3.5 text-green-600 shrink-0" />}
+										{status === "invalid" && <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />}
+									</div>
+									<Button variant="ghost" size="icon-sm" onClick={() => setDetailVote(vote)}>
+										<Eye className="h-4 w-4" />
+									</Button>
+								</div>
+							);
+						})}
+					</div>
+
+					{/* Vote detail dialog (mobile) */}
+					<Dialog open={!!detailVote} onOpenChange={(open) => !open && setDetailVote(null)}>
+						<DialogContent className="sm:max-w-xl">
+							{detailVote && (
+								<>
+									<DialogHeader>
+										<DialogTitle>Vote #{detailVote.sequence} — {optionMap.get(detailVote.optionId) || detailVote.optionId}</DialogTitle>
+									</DialogHeader>
+									<VoteDetailsCards
+										optionLabel={optionMap.get(detailVote.optionId) || detailVote.optionId}
+										sequence={detailVote.sequence}
+										hash={detailVote.hash}
+										previousHash={detailVote.previousHash}
+										blindToken={detailVote.blindToken}
+										blindSignature={detailVote.blindSignature}
+										createdAt={detailVote.createdAt}
+									/>
+								</>
+							)}
+						</DialogContent>
+					</Dialog>
 
 					{/* Pagination */}
 					{pageCount > 1 && (

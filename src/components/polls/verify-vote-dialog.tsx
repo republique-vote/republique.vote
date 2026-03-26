@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CopyableHash } from "@/components/ui/copyable-hash";
 import {
 	Dialog,
 	DialogContent,
@@ -13,25 +12,17 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-	CheckCircle,
-	XCircle,
-	HelpCircle,
-	ListOrdered,
-	Hash,
-	Calendar,
-} from "lucide-react";
+import { VoteDetailsCards } from "@/components/polls/vote-details-cards";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface VerifyResult {
 	found: boolean;
 	sequence?: number;
+	optionLabel?: string;
 	hash?: string;
-	optionId?: string;
+	previousHash?: string | null;
+	blindToken?: string;
+	blindSignature?: string;
 	createdAt?: string;
 }
 
@@ -56,7 +47,8 @@ export function VerifyVoteDialog({ pollId, open, onOpenChange, initialToken = ""
 			const { data } = await res.json();
 			const vote = data.votes.find((v: { blindToken: string }) => v.blindToken === token);
 			if (vote) {
-				setResult({ found: true, sequence: vote.sequence, hash: vote.hash, optionId: vote.optionId, createdAt: vote.createdAt });
+				const optionLabel = data.options?.find((o: { id: string }) => o.id === vote.optionId)?.label || vote.optionId;
+				setResult({ found: true, sequence: vote.sequence, optionLabel, hash: vote.hash, previousHash: vote.previousHash, blindToken: vote.blindToken, blindSignature: vote.blindSignature, createdAt: vote.createdAt });
 			} else {
 				setResult({ found: false });
 			}
@@ -89,61 +81,15 @@ export function VerifyVoteDialog({ pollId, open, onOpenChange, initialToken = ""
 								<AlertTitle>Vote trouvé</AlertTitle>
 								<AlertDescription>Votre vote est bien enregistré dans le registre public.</AlertDescription>
 							</Alert>
-							<div className="space-y-2">
-								<div className="flex items-center gap-3 p-3 border border-border bg-card">
-									<ListOrdered className="h-4 w-4 text-muted-foreground shrink-0" />
-									<div className="flex-1 min-w-0">
-										<div className="flex items-center gap-1.5">
-											<span className="text-xs text-muted-foreground">Position dans le registre</span>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
-												</TooltipTrigger>
-												<TooltipContent className="max-w-xs">
-													<p>Le numéro d&apos;ordre de votre vote dans le registre public. Chaque vote reçoit un numéro unique.</p>
-												</TooltipContent>
-											</Tooltip>
-										</div>
-										<p className="text-sm font-semibold">#{result.sequence}</p>
-									</div>
-								</div>
-								<div className="flex items-center gap-3 p-3 border border-border bg-card overflow-hidden">
-									<Hash className="h-4 w-4 text-muted-foreground shrink-0" />
-									<div className="flex-1 min-w-0 overflow-hidden">
-										<div className="flex items-center gap-1.5">
-											<span className="text-xs text-muted-foreground">Empreinte cryptographique</span>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
-												</TooltipTrigger>
-												<TooltipContent className="max-w-xs">
-													<p>Un code unique calculé à partir de votre vote. Si quelqu&apos;un modifie le vote, ce code change, ce qui rend la fraude détectable.</p>
-												</TooltipContent>
-											</Tooltip>
-										</div>
-										<div className="mt-1">
-											<CopyableHash value={result.hash || ""} />
-										</div>
-									</div>
-								</div>
-								<div className="flex items-center gap-3 p-3 border border-border bg-card">
-									<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-									<div className="flex-1 min-w-0">
-										<div className="flex items-center gap-1.5">
-											<span className="text-xs text-muted-foreground">Date d&apos;enregistrement</span>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
-												</TooltipTrigger>
-												<TooltipContent className="max-w-xs">
-													<p>Le moment exact où votre vote a été inscrit dans le registre public.</p>
-												</TooltipContent>
-											</Tooltip>
-										</div>
-										<p className="text-sm font-semibold">{result.createdAt && new Date(result.createdAt).toLocaleString("fr-FR")}</p>
-									</div>
-								</div>
-							</div>
+							<VoteDetailsCards
+								optionLabel={result.optionLabel}
+								sequence={result.sequence}
+								hash={result.hash}
+								previousHash={result.previousHash}
+								blindToken={result.blindToken}
+								blindSignature={result.blindSignature}
+								createdAt={result.createdAt}
+							/>
 						</div>
 					)}
 					{result && !result.found && (
