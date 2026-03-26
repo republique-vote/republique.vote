@@ -126,7 +126,7 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [x] Explorateur public du bulletin board (tableau paginé, vérification client-side via Web Crypto API)
 - [x] Flux SSE public du cahier de vote (chaque vote diffusé en temps réel aux observateurs)
 - [x] Flux RSS du cahier de vote (chaque vote = une entrée, compatible avec n'importe quel lecteur RSS)
-- [ ] Export du registre complet en JSON/CSV
+- [x] Export du registre complet en JSON/CSV
 
 ### Phase 5 — Observateurs & Confiance distribuée
 - [ ] CLI open source (`npx republique-observer poll-1`) pour surveiller un vote en temps réel et stocker une copie locale
@@ -140,7 +140,13 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [ ] Synchronisation automatique des projets de loi et votes
 - [ ] Notifications aux citoyens
 
-### Phase 7 — Sécurité & Audit
+### Phase 7 — Scalabilité
+- [ ] Exports en streaming (écriture ligne par ligne, pas de chargement mémoire complet)
+- [ ] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
+- [ ] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
+- [ ] Migration SQLite → PostgreSQL pour la production
+
+### Phase 8 — Sécurité & Audit
 - [ ] Dépouillement distribué (plusieurs autorités indépendantes)
 - [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
 - [ ] Intégration avec un transparency log (Sigsum/Rekor)
