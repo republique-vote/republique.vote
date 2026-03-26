@@ -4,46 +4,75 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-republique.vote — transparent online voting platform (POC) for French citizens. Uses cryptographic techniques (blind signatures, Merkle trees) to enable verifiable anonymous voting. Built with the French government design system (DSFR).
+republique.vote — transparent online voting platform (POC) for French citizens. Uses cryptographic techniques (blind signatures RSA-PSS, Merkle trees) to enable verifiable anonymous voting. Every vote is signed, published publicly, and mathematically verifiable by anyone.
 
 ## Commands
 
 ```bash
-pnpm dev          # Start dev server (auto-runs react-dsfr update-icons via predev)
-pnpm build        # Production build (auto-runs react-dsfr update-icons via prebuild)
+pnpm dev          # Start dev server (http://localhost:3000)
+pnpm build        # Production build
 pnpm start        # Start production server
 pnpm lint         # Run ESLint via next lint
+pnpm seed         # Seed database with test polls (tsx scripts/seed.ts)
+pnpm redis        # Start in-memory Redis for real-time results (tsx scripts/redis-dev.ts)
 ```
-
-Note: `predev` and `prebuild` scripts run `react-dsfr update-icons` automatically. The `.npmrc` file enables pre/post scripts for pnpm.
 
 ## Architecture
 
-Next.js 16 App Router with TypeScript (strict mode). Path alias `@/*` → `./src/*`.
+Next.js 16 App Router with TypeScript (strict mode). Path aliases: `@/*` → `./src/*`, `env` → `./env.ts`.
 
-### DSFR Bootstrap (`src/dsfr-bootstrap/`)
+### Design System
 
-Critical integration layer between Next.js and the French government design system:
+Shadcn/ui (Radix primitives) + Tailwind CSS v4. Design inspired by DSFR (French government design system) but using free components for legal reasons. Sharp corners (radius: 0), DSFR blue-france color palette (#000091 light / #8585f6 dark). Geist font. Dark mode via `next-themes`.
 
-- `server-only-index.tsx` — Server-side: exports `getHtmlAttributes` and `DsfrHead` for the root layout
-- `index.tsx` — Client-side: exports `DsfrProvider` (wraps `DsfrProviderBase` + `StartDsfrOnHydration`) and `MuiDsfrThemeProvider`
-- `defaultColorScheme.ts` — Color scheme config (defaults to "system")
+### Server vs Client Components
 
-The root `layout.tsx` imports from both files. `DsfrProvider` must wrap all pages. `StartDsfrOnHydration` must be mounted on every page (currently handled in page components).
+- **Server components**: `layout.tsx`, `polls/page.tsx`, `polls/[pollId]/page.tsx` — fetch data directly from DB
+- **Client components**: voting UI, real-time results, auth header, theme toggle — use `"use client"` directive
+- SSR pages pass initial data as props to client components for hydration
 
-### MUI Integration
+### Services Layer (`src/services/`)
 
-MUI is integrated via `MuiDsfrThemeProvider` which bridges DSFR design tokens to MUI. Uses `@mui/material-nextjs` with `AppRouterCacheProvider` for SSR-compatible CSS-in-JS (Emotion).
+- `auth/` — Better Auth instance (`index.ts`) + client hooks (`client.ts`)
+- `blind-signature/` — RSA-PSS key management + signing (`index.ts`) + client-side blinding (`client.ts`)
+- `poll/` — results aggregation (`results.ts`), Redis pub/sub events (`events.ts`), Merkle tree hashing (`merkle.ts`)
+- `redis.ts` — singleton Redis publisher/subscriber instances
+- `swr.ts` — SWR fetcher config
 
-### Client vs Server Components
+### Cryptographic Vote Flow
 
-- `layout.tsx` is a server component that sets up providers
-- Components needing hooks or interactivity use `"use client"` directive
-- Navigation, login header items, and UI components with state are client components
+1. Client generates random 32-byte token, blinds it with poll's RSA public key
+2. Client POSTs blinded token to `/api/poll/[pollId]/blind-sign` (requires FranceConnect auth)
+3. Server signs blindly (one request per user-poll), returns blind signature
+4. Client unblinds → valid signature on original token
+5. Client POSTs vote with token + signature to `/api/poll/[pollId]/vote` (no auth — signature is the proof)
+6. Server verifies signature, inserts vote with hash chain (Merkle tree), updates merkle root, emits Redis event
+
+### Real-time Results
+
+SSE via `/api/poll/[pollId]/results/stream`. Redis pub/sub channel `poll-results:[pollId]`. Client uses `EventSource` + SWR for initial data.
+
+### Database
+
+SQLite (better-sqlite3) with Drizzle ORM. Auth tables in `auth.db`, app tables in `app.db`. Schema at `src/db/schema.ts`. Migrations via `drizzle-kit generate` / `drizzle-kit push`.
+
+Key tables: `poll`, `option`, `pollKeyPair`, `blindSignatureRequest` (one per user-poll), `voteRecord` (immutable ledger with hash chain).
+
+### Mock FranceConnect
+
+Development auth at `/api/mock-fc/*`. Test users in `src/app/api/mock-fc/test-users.ts`. Click a user card to login — no real credentials needed.
+
+## API Response Format
+
+All endpoints use consistent format via `src/lib/api-response.ts`:
+```typescript
+{ success: true, data: T }           // success
+{ success: false, statusCode, message }  // error
+```
 
 ## Styling
 
-DSFR classes (`fr-*`) are the primary styling approach. MUI `sx` prop for MUI components. Emotion CSS-in-JS available. Use `fr.spacing()` for consistent spacing.
+Tailwind CSS classes. Shadcn/ui components in `src/components/ui/`. Custom variants added to Badge (`success`, `info`, `warning`), Alert (`success`, `info`, `warning`, `destructive`), and Tabs (`framed` — DSFR-inspired tabbed panel). DSFR-like tab styling in `globals.css` via `[data-variant="framed"]` selectors.
 
 ## Language
 

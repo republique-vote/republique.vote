@@ -119,7 +119,7 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [x] Remplacer le DSFR par un design system libre (Shadcn/ui + Tailwind)
 - [x] Retirer le logo Marianne et la font gouvernementale
 - [x] Ajouter un disclaimer clair sur chaque page ("Ceci n'est pas un service gouvernemental")
-- [ ] Page "Comment ça marche" (explication du fonctionnement, schémas, choix techniques)
+- [x] Page "Comment ça marche" (explication du fonctionnement, schémas, choix techniques)
 
 ### Phase 4 — Transparence & Vérification
 - [ ] Vérification individuelle ("mon vote a bien été compté")
