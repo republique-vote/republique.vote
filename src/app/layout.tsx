@@ -80,7 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 								{/* Content — right, pushed to right like DSFR */}
 								<div className="md:flex-[0_1_50%] md:ml-auto mt-4 md:mt-0">
 									<p className="text-sm text-muted-foreground leading-relaxed">
-										Proof of concept open source de vote en ligne transparent pour les citoyens français.
+										Proof of concept <a href="https://github.com/republique-vote/republique.vote" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">open source</a> de vote en ligne transparent pour les citoyens français.
 										Chaque vote est signé, publié publiquement et vérifiable par tous.
 									</p>
 								</div>
