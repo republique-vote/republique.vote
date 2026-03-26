@@ -2,19 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const links = [
-  { href: "/", label: "Accueil", exact: true },
-  { href: "/polls", label: "Votes", exact: false },
-  { href: "/how-it-works", label: "Comment ça marche", exact: true },
-];
+import { navLinks } from "@/constants/nav";
 
 export function HeaderNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-0">
-      {links.map((link) => {
+    <nav className="flex items-center gap-0 overflow-x-auto">
+      {navLinks.map((link) => {
         const isActive = link.exact
           ? pathname === link.href
           : pathname.startsWith(link.href);
@@ -23,7 +18,7 @@ export function HeaderNav() {
           <Link
             key={link.href}
             href={link.href}
-            className={`text-sm py-4 px-4 border-b-2 transition-colors ${
+            className={`text-sm py-4 px-4 border-b-2 transition-colors whitespace-nowrap ${
               isActive
                 ? "border-primary text-primary font-semibold"
                 : "border-transparent text-foreground hover:text-primary hover:border-primary"

@@ -9,6 +9,7 @@ import { HeaderAuthItem } from "@/components/auth/header-auth-item";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandLogo } from "@/components/brand-logo";
 import { HeaderNav } from "@/components/header-nav";
+import { MobileMenu } from "@/components/mobile-menu";
 import { InfoIcon } from "lucide-react";
 import "./globals.css";
 
@@ -50,26 +51,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					</div>
 
 					{/* Header */}
-					<header className="bg-card border-b border-border">
+					<header className="bg-card border-b border-border relative">
 						<div className="max-w-[1200px] mx-auto px-6">
 							{/* Top row: brand + quick access */}
-							<div className="flex items-center justify-between min-h-[116px]">
-								<div className="flex items-center gap-4">
-									<BrandLogo />
-									<div className="h-12 w-px bg-border" />
-									<Link href="/" className="flex flex-col">
-										<span className="text-xl font-bold text-foreground">republique.vote</span>
-										<span className="text-sm text-muted-foreground">Le vote, partout, pour tous. Par le peuple, pour le peuple.</span>
+							<div className="flex items-center justify-between min-h-[56px] md:min-h-[116px] gap-2">
+								<div className="flex items-center gap-4 min-w-0">
+									<div className="hidden md:block shrink-0"><BrandLogo /></div>
+									<div className="hidden md:block h-12 w-px bg-border shrink-0" />
+									<Link href="/" className="flex flex-col min-w-0">
+										<span className="text-lg md:text-xl font-bold text-foreground truncate">republique.vote</span>
+										<span className="hidden md:block text-sm text-muted-foreground">Le vote, partout, pour tous. Par le peuple, pour le peuple.</span>
 									</Link>
 								</div>
-								<div className="flex items-center">
+								{/* Desktop: quick access */}
+								<div className="hidden md:flex items-center shrink-0">
 									<ThemeToggle />
 									<HeaderAuthItem />
 								</div>
+								{/* Mobile: burger menu */}
+								<MobileMenu />
 							</div>
 						</div>
-						{/* Navigation row */}
-						<div className="border-t border-border">
+						{/* Navigation row (desktop only) */}
+						<div className="hidden md:block border-t border-border">
 							<div className="max-w-[1200px] mx-auto px-6">
 								<HeaderNav />
 							</div>
