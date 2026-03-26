@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { CopyableHash } from "@/components/ui/copyable-hash";
 import { VerifyVoteDialog } from "@/components/polls/verify-vote-dialog";
-import { CheckCircle, AlertTriangle, Info, XCircle, Search, ArrowLeft } from "lucide-react";
+import { CheckCircle, AlertTriangle, Info, XCircle, Search, ArrowLeft, Download, Loader2 } from "lucide-react";
 
 interface Option {
 	id: string;
@@ -43,6 +43,14 @@ interface ResultsResponse {
 }
 
 type VoteState = "idle" | "voting" | "success" | "error";
+type VoteStep = "generate" | "sign" | "submit" | "done";
+
+const VOTE_STEPS: { key: VoteStep; label: string }[] = [
+	{ key: "generate", label: "Génération du code secret" },
+	{ key: "sign", label: "Signature aveugle" },
+	{ key: "submit", label: "Enregistrement du vote" },
+	{ key: "done", label: "Vote enregistré" },
+];
 
 function formatCountdown(diff: number) {
 	if (diff <= 0) return null;
@@ -123,10 +131,12 @@ export function PollDetailClient({
 
 	const [selectedOption, setSelectedOption] = useState<string>("");
 	const [voteState, setVoteState] = useState<VoteState>("idle");
+	const [voteStep, setVoteStep] = useState<VoteStep>("generate");
 	const [errorMessage, setErrorMessage] = useState("");
 	const [hasVoted, setHasVoted] = useState(initialHasVoted);
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const [voteToken, setVoteToken] = useState<string>("");
+	const [voteProof, setVoteProof] = useState<{ sequence: number; hash: string; createdAt: string } | null>(null);
 	const [verifyOpen, setVerifyOpen] = useState(false);
 
 	const isOpen = poll.status === "open";
@@ -139,15 +149,18 @@ export function PollDetailClient({
 	const handleVote = useCallback(async () => {
 		if (!selectedOption) return;
 		setVoteState("voting");
+		setVoteStep("generate");
 		setErrorMessage("");
-		setConfirmOpen(false);
 
 		try {
+			// Step 1: Generate token & blind it
 			const pkRes = await fetch(`/api/poll/${poll.id}/public-key`);
 			const { data: pkData } = await pkRes.json();
 			const token = generateToken();
 			const { blindedMsg, inv } = await blindToken(token, pkData.publicKey);
 
+			// Step 2: Get blind signature
+			setVoteStep("sign");
 			const signRes = await fetch(`/api/poll/${poll.id}/blind-sign`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -162,6 +175,8 @@ export function PollDetailClient({
 			const blindSig = Uint8Array.from(atob(signData.blindSignature), (c) => c.charCodeAt(0));
 			const signature = await finalizeSignature(pkData.publicKey, token, blindSig, inv);
 
+			// Step 3: Submit vote
+			setVoteStep("submit");
 			const voteRes = await fetch(`/api/poll/${poll.id}/vote`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -177,11 +192,19 @@ export function PollDetailClient({
 				throw new Error(err.message || "vote_failed");
 			}
 
+			// Step 4: Done
+			setVoteStep("done");
 			const tokenBase64 = toBase64(token);
+			const { data: voteData } = await voteRes.json();
+			setVoteToken(tokenBase64);
+			if (voteData.sequence && voteData.hash && voteData.createdAt) {
+				setVoteProof({ sequence: voteData.sequence, hash: voteData.hash, createdAt: voteData.createdAt });
+			}
+
+			// Brief pause to show "done" step before transitioning
+			await new Promise((r) => setTimeout(r, 800));
 			setVoteState("success");
 			setHasVoted(true);
-			setVoteToken(tokenBase64);
-			setVerifyToken(tokenBase64);
 		} catch (err) {
 			setVoteState("error");
 			setErrorMessage(err instanceof Error ? err.message : "Une erreur est survenue");
@@ -213,25 +236,17 @@ export function PollDetailClient({
 						<AlertTitle>Vote enregistré</AlertTitle>
 						<AlertDescription>Votre vote a été enregistré de manière anonyme et vérifiable.</AlertDescription>
 					</Alert>
-					{voteToken && (
-						<div className="mb-4 p-4 border border-border">
-							<CopyableHash
-								label="Votre code de vérification"
-								tooltip="Conservez ce code pour vérifier votre vote plus tard. Il permet de prouver que votre vote est bien dans le registre public."
-								value={voteToken}
-							/>
-							<p className="text-xs text-muted-foreground mt-2">
-								Conservez ce code précieusement. Il est le seul moyen de vérifier que votre vote a bien été pris en compte.
-							</p>
-						</div>
-					)}
-						<div className="flex gap-2">
-						<Button variant="outline" asChild>
-							<Link href="/polls"><ArrowLeft className="h-4 w-4 mr-1.5" />Voir les autres votes</Link>
+					<div className="flex flex-wrap gap-2">
+						<Button variant="outline" onClick={() => setConfirmOpen(true)}>
+							<Download className="h-4 w-4 mr-1.5" />
+							Ma preuve de vote
 						</Button>
 						<Button variant="outline" onClick={() => setVerifyOpen(true)}>
 							<Search className="h-4 w-4 mr-1.5" />
 							Vérifier mon vote
+						</Button>
+						<Button variant="outline" asChild>
+							<Link href="/polls"><ArrowLeft className="h-4 w-4 mr-1.5" />Voir les autres votes</Link>
 						</Button>
 					</div>
 				</div>
@@ -344,36 +359,146 @@ export function PollDetailClient({
 						>
 							Voter
 						</Button>
-						<Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>Confirmer votre vote</DialogTitle>
-									<DialogDescription>
-										Vous êtes sur le point de voter{" "}
-										<strong>{options.find((o) => o.id === selectedOption)?.label}</strong>.
-									</DialogDescription>
-								</DialogHeader>
-								<p className="text-sm text-muted-foreground">
-									Cette action est définitive. Votre vote sera enregistré de
-									manière anonyme et ne pourra pas être modifié en ligne.
-									Pour changer votre vote, vous devrez vous rendre en bureau de vote.
-								</p>
-								<DialogFooter>
-									<Button variant="outline" onClick={() => setConfirmOpen(false)}>
-										Annuler
-									</Button>
-									<Button
-										onClick={handleVote}
-										disabled={voteState === "voting"}
-									>
-										{voteState === "voting" ? "Vote en cours..." : "Confirmer mon vote"}
-									</Button>
-								</DialogFooter>
-							</DialogContent>
-						</Dialog>
-					</>
+						</>
 				)}
 			</div>
+
+			{/* Vote dialog (confirmation → stepper → success) */}
+			<Dialog open={confirmOpen} onOpenChange={(open) => { if (voteState !== "voting") setConfirmOpen(open); }}>
+				<DialogContent className="sm:max-w-xl">
+					{voteState === "success" ? (
+									<>
+										<DialogHeader>
+											<DialogTitle>
+												<span className="flex items-center gap-2">
+													<CheckCircle className="h-5 w-5 text-green-600" />
+													Vote enregistré
+												</span>
+											</DialogTitle>
+											<DialogDescription>
+												Votre vote a été enregistré de manière anonyme et vérifiable. Conservez cette preuve : elle vous permet de retrouver votre vote dans le registre public et de vérifier qu&apos;il n&apos;a pas été modifié ou supprimé.
+											</DialogDescription>
+										</DialogHeader>
+										{voteToken && (
+											<div className="p-4 border border-border">
+												<CopyableHash
+													label="Votre code de vérification"
+													tooltip="Conservez ce code pour vérifier votre vote plus tard. Il permet de prouver que votre vote est bien dans le registre public."
+													value={voteToken}
+												/>
+												<p className="text-xs text-muted-foreground mt-2">
+													Conservez ce code précieusement. Il est le seul moyen de vérifier que votre vote a bien été pris en compte.
+												</p>
+											</div>
+										)}
+										<Alert variant="warning">
+										<AlertTriangle className="h-4 w-4" />
+										<AlertDescription>
+											Ne publiez pas cette preuve. Toute personne qui la voit peut retrouver votre vote dans le registre public et faire le lien avec vous.
+										</AlertDescription>
+									</Alert>
+									{voteProof && (
+											<div className="border border-border overflow-hidden">
+												{/* eslint-disable-next-line @next/next/no-img-element */}
+												<img
+													src={`/api/poll/${poll.id}/vote-proof?sequence=${voteProof.sequence}&hash=${encodeURIComponent(voteProof.hash)}&token=${encodeURIComponent(voteToken)}&date=${encodeURIComponent(voteProof.createdAt)}`}
+													alt={`Preuve de vote #${voteProof.sequence}`}
+													className="w-full"
+												/>
+											</div>
+										)}
+										<DialogFooter className="flex-col sm:flex-row gap-2">
+											{voteProof && (
+												<Button variant="outline" asChild>
+													<a href={`/api/poll/${poll.id}/vote-proof?sequence=${voteProof.sequence}&hash=${encodeURIComponent(voteProof.hash)}&token=${encodeURIComponent(voteToken)}&date=${encodeURIComponent(voteProof.createdAt)}`} download="preuve-vote.png">
+														<Download className="h-4 w-4 mr-1.5" />
+														Télécharger la preuve
+													</a>
+												</Button>
+											)}
+											<Button onClick={() => setConfirmOpen(false)}>
+												Fermer
+											</Button>
+										</DialogFooter>
+									</>
+								) : voteState === "voting" ? (
+									<>
+										<DialogHeader>
+											<DialogTitle>Vote en cours</DialogTitle>
+											<DialogDescription>
+												Votre vote pour <strong>{options.find((o) => o.id === selectedOption)?.label}</strong> est en cours de traitement.
+											</DialogDescription>
+										</DialogHeader>
+										<div className="space-y-3 py-2">
+											{VOTE_STEPS.map((step, i) => {
+												const currentIndex = VOTE_STEPS.findIndex((s) => s.key === voteStep);
+												const isDone = i < currentIndex || (i === currentIndex && step.key === "done");
+												const isCurrent = i === currentIndex && step.key !== "done";
+
+												return (
+													<div key={step.key} className="flex items-center gap-3">
+														{isDone ? (
+															<CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+														) : isCurrent ? (
+															<Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />
+														) : (
+															<div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+														)}
+														<span className={`text-sm ${isDone ? "text-muted-foreground" : isCurrent ? "text-foreground font-medium" : "text-muted-foreground/50"}`}>
+															{step.label}
+														</span>
+													</div>
+												);
+											})}
+										</div>
+									</>
+								) : voteState === "error" ? (
+									<>
+										<DialogHeader>
+											<DialogTitle>
+												<span className="flex items-center gap-2">
+													<XCircle className="h-5 w-5 text-destructive" />
+													Erreur
+												</span>
+											</DialogTitle>
+											<DialogDescription>{errorMessage}</DialogDescription>
+										</DialogHeader>
+										<DialogFooter>
+											<Button variant="outline" onClick={() => { setConfirmOpen(false); setVoteState("idle"); }}>
+												Fermer
+											</Button>
+										</DialogFooter>
+									</>
+								) : (
+									<>
+										<DialogHeader>
+											<DialogTitle>Confirmer votre vote</DialogTitle>
+											<DialogDescription>
+												Vous êtes sur le point de voter{" "}
+												<strong>{options.find((o) => o.id === selectedOption)?.label}</strong>.
+											</DialogDescription>
+										</DialogHeader>
+										<Alert variant="warning">
+										<AlertTriangle className="h-4 w-4" />
+										<AlertDescription>
+											Assurez-vous d&apos;être seul et à l&apos;abri des regards. Personne ne doit voir votre écran pendant que vous votez.
+										</AlertDescription>
+									</Alert>
+										<p className="text-sm text-muted-foreground">
+											Cette action est définitive. Votre vote sera enregistré de manière anonyme et ne pourra pas être modifié.
+										</p>
+										<DialogFooter>
+											<Button variant="outline" onClick={() => setConfirmOpen(false)}>
+												Annuler
+											</Button>
+											<Button onClick={handleVote}>
+												Confirmer mon vote
+											</Button>
+										</DialogFooter>
+									</>
+								)}
+				</DialogContent>
+			</Dialog>
 		</>
 	);
 }
