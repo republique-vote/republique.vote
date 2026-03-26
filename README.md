@@ -93,13 +93,9 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 | Quelqu'un vous paie pour voter | Vous prenez l'argent, vous montrez votre vote en ligne, puis vous allez voter ce que vous voulez au bureau de vote. |
 | Quelqu'un vous séquestre | C'est un crime (séquestration). Ça relève de la police, pas de la technologie. Aucun système de vote ne peut protéger contre ça. |
 
-**C'est la même approche que l'Estonie** (vote en ligne depuis 2005, 44% des votants) **et la Norvège** (essais 2011-2013).
+**Limite actuelle : le vote en ligne est définitif.** L'anonymat total du vote rend mathématiquement impossible l'annulation d'un vote anonyme sans information supplémentaire cachée dans le bulletin. C'est prouvé : si personne ne sait à qui appartient un vote, personne ne peut retrouver le bon vote à annuler. C'est le même choix que la Suisse.
 
-La leçon de la Norvège : le plus important, c'est que **tout le monde sache** que le vote physique écrase le vote en ligne. Si le personne qui vous force ne le sait pas, ça ne le dissuade pas. C'est pourquoi on l'affiche clairement partout sur le site.
-
-**Limite honnête :** pour les votes purement consultatifs (pas d'élection officielle), il n'y a pas de bureau de vote physique ni de borne en mairie. Dans ce cas, le vote en ligne est définitif et il n'existe pas de moyen de le modifier. C'est une limite assumée : l'anonymat du vote impose que personne (même le système) ne puisse relier un vote à une personne.
-
-**À terme :** des bornes de vote (tablettes) pourraient être installées dans les mairies, avec un isoloir physique. Le vote sur ces bornes serait définitif, complètement anonyme, et écraserait tout vote en ligne précédent. C'est un système différent de l'app en ligne, mais complémentaire.
+**À terme :** un système de tag de révocation caché permettrait l'annulation sans casser l'anonymat. Le bulletin contiendrait dès l'origine une information chiffrée, invisible publiquement, utilisable uniquement par le votant pour déclencher l'annulation via un comité de confiance distribué. C'est un problème de recherche actif, documenté dans [docs/vote-override-research.md](docs/vote-override-research.md).
 
 ## Roadmap
 
@@ -154,7 +150,15 @@ La leçon de la Norvège : le plus important, c'est que **tout le monde sache** 
 - [ ] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
 - [ ] Migration SQLite → PostgreSQL pour la production
 
-### Phase 9 — Sécurité & Audit
+### Phase 9 — Annulation de vote (recherche)
+- [ ] Tag de révocation caché dans le bulletin (choix chiffré + tag dérivé du secret votant)
+- [ ] Preuves à divulgation nulle (ZK) de validité du bulletin
+- [ ] Comité de trustees distribué pour le matching chiffré
+- [ ] Ajustement homomorphe vérifiable du décompte (sans révéler la ligne annulée)
+- [ ] Documentation complète du protocole : [docs/vote-override-research.md](docs/vote-override-research.md)
+
+### Phase 10 — Sécurité & Audit
+- [ ] Build reproductible + déploiement signé (GitHub Actions + Sigstore) pour prouver que le code en prod = le code sur GitHub
 - [ ] Dépouillement distribué (plusieurs autorités indépendantes)
 - [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
 - [ ] Intégration avec un transparency log (Sigsum/Rekor)

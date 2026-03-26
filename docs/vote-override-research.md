@@ -187,9 +187,52 @@ Si une seule entite heberge le serveur (nous, l'Etat, un cloud provider), cette 
 - **Phase suivante** : publier le registre vote sur IPFS apres chaque vote (copie immutable publique)
 - **Long terme** : federation de noeuds heberges par des entites independantes + registre sur blockchain L2 pour la preuve d'integrite
 
+## Conclusion : résultat de la recherche
+
+### Le théorème fondamental
+
+Dans un modèle de signature aveugle + cahier anonyme pur (notre modèle actuel), l'annulation exacte d'un vote est **mathématiquement impossible**.
+
+Preuve par contre-exemple : deux électeurs (p, q), deux votes anonymes publiés (A, B). Deux mondes sont indistinguables publiquement : (f(p)=A, f(q)=B) ou (f(p)=B, f(q)=A). Si on doit annuler le vote de p, on ne sait pas s'il faut retirer A ou B. Aucun algorithme ne peut être correct dans les deux mondes sans information supplémentaire.
+
+**En clair : si personne ne sait à qui appartient un vote, personne ne peut retrouver le bon vote à annuler.**
+
+### La sortie : le lien latent
+
+Pour rendre l'annulation possible, il faut accepter un **lien latent** — une information cachée dans le bulletin dès l'origine, invisible publiquement, utilisable uniquement si le votant déclenche l'annulation.
+
+La construction la plus solide :
+1. Le vote contient un **choix chiffré** + un **tag de révocation caché** dérivé du secret du votant
+2. En bureau de vote, le votant fournit son secret
+3. Un **comité de trustees** (plusieurs entités indépendantes) retrouve le bulletin correspondant via des tests d'égalité chiffrés, **sans révéler quelle ligne du cahier**
+4. Ils calculent un **vecteur d'annulation chiffré** ajouté au décompte
+5. Résultat final = votes en ligne − annulations + votes papier
+6. Le cahier public n'est jamais modifié (append-only)
+
+Nécessite : preuves à divulgation nulle (ZK), chiffrement homomorphe ou MPC, comité de trustees distribué.
+
+### Décision pour le POC
+
+**Le vote en ligne est définitif.** Comme la Suisse, on ne permet pas l'annulation du vote en ligne. C'est le seul choix honnête tant qu'on n'a pas implémenté le système de tag de révocation.
+
+L'architecture de tag de révocation caché + annulation homomorphe vérifiable est documentée et prévue comme objectif long terme. Elle nécessite :
+- Modifier la structure du bulletin pour inclure le tag chiffré
+- Implémenter les preuves ZK de validité
+- Mettre en place un comité de trustees distribué
+- Modifier le processus de décompte pour intégrer les ajustements
+
+### Les trois options possibles
+
+| Option | Principe | Anonymat | Annulation | Complexité |
+|--------|----------|----------|------------|------------|
+| **A. Tag de révocation** | Lien latent caché + ZK + trustees | Préservé | Oui | Très élevée |
+| **B. Anonymat différé (Estonie)** | Identité liée au vote pendant la période | Risqué pendant le vote | Oui | Moyenne |
+| **C. Pas d'annulation (Suisse)** | Vote en ligne définitif | Parfait | Non | Zéro |
+
+**Choix POC : option C.** Objectif long terme : option A.
+
 ## Notes
-- La tension fondamentale : anonymat parfait vs capacite d'annulation. Aucune solution connue ne resout les deux a 100%.
-- L'Estonie accepte un compromis (anonymat differe). La Norvege a refuse ce compromis et a abandonne.
-- La Suisse evite le probleme en interdisant le vote physique apres un vote electronique.
-- Le systeme a deux registres + cle citoyen est la piste la plus prometteuse. Il ne resout pas tout (separation des entites necessaire) mais l'architecture est solide.
-- Pour le POC, on documente honnetement que l'ecrasement physique necessite une separation d'entites qui n'existe pas encore.
+- La tension fondamentale : anonymat parfait vs capacité d'annulation. Les deux simultanément sans lien latent est mathématiquement impossible.
+- L'Estonie accepte un compromis (anonymat différé). La Norvège a refusé ce compromis et a abandonné.
+- La Suisse contourne le problème en interdisant le vote physique après un vote électronique.
+- La vraie question n'est pas "est-ce possible ?" mais : **quel lien latent accepte-t-on de conserver, chez qui, jusqu'à quand, et sous quelle hypothèse de non-collusion ?**

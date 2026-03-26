@@ -84,22 +84,22 @@ const coercionScenarios = [
 	{
 		situation: "Quelqu'un vous regarde voter en ligne",
 		response:
-			"Vous allez au bureau de vote, vous votez ce que VOUS voulez dans l'isoloir. Le vote physique écrase le vote en ligne.",
-	},
-	{
-		situation: "On vous force à voter à la dernière seconde en ligne",
-		response:
-			"Le vote en bureau de vote a lieu APRÈS la clôture en ligne. Vous pouvez encore tout annuler.",
+			"Aujourd'hui, le vote en ligne est définitif. Votez seul, dans un endroit calme. À terme, le vote physique en bureau pourra écraser le vote en ligne.",
 	},
 	{
 		situation: "On vous demande une preuve de votre vote",
 		response:
-			"Vous montrez votre vote en ligne. Mais l'autre personne sait que vous avez pu aller au bureau de vote et voter autre chose. Votre « preuve » ne vaut rien.",
+			"Votre code de vérification prouve que vous avez voté, mais pas pour qui. Personne ne peut prouver le contenu de votre vote à un tiers.",
 	},
 	{
-		situation: "Quelqu'un vous paie pour voter",
+		situation: "Quelqu'un vous force à voter devant lui",
 		response:
-			"Vous prenez l'argent, vous montrez votre vote en ligne, puis vous allez voter ce que vous voulez au bureau de vote.",
+			"C'est un délit (contrainte, violence). Aucun système de vote, en ligne ou physique, ne peut empêcher la contrainte physique. Ça relève de la police.",
+	},
+	{
+		situation: "Objectif futur : le vote physique écrase le vote en ligne",
+		response:
+			"On travaille sur un système de tag de révocation caché qui permettrait d'annuler un vote en ligne en allant voter en bureau, sans casser l'anonymat. C'est un problème de recherche ouvert.",
 	},
 ];
 
@@ -107,7 +107,12 @@ const faqItems = [
 	{
 		question: "Pourquoi je ne peux pas changer mon vote en ligne ?",
 		answer:
-			"Pour retrouver votre ancien vote et le remplacer, le système devrait pouvoir relier votre identité à votre vote. Ça casserait l'anonymat. Donc le vote en ligne est définitif. Si vous voulez changer d'avis, vous pouvez aller voter en bureau de vote : le vote physique écrase toujours le vote en ligne.",
+			"Votre vote est anonyme : personne ne sait à qui il appartient, même pas le serveur. Pour le modifier, il faudrait le retrouver dans le cahier public. Mais c'est mathématiquement impossible sans casser l'anonymat. Donc le vote en ligne est définitif. C'est le même choix que la Suisse.",
+	},
+	{
+		question: "Est-ce que le vote physique peut annuler mon vote en ligne ?",
+		answer:
+			"Pas encore. C'est un problème de recherche ouvert. Pour annuler un vote anonyme, il faudrait cacher une information de révocation dans le bulletin dès l'origine, puis utiliser de la cryptographie avancée pour retrouver le bon vote sans révéler sa position dans le cahier. On travaille dessus pour une future version.",
 	},
 	{
 		question: "C'est quoi un « Merkle tree » ?",
@@ -278,7 +283,7 @@ export default function HowItWorksPage() {
 						<Alert variant="warning" className="mt-4 max-w-2xl">
 							<AlertTriangle className="h-4 w-4" />
 							<AlertDescription>
-								Les résultats affichés en ligne ne sont pas forcément les résultats finaux. Comme le vote en bureau de vote peut écraser le vote en ligne, le résultat définitif peut être différent de ce que vous voyez sur le site.
+								Les résultats sont visibles en temps réel pendant le vote. Le vote en ligne est actuellement définitif. À terme, un mécanisme d&apos;annulation par vote physique est prévu.
 							</AlertDescription>
 						</Alert>
 					</div>
@@ -305,11 +310,11 @@ export default function HowItWorksPage() {
 
 				<div className="border border-border p-6 mb-6 bg-accent/30">
 					<p className="font-bold text-lg mb-1">
-						Le vote en bureau de vote annule toujours le vote en ligne.
+						Aujourd&apos;hui, le vote en ligne est définitif.
 					</p>
 					<p className="text-sm text-muted-foreground">
-						C&apos;est la même approche que l&apos;Estonie (vote en ligne depuis 2005) et
-						la Norvège (essais 2011-2013).
+						L&apos;anonymat total rend l&apos;annulation mathématiquement impossible sans information supplémentaire cachée dans le bulletin.
+						On travaille sur un système de révocation qui permettrait au vote physique d&apos;écraser le vote en ligne, sans casser l&apos;anonymat.
 					</p>
 				</div>
 
@@ -366,13 +371,13 @@ export default function HowItWorksPage() {
 					<div className="border-l-2 border-border pl-4">
 						<h3 className="font-bold mb-1">Phase 3 : Vote en ligne + bureau de vote</h3>
 						<p className="text-muted-foreground leading-relaxed">
-							Les citoyens votent en ligne. Ceux qui veulent changer leur choix ou qui préfèrent le vote traditionnel se rendent au bureau de vote classique, avec des assesseurs, un isoloir, des bulletins papier. Le vote physique écrase toujours le vote en ligne. Pas de technologie supplémentaire en bureau de vote, juste le système actuel.
+							Les citoyens votent en ligne. Grâce à un système de tag de révocation caché dans le bulletin, ceux qui veulent changer leur choix pourront aller voter en bureau de vote. Le vote physique annulera le vote en ligne, sans casser l&apos;anonymat. C&apos;est un problème de recherche cryptographique sur lequel on travaille activement.
 						</p>
 					</div>
 					<div className="border-l-2 border-border pl-4">
 						<h3 className="font-bold mb-1">Phase 4 : Bornes en mairie</h3>
 						<p className="text-muted-foreground leading-relaxed">
-							Des bornes de vote en mairie, avec un isoloir physique, connectées au même système. Le meilleur des deux mondes : l&apos;accessibilité du vote en ligne et la protection de l&apos;isoloir physique. Le vote en borne écrase toujours le vote en ligne.
+							Des bornes de vote en mairie, avec un isoloir physique, connectées au même système. Le meilleur des deux mondes : l&apos;accessibilité du vote en ligne et la protection de l&apos;isoloir physique.
 						</p>
 					</div>
 				</div>
