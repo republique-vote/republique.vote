@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <style>
+    rect.bg { fill: #000091; }
+    .icon { fill: #ffffff; }
+    .icon-fente { fill: #000091; }
+    .icon-shadow { fill: #ffffff; opacity: 0.5; }
+    @media (prefers-color-scheme: dark) {
+      rect.bg { fill: #8585f6; }
+      .icon-fente { fill: #8585f6; }
+    }
+  </style>
+  <rect class="bg" width="32" height="32" />
+  <!-- Bulletin -->
+  <rect class="icon" x="12" y="2" width="8" height="12" opacity="0.85" transform="rotate(8, 16, 8)" />
+  <!-- Urne body -->
+  <rect class="icon" x="5" y="11" width="22" height="16" />
+  <!-- Fente -->
+  <rect class="icon-fente" x="11" y="11" width="10" height="3" />
+  <!-- Shadow -->
+  <rect class="icon-shadow" x="5" y="27" width="22" height="2" />
+</svg>

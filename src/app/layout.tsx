@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -13,13 +14,29 @@ import "./globals.css";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
+export const metadata: Metadata = {
+	title: {
+		default: "republique.vote — Le vote, partout, pour tous.",
+		template: "%s | republique.vote",
+	},
+	description: "Plateforme de vote en ligne transparente pour les citoyens français. Chaque vote est anonyme, publié publiquement et vérifiable par tous.",
+	metadataBase: new URL("https://republique.vote"),
+	openGraph: {
+		type: "website",
+		locale: "fr_FR",
+		siteName: "republique.vote",
+	},
+	twitter: {
+		card: "summary_large_image",
+	},
+	icons: {
+		icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+	},
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="fr" className={cn("font-sans", figtree.variable)} suppressHydrationWarning>
-			<head>
-				<title>republique.vote — Le vote, partout, pour tous. Par le peuple, pour le peuple.</title>
-				<meta name="description" content="Plateforme de vote en ligne transparente pour les citoyens français" />
-			</head>
 			<body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 				<TooltipProvider>
