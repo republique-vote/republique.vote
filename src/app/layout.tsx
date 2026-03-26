@@ -100,8 +100,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 									</li>
 								</ul>
 								<p className="text-xs text-muted-foreground mt-4">
-									Sauf mention explicite de propriété intellectuelle détenue par des tiers, les contenus de ce site sont proposés sous{" "}
-									<a href="https://github.com/etalab/licence-ouverte/blob/master/LO.md" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">licence etalab-2.0</a>
+									Le code source de ce site est publié sous{" "}
+									<a href="https://github.com/republique-vote/republique.vote/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">licence AGPL-3.0</a>
 								</p>
 							</div>
 						</div>
