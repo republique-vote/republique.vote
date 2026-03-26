@@ -4,7 +4,7 @@ import { poll, option, voteRecord } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getOrCreateKeyPair, verifySignature } from "@/services/blind-signature";
 import { successResponse, errorResponse } from "@/lib/api-response";
-import { emitVoteUpdate } from "@/services/poll/events";
+import { emitVoteUpdate, emitBoardVote } from "@/services/poll/events";
 import { getPollResults } from "@/services/poll/results";
 import { getLastVoteInChain, computeVoteHash, updateMerkleRoot } from "@/services/poll/merkle";
 
@@ -81,12 +81,22 @@ export async function POST(
     });
 
     await updateMerkleRoot(pollId, hash);
+
+    const results = await getPollResults(pollId);
+    emitVoteUpdate(pollId, results);
+    emitBoardVote(pollId, {
+      sequence,
+      optionId,
+      blindToken: token,
+      blindSignature: signature,
+      hash,
+      previousHash,
+      createdAt,
+      merkleRoot: hash,
+    });
+
+    return successResponse({ voted: true }, 201);
   } catch {
     return errorResponse("already_voted", 409);
   }
-
-  const results = await getPollResults(pollId);
-  emitVoteUpdate(pollId, results);
-
-  return successResponse({ voted: true }, 201);
 }
