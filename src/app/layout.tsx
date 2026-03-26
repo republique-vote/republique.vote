@@ -1,4 +1,4 @@
-import { Geist } from "next/font/google";
+import { Figtree } from "next/font/google";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "next-themes";
@@ -11,13 +11,13 @@ import { HeaderNav } from "@/components/header-nav";
 import { InfoIcon } from "lucide-react";
 import "./globals.css";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="fr" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
+		<html lang="fr" className={cn("font-sans", figtree.variable)} suppressHydrationWarning>
 			<head>
-				<title>republique.vote — Le vote, partout, pour tous</title>
+				<title>republique.vote — Le vote, partout, pour tous. Par le peuple, pour le peuple.</title>
 				<meta name="description" content="Plateforme de vote en ligne transparente pour les citoyens français" />
 			</head>
 			<body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					<div className="bg-accent/50 border-b border-border">
 						<div className="max-w-[1200px] mx-auto px-6 py-2 flex items-center gap-2 text-sm text-accent-foreground/80">
 							<InfoIcon className="h-3.5 w-3.5 shrink-0" />
-							<span>republique.vote est un projet de recherche open source. Ce site n&apos;est pas un service officiel du gouvernement français.</span>
+							<span>republique.vote est un projet de recherche <a href="https://github.com/republique-vote/republique.vote" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">open source</a>. Ce site n&apos;est pas un service officiel du gouvernement français.</span>
 						</div>
 					</div>
 
@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 									<div className="h-12 w-px bg-border" />
 									<Link href="/" className="flex flex-col">
 										<span className="text-xl font-bold text-foreground">republique.vote</span>
-										<span className="text-sm text-muted-foreground">Le vote, partout, pour tous</span>
+										<span className="text-sm text-muted-foreground">Le vote, partout, pour tous. Par le peuple, pour le peuple.</span>
 									</Link>
 								</div>
 								<div className="flex items-center">
