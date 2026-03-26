@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/", label: "Accueil", exact: true },
   { href: "/polls", label: "Votes", exact: false },
+  { href: "/how-it-works", label: "Comment ça marche", exact: true },
 ];
 
 export function HeaderNav() {
