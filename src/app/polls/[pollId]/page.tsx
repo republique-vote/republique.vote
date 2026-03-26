@@ -9,6 +9,9 @@ import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { CopyableHash } from "@/components/ui/copyable-hash";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ScrollText } from "lucide-react";
 
 export default async function PollDetailPage({
 	params,
@@ -105,6 +108,12 @@ export default async function PollDetailPage({
 						tooltip="Ce code est calculé mathématiquement à partir de tous les votes. Il évolue à chaque nouveau vote. Si quelqu'un modifie ou supprime un ancien vote, le calcul ne tombe plus juste et tout le monde peut le vérifier."
 						value={p.merkleRoot}
 					/>
+					<Button variant="outline" asChild className="mt-3">
+						<Link href={`/polls/${p.id}/board`}>
+							<ScrollText className="h-4 w-4 mr-1.5" />
+							Consulter le cahier de vote
+						</Link>
+					</Button>
 				</div>
 			)}
 		</>

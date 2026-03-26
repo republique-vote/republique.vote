@@ -19,7 +19,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { CheckCircle, AlertTriangle, Info, XCircle } from "lucide-react";
+import { CopyableHash } from "@/components/ui/copyable-hash";
+import { VerifyVoteDialog } from "@/components/polls/verify-vote-dialog";
+import { CheckCircle, AlertTriangle, Info, XCircle, Search, ArrowLeft } from "lucide-react";
 
 interface Option {
 	id: string;
@@ -124,6 +126,8 @@ export function PollDetailClient({
 	const [errorMessage, setErrorMessage] = useState("");
 	const [hasVoted, setHasVoted] = useState(initialHasVoted);
 	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [voteToken, setVoteToken] = useState<string>("");
+	const [verifyOpen, setVerifyOpen] = useState(false);
 
 	const isOpen = poll.status === "open";
 	const isAuthenticated = !!session;
@@ -173,13 +177,17 @@ export function PollDetailClient({
 				throw new Error(err.message || "vote_failed");
 			}
 
+			const tokenBase64 = toBase64(token);
 			setVoteState("success");
 			setHasVoted(true);
+			setVoteToken(tokenBase64);
+			setVerifyToken(tokenBase64);
 		} catch (err) {
 			setVoteState("error");
 			setErrorMessage(err instanceof Error ? err.message : "Une erreur est survenue");
 		}
 	}, [selectedOption, poll.id]);
+
 
 	return (
 		<>
@@ -205,9 +213,27 @@ export function PollDetailClient({
 						<AlertTitle>Vote enregistré</AlertTitle>
 						<AlertDescription>Votre vote a été enregistré de manière anonyme et vérifiable.</AlertDescription>
 					</Alert>
-					<Button variant="outline" asChild>
-						<Link href="/polls">Voir les autres votes</Link>
-					</Button>
+					{voteToken && (
+						<div className="mb-4 p-4 border border-border">
+							<CopyableHash
+								label="Votre code de vérification"
+								tooltip="Conservez ce code pour vérifier votre vote plus tard. Il permet de prouver que votre vote est bien dans le registre public."
+								value={voteToken}
+							/>
+							<p className="text-xs text-muted-foreground mt-2">
+								Conservez ce code précieusement. Il est le seul moyen de vérifier que votre vote a bien été pris en compte.
+							</p>
+						</div>
+					)}
+						<div className="flex gap-2">
+						<Button variant="outline" asChild>
+							<Link href="/polls"><ArrowLeft className="h-4 w-4 mr-1.5" />Voir les autres votes</Link>
+						</Button>
+						<Button variant="outline" onClick={() => setVerifyOpen(true)}>
+							<Search className="h-4 w-4 mr-1.5" />
+							Vérifier mon vote
+						</Button>
+					</div>
 				</div>
 			)}
 
@@ -226,11 +252,19 @@ export function PollDetailClient({
 						<AlertTitle>Vous avez déjà voté</AlertTitle>
 						<AlertDescription>Vous avez déjà participé à ce vote.</AlertDescription>
 					</Alert>
-					<Button variant="outline" asChild>
-						<Link href="/polls">Voir les autres votes</Link>
-					</Button>
+					<div className="flex gap-2">
+						<Button variant="outline" asChild>
+							<Link href="/polls"><ArrowLeft className="h-4 w-4 mr-1.5" />Voir les autres votes</Link>
+						</Button>
+						<Button variant="outline" onClick={() => setVerifyOpen(true)}>
+							<Search className="h-4 w-4 mr-1.5" />
+							Vérifier mon vote
+						</Button>
+					</div>
 				</div>
 			)}
+
+			<VerifyVoteDialog pollId={poll.id} open={verifyOpen} onOpenChange={setVerifyOpen} initialToken={voteToken} />
 
 			{isOpen && !isAuthenticated && (
 				<div className="mb-6">
