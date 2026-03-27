@@ -18,8 +18,8 @@ export async function getPollResults(pollId: string) {
     .where(eq(voteRecord.pollId, pollId))
     .groupBy(voteRecord.optionId);
 
-  const voteCounts = new Map(votes.map((v) => [v.optionId, v.count]));
-  const totalVotes = votes.reduce((sum, v) => sum + v.count, 0);
+  const voteCounts = new Map(votes.map((v) => [v.optionId, Number(v.count)]));
+  const totalVotes = votes.reduce((sum, v) => sum + Number(v.count), 0);
 
   return {
     pollId,

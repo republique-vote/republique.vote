@@ -9,7 +9,7 @@ import { auth } from "@/services/auth";
 export const dynamic = "force-dynamic";
 
 export default async function PollsPage() {
-	const polls = await db
+	const rawPolls = await db
 		.select({
 			id: poll.id,
 			title: poll.title,
@@ -25,6 +25,7 @@ export default async function PollsPage() {
 		.leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
 		.groupBy(poll.id)
 		.orderBy(poll.createdAt);
+	const polls = rawPolls.map((p) => ({ ...p, voteCount: Number(p.voteCount) }));
 
 	let votedPollIds: string[] = [];
 	try {

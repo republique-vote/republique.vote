@@ -22,10 +22,11 @@ export async function GET(
   const stream = new ReadableStream({
     async start(controller) {
       // Send initial state
-      const [{ count }] = await db
+      const [{ count: rawCount }] = await db
         .select({ count: sql<number>`COUNT(*)` })
         .from(voteRecord)
         .where(eq(voteRecord.pollId, pollId));
+      const count = Number(rawCount);
 
       controller.enqueue(
         encoder.encode(`data: ${JSON.stringify({ type: "init", totalVotes: count, merkleRoot: p.merkleRoot })}\n\n`),

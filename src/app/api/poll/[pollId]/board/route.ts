@@ -25,10 +25,11 @@ export async function GET(
     .where(eq(option.pollId, pollId))
     .orderBy(option.position);
 
-  const [{ count: totalVotes }] = await db
+  const [{ count: rawCount }] = await db
     .select({ count: sql<number>`COUNT(*)` })
     .from(voteRecord)
     .where(eq(voteRecord.pollId, pollId));
+  const totalVotes = Number(rawCount);
 
   const integrity = await verifyChain(pollId);
 

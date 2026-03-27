@@ -42,10 +42,11 @@ export default async function BoardPage({
 		.where(eq(option.pollId, pollId))
 		.orderBy(option.position);
 
-	const [{ count: totalVotes }] = await db
+	const [{ count }] = await db
 		.select({ count: sql<number>`COUNT(*)` })
 		.from(voteRecord)
 		.where(eq(voteRecord.pollId, pollId));
+	const totalVotes = Number(count);
 
 	const initialVotes = await db
 		.select({

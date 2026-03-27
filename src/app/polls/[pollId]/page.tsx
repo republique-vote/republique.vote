@@ -34,10 +34,11 @@ export default async function PollDetailPage({
 		.where(eq(option.pollId, pollId))
 		.orderBy(option.position);
 
-	const [{ count }] = await db
+	const [{ count: rawCount }] = await db
 		.select({ count: sql<number>`COUNT(*)` })
 		.from(sql`vote_record`)
 		.where(sql`poll_id = ${pollId}`);
+	const count = Number(rawCount);
 
 	const results = await getPollResults(pollId);
 

@@ -18,10 +18,11 @@ export async function GET(
     return errorResponse("poll_not_found", 404);
   }
 
-  const [{ count }] = await db
+  const [{ count: rawCount }] = await db
     .select({ count: sql<number>`COUNT(*)` })
     .from(voteRecord)
     .where(eq(voteRecord.pollId, pollId));
+  const count = Number(rawCount);
 
   return successResponse({
     pollId,
