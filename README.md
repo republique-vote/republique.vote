@@ -128,8 +128,8 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] Ajouter la licence AGPL-3.0 (le code doit rester open source, y compris pour les déploiements SaaS)
 - [x] Favicon et métadonnées Open Graph
 - [x] Preuve de vote visuelle (image générée avec numéro, empreinte, jeton, date — permet de retrouver et vérifier son vote plus tard)
-- [ ] Déployer sur Railway/Vercel + configurer republique.vote (DNS, certificat)
-- [ ] PostgreSQL + Redis managés en production
+- [ ] Déployer sur Railway + configurer republique.vote (DNS, certificat)
+- [ ] PostgreSQL + Redis managés sur Railway
 - [ ] CI/CD (GitHub Actions : lint + build)
 
 ### Phase 6 — Observateurs & Confiance distribuée
