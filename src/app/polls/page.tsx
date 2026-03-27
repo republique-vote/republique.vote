@@ -4,6 +4,8 @@ import { eq, count } from "drizzle-orm";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { PollListClient } from "@/components/polls/poll-list-client";
 
+export const dynamic = "force-dynamic";
+
 export default async function PollsPage() {
 	const polls = await db
 		.select({
