@@ -46,12 +46,21 @@ function BreadcrumbLink({
 }: React.ComponentProps<"a"> & {
   asChild?: boolean
 }) {
-  const Comp = asChild ? Slot.Root : Link
+  if (asChild) {
+    return (
+      <Slot.Root
+        data-slot="breadcrumb-link"
+        className={cn("transition-colors hover:text-foreground", className)}
+        {...props}
+      />
+    )
+  }
 
   return (
-    <Comp
+    <Link
       data-slot="breadcrumb-link"
       className={cn("transition-colors hover:text-foreground", className)}
+      href={props.href || "/"}
       {...props}
     />
   )
