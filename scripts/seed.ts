@@ -2,11 +2,12 @@ import Database from "better-sqlite3";
 
 const db = new Database("app.db");
 
-db.exec(`DELETE FROM vote_record`);
-db.exec(`DELETE FROM blind_signature_request`);
-db.exec(`DELETE FROM poll_key_pair`);
-db.exec(`DELETE FROM option`);
-db.exec(`DELETE FROM poll`);
+// Skip seed if polls already exist
+const existing = db.prepare("SELECT COUNT(*) as count FROM poll").get() as { count: number };
+if (existing.count > 0) {
+  console.log("Seed skipped: polls already exist");
+  process.exit(0);
+}
 
 const insertPoll = db.prepare(
   `INSERT INTO poll (id, title, description, type, status, start_date, end_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
