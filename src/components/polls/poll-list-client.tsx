@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 
 export interface PollListItem {
 	id: string;
@@ -46,7 +46,7 @@ function getTimeLabel(poll: PollListItem) {
 	return null;
 }
 
-function PollCards({ polls }: { polls: PollListItem[] }) {
+function PollCards({ polls, votedPollIds }: { polls: PollListItem[]; votedPollIds: string[] }) {
 	if (polls.length === 0) {
 		return <p className="mt-6 text-muted-foreground">Aucun vote pour le moment.</p>;
 	}
@@ -64,6 +64,12 @@ function PollCards({ polls }: { polls: PollListItem[] }) {
 							<Badge variant={STATUS_VARIANT[p.status] || "secondary"} className="text-xs">
 								{STATUS_LABELS[p.status] || p.status}
 							</Badge>
+							{votedPollIds.includes(p.id) && (
+								<Badge variant="outline" className="text-xs text-green-600 border-green-600/30">
+									<CheckCircle className="h-3 w-3 mr-1" />
+									A voté
+								</Badge>
+							)}
 							<span className="text-xs text-muted-foreground">
 								{p.voteCount} vote{p.voteCount !== 1 ? "s" : ""}
 							</span>
@@ -89,7 +95,7 @@ function PollCards({ polls }: { polls: PollListItem[] }) {
 	);
 }
 
-export function PollListClient({ polls }: { polls: PollListItem[] }) {
+export function PollListClient({ polls, votedPollIds = [] }: { polls: PollListItem[]; votedPollIds?: string[] }) {
 	const openPolls = polls.filter((p) => p.status === "open");
 	const closedPolls = polls.filter((p) => p.status === "closed" || p.status === "tallied");
 
@@ -101,13 +107,13 @@ export function PollListClient({ polls }: { polls: PollListItem[] }) {
 				<TabsTrigger value="all">Tous ({polls.length})</TabsTrigger>
 			</TabsList>
 			<TabsContent value="open" variant="framed">
-				<PollCards polls={openPolls} />
+				<PollCards polls={openPolls} votedPollIds={votedPollIds} />
 			</TabsContent>
 			<TabsContent value="closed" variant="framed">
-				<PollCards polls={closedPolls} />
+				<PollCards polls={closedPolls} votedPollIds={votedPollIds} />
 			</TabsContent>
 			<TabsContent value="all" variant="framed">
-				<PollCards polls={polls} />
+				<PollCards polls={polls} votedPollIds={votedPollIds} />
 			</TabsContent>
 		</Tabs>
 	);

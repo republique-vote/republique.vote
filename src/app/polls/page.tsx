@@ -1,8 +1,10 @@
+import { headers } from "next/headers";
 import { db } from "@/db";
-import { poll, voteRecord } from "@/db/schema";
+import { poll, voteRecord, blindSignatureRequest } from "@/db/schema";
 import { eq, count } from "drizzle-orm";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { PollListClient } from "@/components/polls/poll-list-client";
+import { auth } from "@/services/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,20 @@ export default async function PollsPage() {
 		.groupBy(poll.id)
 		.orderBy(poll.createdAt);
 
+	let votedPollIds: string[] = [];
+	try {
+		const session = await auth.api.getSession({ headers: await headers() });
+		if (session) {
+			const requests = await db
+				.select({ pollId: blindSignatureRequest.pollId })
+				.from(blindSignatureRequest)
+				.where(eq(blindSignatureRequest.userId, session.user.id));
+			votedPollIds = requests.map((r) => r.pollId);
+		}
+	} catch {
+		// Not authenticated
+	}
+
 	return (
 		<>
 			<Breadcrumb className="mb-6">
@@ -41,7 +57,7 @@ export default async function PollsPage() {
 			<p className="text-lg text-muted-foreground mt-2">
 				Participez aux votes en cours ou consultez les résultats des votes terminés.
 			</p>
-			<PollListClient polls={polls} />
+			<PollListClient polls={polls} votedPollIds={votedPollIds} />
 		</>
 	);
 }
