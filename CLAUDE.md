@@ -9,12 +9,15 @@ republique.vote — transparent online voting platform (POC) for French citizens
 ## Commands
 
 ```bash
+pnpm db:dev       # Start Postgres + Redis in-memory (background)
+pnpm db:push      # Push schema to database (drizzle-kit push)
+pnpm seed         # Seed database with test polls
 pnpm dev          # Start dev server (http://localhost:3000)
 pnpm build        # Production build
-pnpm start        # Start production server
+pnpm start        # Start production server (prestart: push + seed)
 pnpm lint         # Run ESLint via next lint
-pnpm seed         # Seed database with test polls (tsx scripts/seed.ts)
-pnpm redis        # Start in-memory Redis for real-time results (tsx scripts/redis-dev.ts)
+pnpm postgres     # Start embedded Postgres only (:5432)
+pnpm redis        # Start in-memory Redis only (:6379)
 ```
 
 ## Architecture
@@ -54,7 +57,7 @@ SSE via `/api/poll/[pollId]/results/stream`. Redis pub/sub channel `poll-results
 
 ### Database
 
-SQLite (better-sqlite3) with Drizzle ORM. Auth tables in `auth.db`, app tables in `app.db`. Schema at `src/db/schema.ts`. Migrations via `drizzle-kit generate` / `drizzle-kit push`.
+PostgreSQL with Drizzle ORM (postgres-js driver). Dev: `embedded-postgres` on port 5432. Prod: Railway Postgres via `DATABASE_URL`. Auth uses the same database via `drizzleAdapter`. Schema at `src/db/schema.ts`. Schema push via `drizzle-kit push`.
 
 Key tables: `poll`, `option`, `pollKeyPair`, `blindSignatureRequest` (one per user-poll), `voteRecord` (immutable ledger with hash chain).
 

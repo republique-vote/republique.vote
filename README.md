@@ -102,7 +102,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 ### Phase 1 — Fondations
 - [x] Initialiser le projet Next.js + DSFR
 - [x] Intégrer FranceConnect (mock local, en attente d'habilitation pour la sandbox officielle)
-- [x] Modéliser la base de données (SQLite en dev, PostgreSQL en prod)
+- [x] Modéliser la base de données (PostgreSQL)
 - [x] Concevoir le système de blind signatures
 
 ### Phase 2 — Vote MVP
@@ -128,8 +128,8 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] Ajouter la licence AGPL-3.0 (le code doit rester open source, y compris pour les déploiements SaaS)
 - [x] Favicon et métadonnées Open Graph
 - [x] Preuve de vote visuelle (image générée avec numéro, empreinte, jeton, date — permet de retrouver et vérifier son vote plus tard)
+- [x] PostgreSQL + Redis managés sur Railway
 - [ ] Déployer sur Railway + configurer republique.vote (DNS, certificat)
-- [ ] PostgreSQL + Redis managés sur Railway
 - [ ] CI/CD (GitHub Actions : lint + build)
 
 ### Phase 6 — Observateurs & Confiance distribuée
@@ -148,7 +148,6 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [ ] Exports en streaming (écriture ligne par ligne, pas de chargement mémoire complet)
 - [ ] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
 - [ ] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
-- [ ] Migration SQLite → PostgreSQL pour la production
 
 ### Phase 9 — Annulation de vote (recherche)
 - [ ] Tag de révocation caché dans le bulletin (choix chiffré + tag dérivé du secret votant)
