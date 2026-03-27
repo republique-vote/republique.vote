@@ -1,6 +1,12 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
-const sqlite = new Database("app.db");
-export const db = drizzle(sqlite, { schema });
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  throw new Error("DATABASE_URL is required. Run `docker compose up -d` to start Postgres.");
+}
+
+const client = postgres(DATABASE_URL);
+export const db = drizzle(client, { schema });

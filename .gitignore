@@ -45,4 +45,4 @@ tmp/
 
 # sqlite dev database
 auth.db
-app.db
+app.dbtmp/

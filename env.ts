@@ -12,7 +12,8 @@ export const env = createEnv({
     FC_AUTHORIZATION_URL: z.url(),
     FC_TOKEN_URL: z.url(),
     FC_USERINFO_URL: z.url(),
-    REDIS_URL: z.url(),
+    DATABASE_URL: z.url().default("postgresql://postgres:postgres@localhost:5432/vote"),
+    REDIS_URL: z.url().default("redis://localhost:6379"),
   },
   experimental__runtimeEnv: {},
 });
