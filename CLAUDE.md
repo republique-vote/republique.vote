@@ -15,7 +15,8 @@ pnpm seed         # Seed database with test polls
 pnpm dev          # Start dev server (http://localhost:3000)
 pnpm build        # Production build
 pnpm start        # Start production server (prestart: push + seed)
-pnpm lint         # Run ESLint via next lint
+pnpm lint         # Check code with Ultracite (Biome engine)
+pnpm lint:fix     # Auto-fix formatting/linting issues
 pnpm postgres     # Start embedded Postgres only (:5432)
 pnpm redis        # Start in-memory Redis only (:6379)
 ```
@@ -76,6 +77,10 @@ All endpoints use consistent format via `src/lib/api-response.ts`:
 ## Styling
 
 Tailwind CSS classes. Shadcn/ui components in `src/components/ui/`. Custom variants added to Badge (`success`, `info`, `warning`), Alert (`success`, `info`, `warning`, `destructive`), and Tabs (`framed` — DSFR-inspired tabbed panel). DSFR-like tab styling in `globals.css` via `[data-variant="framed"]` selectors.
+
+## Linting
+
+Ultracite (Biome engine) — configured in `biome.jsonc` extending `ultracite/biome/core`, `next`, `react`. Copilot coding standards in `.github/copilot-instructions.md`. Run `pnpm lint:fix` before committing. Key rules: prefer `node:` protocol for Node.js imports, explicit `type="button"` on buttons, `aria-label` on SVGs, no nested ternaries (extract components instead), `key` props from stable data (not array indices).
 
 ## Language
 

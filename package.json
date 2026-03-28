@@ -7,12 +7,14 @@
     "build": "next build",
     "prestart": "npx drizzle-kit push --force && tsx scripts/seed.ts",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "ultracite check",
+    "lint:fix": "ultracite fix",
     "seed": "tsx scripts/seed.ts",
     "db:push": "npx drizzle-kit push",
     "db:dev": "concurrently -n pgsql,redis -c blue,red \"pnpm run postgres\" \"pnpm run redis\"",
     "postgres": "tsx scripts/postgres.ts",
-    "redis": "tsx scripts/redis.ts"
+    "redis": "tsx scripts/redis.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@cloudflare/blindrsa-ts": "^0.4.5",
@@ -37,6 +39,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.7",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -44,11 +47,13 @@
     "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.10",
     "embedded-postgres": "18.3.0-beta.16",
+    "husky": "^9.1.7",
     "postcss": "^8.5.8",
     "redis-memory-server": "^0.16.0",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "ultracite": "7.3.2"
   },
   "packageManager": "pnpm@9.15.9+sha512.68046141893c66fad01c079231128e9afb89ef87e2691d69e4d40eee228988295fd4682181bae55b58418c3a253bde65a505ec7c5f9403ece5cc3cd37dcf2531"
 }
