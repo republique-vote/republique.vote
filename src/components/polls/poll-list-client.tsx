@@ -113,7 +113,11 @@ export function PollListClient({ polls, votedPollIds = [] }: { polls: PollListIt
 				<PollCards polls={closedPolls} votedPollIds={votedPollIds} />
 			</TabsContent>
 			<TabsContent value="all" variant="framed">
-				<PollCards polls={polls} votedPollIds={votedPollIds} />
+				<PollCards polls={[...polls].sort((a, b) => {
+					const aEnded = a.status === "closed" || a.status === "tallied" ? 1 : 0;
+					const bEnded = b.status === "closed" || b.status === "tallied" ? 1 : 0;
+					return aEnded - bEnded;
+				})} votedPollIds={votedPollIds} />
 			</TabsContent>
 		</Tabs>
 	);
