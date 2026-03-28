@@ -5,7 +5,9 @@ import * as schema from "./schema";
 const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
-  throw new Error("DATABASE_URL is required. Run `docker compose up -d` to start Postgres.");
+  throw new Error(
+    "DATABASE_URL is required. Run `docker compose up -d` to start Postgres."
+  );
 }
 
 const client = postgres(DATABASE_URL);

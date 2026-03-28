@@ -1,16 +1,23 @@
-import { NextRequest } from "next/server";
+import { and, eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { poll, option, voteRecord } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import { getOrCreateKeyPair, verifySignature } from "@/services/blind-signature";
-import { successResponse, errorResponse } from "@/lib/api-response";
-import { emitVoteUpdate, emitBoardVote } from "@/services/poll/events";
+import { option, poll, voteRecord } from "@/db/schema";
+import { errorResponse, successResponse } from "@/lib/api-response";
+import {
+  getOrCreateKeyPair,
+  verifySignature,
+} from "@/services/blind-signature";
+import { emitBoardVote, emitVoteUpdate } from "@/services/poll/events";
+import {
+  computeVoteHash,
+  getLastVoteInChain,
+  updateMerkleRoot,
+} from "@/services/poll/merkle";
 import { getPollResults } from "@/services/poll/results";
-import { getLastVoteInChain, computeVoteHash, updateMerkleRoot } from "@/services/poll/merkle";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 
@@ -33,7 +40,7 @@ export async function POST(
     signature: string;
   };
 
-  if (!optionId || !token || !signature) {
+  if (!(optionId && token && signature)) {
     return errorResponse("missing_fields", 400);
   }
 

@@ -10,20 +10,20 @@ export function generateToken(): Uint8Array {
   return token;
 }
 
-async function importPublicKey(publicKeyB64: string) {
+function importPublicKey(publicKeyB64: string) {
   const keyData = Uint8Array.from(atob(publicKeyB64), (c) => c.charCodeAt(0));
   return crypto.subtle.importKey(
     "spki",
     keyData,
     { name: "RSA-PSS", hash: "SHA-384" },
     true,
-    ["verify"],
+    ["verify"]
   );
 }
 
 export async function blindToken(
   token: Uint8Array,
-  publicKeyB64: string,
+  publicKeyB64: string
 ): Promise<{ blindedMsg: Uint8Array; inv: Uint8Array }> {
   const publicKey = await importPublicKey(publicKeyB64);
   const { blindedMsg, inv } = await suite.blind(publicKey, token);
@@ -34,7 +34,7 @@ export async function finalizeSignature(
   publicKeyB64: string,
   token: Uint8Array,
   blindSig: Uint8Array,
-  inv: Uint8Array,
+  inv: Uint8Array
 ): Promise<Uint8Array> {
   const publicKey = await importPublicKey(publicKeyB64);
   return suite.finalize(publicKey, token, blindSig, inv);

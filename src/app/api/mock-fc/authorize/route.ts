@@ -1,8 +1,8 @@
-import { NextRequest } from "next/server";
-import { TEST_USERS } from "../test-users";
+import type { NextRequest } from "next/server";
 import { storeAuthCode } from "../store";
+import { TEST_USERS } from "../test-users";
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const redirectUri = searchParams.get("redirect_uri") || "";
   const state = searchParams.get("state") || "";
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
           <p class="login">Login: <code>${user.login}</code> / Mot de passe: <code>${user.password}</code></p>
         </div>
       </button>
-    </form>`,
+    </form>`
   ).join("\n");
 
   const html = `<!DOCTYPE html>

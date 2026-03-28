@@ -1,59 +1,62 @@
 import { NextResponse } from "next/server";
 
 export interface ApiSuccessResponse<T> {
-  success: true;
   data: T;
+  success: true;
 }
 
 export interface ApiErrorResponse {
-  success: false;
-  statusCode: number;
   message: string;
+  statusCode: number;
+  success: false;
 }
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
-export function successResponse<T>(data: T, status: number = 200) {
+export function successResponse<T>(data: T, status = 200) {
   return NextResponse.json<ApiSuccessResponse<T>>(
     { success: true, data },
-    { status },
+    { status }
   );
 }
 
 export function errorResponse(message: string, statusCode: number) {
   return NextResponse.json<ApiErrorResponse>(
     { success: false, statusCode, message },
-    { status: statusCode },
+    { status: statusCode }
   );
 }
 
 export interface PaginatedData<T> {
-  items: T[];
+  currentPage: number;
   itemCount: number;
   itemLimit: number;
+  items: T[];
   pageCount: number;
-  currentPage: number;
 }
 
 export interface PaginationOptions {
-  page?: number;
   limit?: number;
+  page?: number;
 }
 
 export function getPaginationParams(
-  searchParams: URLSearchParams,
+  searchParams: URLSearchParams
 ): PaginationOptions {
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const page = Math.max(
+    1,
+    Number.parseInt(searchParams.get("page") || "1", 10)
+  );
   const limit = Math.min(
     100,
-    Math.max(1, parseInt(searchParams.get("limit") || "20", 10)),
+    Math.max(1, Number.parseInt(searchParams.get("limit") || "20", 10))
   );
   return { page, limit };
 }
 
 export function paginateArray<T>(
   items: T[],
-  options: PaginationOptions,
+  options: PaginationOptions
 ): PaginatedData<T> {
   const limit = options.limit || 20;
   const page = options.page || 1;
@@ -73,10 +76,10 @@ export function paginateArray<T>(
 
 export function paginatedSuccessResponse<T>(
   paginatedData: PaginatedData<T>,
-  status: number = 200,
+  status = 200
 ) {
   return NextResponse.json<ApiSuccessResponse<PaginatedData<T>>>(
     { success: true, data: paginatedData },
-    { status },
+    { status }
   );
 }

@@ -1,12 +1,12 @@
-import { NextRequest } from "next/server";
+import { eq, sql } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { poll, voteRecord } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
 import { onBoardVote } from "@/services/poll/events";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 
@@ -29,14 +29,18 @@ export async function GET(
       const count = Number(rawCount);
 
       controller.enqueue(
-        encoder.encode(`data: ${JSON.stringify({ type: "init", totalVotes: count, merkleRoot: p.merkleRoot })}\n\n`),
+        encoder.encode(
+          `data: ${JSON.stringify({ type: "init", totalVotes: count, merkleRoot: p.merkleRoot })}\n\n`
+        )
       );
 
       // Subscribe to new votes
       const unsubscribe = onBoardVote(pollId, (data) => {
         try {
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ type: "vote", ...data as object })}\n\n`),
+            encoder.encode(
+              `data: ${JSON.stringify({ type: "vote", ...(data as object) })}\n\n`
+            )
           );
         } catch {
           unsubscribe();

@@ -1,7 +1,12 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { voteRecord, blindSignatureRequest, pollKeyPair, poll } from "@/db/schema";
-import { successResponse, errorResponse } from "@/lib/api-response";
+import {
+  blindSignatureRequest,
+  poll,
+  pollKeyPair,
+  voteRecord,
+} from "@/db/schema";
+import { errorResponse, successResponse } from "@/lib/api-response";
 
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get("secret");

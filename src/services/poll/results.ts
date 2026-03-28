@@ -1,6 +1,6 @@
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { option, voteRecord } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
 
 export async function getPollResults(pollId: string) {
   const options = await db
@@ -32,9 +32,7 @@ export async function getPollResults(pollId: string) {
         position: opt.position,
         count,
         percentage:
-          totalVotes > 0
-            ? Math.round((count / totalVotes) * 1000) / 10
-            : 0,
+          totalVotes > 0 ? Math.round((count / totalVotes) * 1000) / 10 : 0,
       };
     }),
   };

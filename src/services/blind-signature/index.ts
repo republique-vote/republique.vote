@@ -1,7 +1,7 @@
 import { RSABSSA } from "@cloudflare/blindrsa-ts";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { pollKeyPair } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 const suite = RSABSSA.SHA384.PSS.Randomized();
 
@@ -40,31 +40,31 @@ export async function getOrCreateKeyPair(pollId: string) {
   return keys;
 }
 
-async function importPrivateKey(privateKeyJson: string) {
+function importPrivateKey(privateKeyJson: string) {
   const jwk = JSON.parse(privateKeyJson);
   return crypto.subtle.importKey(
     "jwk",
     jwk,
     { name: "RSA-PSS", hash: "SHA-384" },
     true,
-    ["sign"],
+    ["sign"]
   );
 }
 
-async function importPublicKey(publicKeyJson: string) {
+function importPublicKey(publicKeyJson: string) {
   const jwk = JSON.parse(publicKeyJson);
   return crypto.subtle.importKey(
     "jwk",
     jwk,
     { name: "RSA-PSS", hash: "SHA-384" },
     true,
-    ["verify"],
+    ["verify"]
   );
 }
 
 export async function signBlindedToken(
   blindedMessage: Uint8Array,
-  privateKeyJson: string,
+  privateKeyJson: string
 ): Promise<Uint8Array> {
   const privateKey = await importPrivateKey(privateKeyJson);
   return suite.blindSign(privateKey, blindedMessage);
@@ -73,7 +73,7 @@ export async function signBlindedToken(
 export async function verifySignature(
   token: Uint8Array,
   signature: Uint8Array,
-  publicKeyJson: string,
+  publicKeyJson: string
 ): Promise<boolean> {
   try {
     const publicKey = await importPublicKey(publicKeyJson);

@@ -12,7 +12,7 @@ export class FetchError extends Error {
 }
 
 export async function fetcher<T>(
-  key: string | [string, ...unknown[]],
+  key: string | [string, ...unknown[]]
 ): Promise<T> {
   const url = Array.isArray(key) ? key[0] : key;
 
@@ -29,7 +29,7 @@ export async function fetcher<T>(
     throw new FetchError(
       "message" in data ? data.message : "API request failed",
       res.status,
-      data,
+      data
     );
   }
 

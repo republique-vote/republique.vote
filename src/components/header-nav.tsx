@@ -16,13 +16,13 @@ export function HeaderNav() {
 
         return (
           <Link
-            key={link.href}
-            href={link.href}
-            className={`text-sm py-4 px-4 border-b-2 transition-colors whitespace-nowrap ${
+            className={`whitespace-nowrap border-b-2 px-4 py-4 text-sm transition-colors ${
               isActive
-                ? "border-primary text-primary font-semibold"
-                : "border-transparent text-foreground hover:text-primary hover:border-primary"
+                ? "border-primary font-semibold text-primary"
+                : "border-transparent text-foreground hover:border-primary hover:text-primary"
             }`}
+            href={link.href}
+            key={link.href}
           >
             {link.label}
           </Link>

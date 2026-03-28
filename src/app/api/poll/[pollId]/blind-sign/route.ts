@@ -1,15 +1,18 @@
-import { NextRequest } from "next/server";
-import { db } from "@/db";
-import { poll, blindSignatureRequest } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import { auth } from "@/services/auth";
-import { getOrCreateKeyPair, signBlindedToken } from "@/services/blind-signature";
-import { successResponse, errorResponse } from "@/lib/api-response";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
+import type { NextRequest } from "next/server";
+import { db } from "@/db";
+import { blindSignatureRequest, poll } from "@/db/schema";
+import { errorResponse, successResponse } from "@/lib/api-response";
+import { auth } from "@/services/auth";
+import {
+  getOrCreateKeyPair,
+  signBlindedToken,
+} from "@/services/blind-signature";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 
@@ -36,7 +39,7 @@ export async function POST(
   const existing = await db.query.blindSignatureRequest.findFirst({
     where: and(
       eq(blindSignatureRequest.pollId, pollId),
-      eq(blindSignatureRequest.userId, session.user.id),
+      eq(blindSignatureRequest.userId, session.user.id)
     ),
   });
 

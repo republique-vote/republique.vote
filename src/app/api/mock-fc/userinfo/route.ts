@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getUserIdFromToken } from "../store";
 import { TEST_USERS } from "../test-users";
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const token = authHeader?.replace("Bearer ", "");
 

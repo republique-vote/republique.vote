@@ -1,57 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useState } from "react";
 import { HeaderAuthItem } from "@/components/auth/header-auth-item";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { navLinks } from "@/constants/nav";
 
 export function MobileMenu() {
-	const [open, setOpen] = useState(false);
-	const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
-	return (
-		<div className="md:hidden">
-			<Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label="Menu">
-				{open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-			</Button>
+  return (
+    <div className="md:hidden">
+      <Button
+        aria-label="Menu"
+        onClick={() => setOpen(!open)}
+        size="icon"
+        variant="ghost"
+      >
+        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </Button>
 
-			{open && (
-				<div className="absolute top-full left-0 right-0 z-50 bg-card border-b border-border">
-					{/* Navigation */}
-					<nav className="flex flex-col border-b border-border">
-						{navLinks.map((link) => {
-							const isActive = link.exact
-								? pathname === link.href
-								: pathname.startsWith(link.href);
+      {open && (
+        <div className="absolute top-full right-0 left-0 z-50 border-border border-b bg-card">
+          {/* Navigation */}
+          <nav className="flex flex-col border-border border-b">
+            {navLinks.map((link) => {
+              const isActive = link.exact
+                ? pathname === link.href
+                : pathname.startsWith(link.href);
 
-							return (
-								<Link
-									key={link.href}
-									href={link.href}
-									onClick={() => setOpen(false)}
-									className={`text-sm py-3 px-6 border-l-2 transition-colors ${
-										isActive
-											? "border-primary text-primary font-semibold bg-accent/50"
-											: "border-transparent text-foreground hover:bg-accent/30"
-									}`}
-								>
-									{link.label}
-								</Link>
-							);
-						})}
-					</nav>
+              return (
+                <Link
+                  className={`border-l-2 px-6 py-3 text-sm transition-colors ${
+                    isActive
+                      ? "border-primary bg-accent/50 font-semibold text-primary"
+                      : "border-transparent text-foreground hover:bg-accent/30"
+                  }`}
+                  href={link.href}
+                  key={link.href}
+                  onClick={() => setOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-					{/* Quick access */}
-					<div className="flex items-center justify-between px-6 py-3">
-						<ThemeToggle />
-						<HeaderAuthItem />
-					</div>
-				</div>
-			)}
-		</div>
-	);
+          {/* Quick access */}
+          <div className="flex items-center justify-between px-6 py-3">
+            <ThemeToggle />
+            <HeaderAuthItem />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

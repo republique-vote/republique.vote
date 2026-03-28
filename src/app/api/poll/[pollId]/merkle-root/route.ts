@@ -1,12 +1,12 @@
-import { NextRequest } from "next/server";
+import { eq, sql } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { poll, voteRecord } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
-import { successResponse, errorResponse } from "@/lib/api-response";
+import { errorResponse, successResponse } from "@/lib/api-response";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 

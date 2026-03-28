@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
+import { desc, eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { poll, option, voteRecord } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { option, poll, voteRecord } from "@/db/schema";
 
 function escapeXml(str: string) {
   return str
@@ -14,7 +14,7 @@ function escapeXml(str: string) {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 
@@ -53,7 +53,9 @@ export async function GET(
   const feedUrl = `${baseUrl}/api/poll/${pollId}/board/feed`;
 
   const items = votes.map((vote) => {
-    const optionLabel = escapeXml(optionMap.get(vote.optionId) || vote.optionId);
+    const optionLabel = escapeXml(
+      optionMap.get(vote.optionId) || vote.optionId
+    );
     const prevHash = vote.previousHash || "genèse";
 
     return `    <item>

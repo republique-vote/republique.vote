@@ -1,13 +1,17 @@
-import { NextRequest } from "next/server";
+import { desc, eq, sql } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { poll, option, voteRecord } from "@/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
-import { successResponse, errorResponse, getPaginationParams } from "@/lib/api-response";
+import { option, poll, voteRecord } from "@/db/schema";
+import {
+  errorResponse,
+  getPaginationParams,
+  successResponse,
+} from "@/lib/api-response";
 import { verifyChain } from "@/services/poll/merkle";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 

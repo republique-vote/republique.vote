@@ -24,13 +24,20 @@ export function Skeleton({
 export function PollDetailSkeleton() {
   return (
     <div style={{ width: "100%", alignSelf: "stretch" }}>
-      <Skeleton width="80px" height="24px" borderRadius="12px" />
-      <Skeleton width="70%" height="2.5rem" style={{ marginTop: "16px" }} />
-      <Skeleton width="100%" height="1rem" style={{ marginTop: "16px" }} />
-      <Skeleton width="90%" height="1rem" style={{ marginTop: "8px" }} />
-      <Skeleton width="120px" height="0.875rem" style={{ marginTop: "24px" }} />
+      <Skeleton borderRadius="12px" height="24px" width="80px" />
+      <Skeleton height="2.5rem" style={{ marginTop: "16px" }} width="70%" />
+      <Skeleton height="1rem" style={{ marginTop: "16px" }} width="100%" />
+      <Skeleton height="1rem" style={{ marginTop: "8px" }} width="90%" />
+      <Skeleton height="0.875rem" style={{ marginTop: "24px" }} width="120px" />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "32px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          marginTop: "32px",
+        }}
+      >
         {[1, 2, 3].map((i) => (
           <div
             key={i}
@@ -44,16 +51,21 @@ export function PollDetailSkeleton() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Skeleton width="20px" height="20px" borderRadius="50%" />
-              <Skeleton width="100px" height="1rem" />
+              <Skeleton borderRadius="50%" height="20px" width="20px" />
+              <Skeleton height="1rem" width="100px" />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Skeleton width="40px" height="1.25rem" />
-              <Skeleton width="30px" height="0.875rem" />
+              <Skeleton height="1.25rem" width="40px" />
+              <Skeleton height="0.875rem" width="30px" />
             </div>
           </div>
         ))}
-        <Skeleton width="80px" height="40px" borderRadius="4px" style={{ marginTop: "4px" }} />
+        <Skeleton
+          borderRadius="4px"
+          height="40px"
+          style={{ marginTop: "4px" }}
+          width="80px"
+        />
       </div>
     </div>
   );
@@ -61,7 +73,7 @@ export function PollDetailSkeleton() {
 
 export function PollListSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+    <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
       {[1, 2, 3, 4].map((i) => (
         <div key={i}>
           <div
@@ -71,14 +83,33 @@ export function PollListSkeleton() {
               borderRadius: "4px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-              <Skeleton width="70px" height="20px" borderRadius="12px" />
-              <Skeleton width="50px" height="14px" />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "12px",
+              }}
+            >
+              <Skeleton borderRadius="12px" height="20px" width="70px" />
+              <Skeleton height="14px" width="50px" />
             </div>
-            <Skeleton width="85%" height="1.25rem" style={{ marginBottom: "8px" }} />
-            <Skeleton width="100%" height="0.875rem" style={{ marginBottom: "6px" }} />
-            <Skeleton width="90%" height="0.875rem" style={{ marginBottom: "6px" }} />
-            <Skeleton width="40%" height="0.875rem" />
+            <Skeleton
+              height="1.25rem"
+              style={{ marginBottom: "8px" }}
+              width="85%"
+            />
+            <Skeleton
+              height="0.875rem"
+              style={{ marginBottom: "6px" }}
+              width="100%"
+            />
+            <Skeleton
+              height="0.875rem"
+              style={{ marginBottom: "6px" }}
+              width="90%"
+            />
+            <Skeleton height="0.875rem" width="40%" />
           </div>
         </div>
       ))}

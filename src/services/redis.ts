@@ -1,5 +1,5 @@
-import Redis from "ioredis";
 import { env } from "env";
+import Redis from "ioredis";
 
 function createRedisClient() {
   const url = new URL(env.REDIS_URL);

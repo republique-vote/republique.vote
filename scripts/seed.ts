@@ -1,6 +1,6 @@
 import "dotenv-flow/config";
-import { env } from "../env";
 import postgres from "postgres";
+import { env } from "../env";
 
 const sql = postgres(env.DATABASE_URL);
 

@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Tabs as TabsPrimitive } from "radix-ui"
+import { cva, type VariantProps } from "class-variance-authority";
+import { Tabs as TabsPrimitive } from "radix-ui";
+import type * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 function Tabs({
   className,
@@ -13,15 +13,15 @@ function Tabs({
 }: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return (
     <TabsPrimitive.Root
-      data-slot="tabs"
-      data-orientation={orientation}
       className={cn(
         "group/tabs flex gap-0 data-horizontal:flex-col",
         className
       )}
+      data-orientation={orientation}
+      data-slot="tabs"
       {...props}
     />
-  )
+  );
 }
 
 const tabsListVariants = cva(
@@ -29,16 +29,17 @@ const tabsListVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-muted rounded-lg p-[3px] h-8",
-        line: "gap-1 bg-transparent rounded-none",
-        framed: "bg-transparent h-auto p-0 gap-0 rounded-none border-b border-border",
+        default: "h-8 rounded-lg bg-muted p-[3px]",
+        line: "gap-1 rounded-none bg-transparent",
+        framed:
+          "h-auto gap-0 rounded-none border-border border-b bg-transparent p-0",
       },
     },
     defaultVariants: {
       variant: "default",
     },
   }
-)
+);
 
 function TabsList({
   className,
@@ -48,12 +49,12 @@ function TabsList({
   VariantProps<typeof tabsListVariants>) {
   return (
     <TabsPrimitive.List
+      className={cn(tabsListVariants({ variant }), className)}
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
       {...props}
     />
-  )
+  );
 }
 
 function TabsTrigger({
@@ -62,38 +63,35 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
-      data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap border border-transparent px-1.5 py-0.5 font-medium text-foreground/60 text-sm transition-all hover:text-foreground focus-visible:border-ring focus-visible:outline-1 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start dark:text-muted-foreground dark:hover:text-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         // Default variant
-        "group-data-[variant=default]/tabs-list:rounded-md group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=default]/tabs-list:data-active:bg-background group-data-[variant=default]/tabs-list:data-active:text-foreground",
+        "group-data-[variant=default]/tabs-list:rounded-md group-data-[variant=default]/tabs-list:data-active:bg-background group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm",
         // Line variant
         "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:shadow-none",
         // Framed variant — styles handled in globals.css via [data-variant="framed"] selectors
         // Line underline
-        "after:absolute after:bg-primary after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
+        "after:absolute after:bg-primary after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
         className
       )}
+      data-slot="tabs-trigger"
       {...props}
     />
-  )
+  );
 }
 
-const tabsContentVariants = cva(
-  "flex-1 text-sm outline-none",
-  {
-    variants: {
-      variant: {
-        default: "",
-        line: "",
-        framed: "border border-border border-t-0 p-4 md:p-8",
-      },
+const tabsContentVariants = cva("flex-1 text-sm outline-none", {
+  variants: {
+    variant: {
+      default: "",
+      line: "",
+      framed: "border border-border border-t-0 p-4 md:p-8",
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 function TabsContent({
   className,
@@ -103,11 +101,18 @@ function TabsContent({
   VariantProps<typeof tabsContentVariants>) {
   return (
     <TabsPrimitive.Content
-      data-slot="tabs-content"
       className={cn(tabsContentVariants({ variant }), className)}
+      data-slot="tabs-content"
       {...props}
     />
-  )
+  );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants, tabsContentVariants }
+export {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  tabsContentVariants,
+  tabsListVariants,
+};

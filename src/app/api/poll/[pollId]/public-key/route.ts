@@ -1,13 +1,16 @@
-import { NextRequest } from "next/server";
+import { eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { poll } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { getOrCreateKeyPair, getPublicKeySpki } from "@/services/blind-signature";
-import { successResponse, errorResponse } from "@/lib/api-response";
+import { errorResponse, successResponse } from "@/lib/api-response";
+import {
+  getOrCreateKeyPair,
+  getPublicKeySpki,
+} from "@/services/blind-signature";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 

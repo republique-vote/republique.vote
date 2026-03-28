@@ -1,14 +1,14 @@
-import { NextRequest } from "next/server";
-import { db } from "@/db";
-import { poll, option, blindSignatureRequest } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
-import { auth } from "@/services/auth";
-import { successResponse, errorResponse } from "@/lib/api-response";
+import { and, eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
+import type { NextRequest } from "next/server";
+import { db } from "@/db";
+import { blindSignatureRequest, option, poll } from "@/db/schema";
+import { errorResponse, successResponse } from "@/lib/api-response";
+import { auth } from "@/services/auth";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 
@@ -28,9 +28,7 @@ export async function GET(
 
   const [{ count: rawCount }] = await db
     .select({ count: sql<number>`COUNT(*)` })
-    .from(
-      sql`vote_record`,
-    )
+    .from(sql`vote_record`)
     .where(sql`poll_id = ${pollId}`);
   const count = Number(rawCount);
 
@@ -43,7 +41,7 @@ export async function GET(
       const request = await db.query.blindSignatureRequest.findFirst({
         where: and(
           eq(blindSignatureRequest.pollId, pollId),
-          eq(blindSignatureRequest.userId, session.user.id),
+          eq(blindSignatureRequest.userId, session.user.id)
         ),
       });
       hasVoted = !!request;

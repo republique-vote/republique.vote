@@ -1,18 +1,21 @@
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
+import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { voteRecord, poll } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { poll, voteRecord } from "@/db/schema";
 
 interface VoteData {
-  pollId: string;
-  optionId: string;
-  blindToken: string;
   blindSignature: string;
+  blindToken: string;
   createdAt: string;
+  optionId: string;
+  pollId: string;
   sequence: number;
 }
 
-export function computeVoteHash(previousHash: string | null, vote: VoteData): string {
+export function computeVoteHash(
+  previousHash: string | null,
+  vote: VoteData
+): string {
   const data = [
     previousHash || "",
     vote.pollId,
@@ -41,13 +44,12 @@ export async function getLastVoteInChain(pollId: string) {
 }
 
 export async function updateMerkleRoot(pollId: string, newHash: string) {
-  await db
-    .update(poll)
-    .set({ merkleRoot: newHash })
-    .where(eq(poll.id, pollId));
+  await db.update(poll).set({ merkleRoot: newHash }).where(eq(poll.id, pollId));
 }
 
-export async function verifyChain(pollId: string): Promise<{ valid: boolean; error?: string }> {
+export async function verifyChain(
+  pollId: string
+): Promise<{ valid: boolean; error?: string }> {
   const votes = await db
     .select()
     .from(voteRecord)
@@ -59,7 +61,10 @@ export async function verifyChain(pollId: string): Promise<{ valid: boolean; err
     const expectedPreviousHash = i === 0 ? null : votes[i - 1].hash;
 
     if (vote.previousHash !== expectedPreviousHash) {
-      return { valid: false, error: `Vote #${vote.sequence}: previousHash mismatch` };
+      return {
+        valid: false,
+        error: `Vote #${vote.sequence}: previousHash mismatch`,
+      };
     }
 
     const expectedHash = computeVoteHash(vote.previousHash, {

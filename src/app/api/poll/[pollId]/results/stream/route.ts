@@ -1,13 +1,13 @@
-import { NextRequest } from "next/server";
+import { eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { poll } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { getPollResults } from "@/services/poll/results";
 import { onVoteUpdate } from "@/services/poll/events";
+import { getPollResults } from "@/services/poll/results";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
 
@@ -24,13 +24,13 @@ export async function GET(
     async start(controller) {
       const initialResults = await getPollResults(pollId);
       controller.enqueue(
-        encoder.encode(`data: ${JSON.stringify(initialResults)}\n\n`),
+        encoder.encode(`data: ${JSON.stringify(initialResults)}\n\n`)
       );
 
       const unsubscribe = onVoteUpdate(pollId, (data) => {
         try {
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
+            encoder.encode(`data: ${JSON.stringify(data)}\n\n`)
           );
         } catch {
           unsubscribe();

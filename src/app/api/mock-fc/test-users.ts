@@ -1,16 +1,16 @@
 export interface FranceConnectProfile {
-  sub: string;
-  login: string;
-  password: string;
-  given_name: string;
-  family_name: string;
-  preferred_username: string;
-  gender: string;
-  email: string;
-  phone_number: string;
+  birthcountry: string;
   birthdate: string;
   birthplace: string;
-  birthcountry: string;
+  email: string;
+  family_name: string;
+  gender: string;
+  given_name: string;
+  login: string;
+  password: string;
+  phone_number: string;
+  preferred_username: string;
+  sub: string;
 }
 
 export const TEST_USERS: FranceConnectProfile[] = [

@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
-import { db } from "@/db";
-import { poll, option, voteRecord } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
+import { db } from "@/db";
+import { option, poll, voteRecord } from "@/db/schema";
 import { verifyChain } from "@/services/poll/merkle";
 
 function escapeCsv(value: string) {
@@ -13,7 +13,7 @@ function escapeCsv(value: string) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ pollId: string }> },
+  { params }: { params: Promise<{ pollId: string }> }
 ) {
   const { pollId } = await params;
   const format = request.nextUrl.searchParams.get("format") || "json";
@@ -49,7 +49,8 @@ export async function GET(
     .orderBy(voteRecord.sequence);
 
   if (format === "csv") {
-    const header = "sequence,choix,empreinte,empreinte_precedente,jeton,signature,date";
+    const header =
+      "sequence,choix,empreinte,empreinte_precedente,jeton,signature,date";
     const rows = votes.map((v) =>
       [
         v.sequence.toString(),
@@ -59,7 +60,7 @@ export async function GET(
         escapeCsv(v.blindToken),
         escapeCsv(v.blindSignature),
         v.createdAt,
-      ].join(","),
+      ].join(",")
     );
 
     const csv = [header, ...rows].join("\n");

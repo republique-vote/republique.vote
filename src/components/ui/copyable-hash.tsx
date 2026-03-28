@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HelpCircle } from "lucide-react";
 
 export function CopyableHash({
   value,
@@ -30,7 +30,7 @@ export function CopyableHash({
   return (
     <div>
       {label && (
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
+        <div className="mb-2 flex items-center gap-1.5 text-muted-foreground text-sm">
           {label}
           {tooltip && (
             <Tooltip>
@@ -44,13 +44,17 @@ export function CopyableHash({
           )}
         </div>
       )}
-      <div className="flex gap-0 items-stretch max-w-lg">
+      <div className="flex max-w-lg items-stretch gap-0">
         <Input
+          className="truncate rounded-r-none font-mono text-muted-foreground text-xs"
           readOnly
           value={value}
-          className="font-mono text-xs text-muted-foreground truncate rounded-r-none"
         />
-        <Button variant="outline" onClick={handleCopy} className="rounded-l-none border-l-0 shrink-0">
+        <Button
+          className="shrink-0 rounded-l-none border-l-0"
+          onClick={handleCopy}
+          variant="outline"
+        >
           {copied ? "Copié" : "Copier"}
         </Button>
       </div>

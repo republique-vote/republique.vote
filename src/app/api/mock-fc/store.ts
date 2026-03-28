@@ -1,9 +1,12 @@
-const authCodes = new Map<string, { userId: string; codeChallenge?: string; redirectUri: string }>();
+const authCodes = new Map<
+  string,
+  { userId: string; codeChallenge?: string; redirectUri: string }
+>();
 const accessTokens = new Map<string, string>();
 
 export function storeAuthCode(
   code: string,
-  data: { userId: string; codeChallenge?: string; redirectUri: string },
+  data: { userId: string; codeChallenge?: string; redirectUri: string }
 ) {
   authCodes.set(code, data);
   setTimeout(() => authCodes.delete(code), 5 * 60 * 1000);

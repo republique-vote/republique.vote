@@ -10,7 +10,7 @@ export function emitVoteUpdate(pollId: string, data: unknown) {
 
 export function onVoteUpdate(
   pollId: string,
-  callback: (data: unknown) => void,
+  callback: (data: unknown) => void
 ) {
   const sub = getSubscriber();
   const channel = `${RESULTS_PREFIX}${pollId}`;
@@ -35,10 +35,7 @@ export function emitBoardVote(pollId: string, data: unknown) {
   pub.publish(`${BOARD_PREFIX}${pollId}`, JSON.stringify(data));
 }
 
-export function onBoardVote(
-  pollId: string,
-  callback: (data: unknown) => void,
-) {
+export function onBoardVote(pollId: string, callback: (data: unknown) => void) {
   const sub = getSubscriber();
   const channel = `${BOARD_PREFIX}${pollId}`;
 
