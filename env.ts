@@ -2,7 +2,6 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";
 
 export const env = createEnv({
-  emptyStringAsUndefined: true,
   server: {
     AUTH_SECRET: z.string().min(1),
     AUTH_BASE_URL: z.url(),
@@ -18,4 +17,6 @@ export const env = createEnv({
     REDIS_URL: z.url().default("redis://localhost:6379"),
   },
   experimental__runtimeEnv: {},
+  skipValidation: !!process.env.CI,
+  emptyStringAsUndefined: true,
 });
