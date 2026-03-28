@@ -228,7 +228,7 @@ export default function HowItWorksPage() {
             const Icon = step.icon;
             return (
               <div
-                className={`group relative p-6 md:p-8 ${i % 2 === 0 ? "" : "border-border md:border-l"} ${i >= 2 ? "border-border border-t" : ""}`}
+                className={`group relative p-6 md:p-8 ${i % 2 === 0 ? "" : "border-border md:border-l"} ${i >= 1 ? "border-border border-t" : ""} ${i >= 1 && i < 2 ? "md:border-t-0" : ""}`}
                 key={step.number}
               >
                 {/* Step number */}
