@@ -129,8 +129,8 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] Favicon et métadonnées Open Graph
 - [x] Preuve de vote visuelle (image générée avec numéro, empreinte, jeton, date — permet de retrouver et vérifier son vote plus tard)
 - [x] PostgreSQL + Redis managés sur Railway
-- [ ] Déployer sur Railway + configurer republique.vote (DNS, certificat)
-- [ ] CI/CD (GitHub Actions : lint + build)
+- [x] Déployer sur Railway + configurer republique.vote (DNS, certificat)
+- [x] CI/CD (GitHub Actions : lint + build)
 
 ### Phase 6 — Observateurs & Confiance distribuée
 - [ ] CLI open source (`npx republique-observer poll-1`) pour surveiller un vote en temps réel et stocker une copie locale
