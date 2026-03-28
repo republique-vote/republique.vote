@@ -1,12 +1,7 @@
-export function onRequestInit() {
-  // Only run in production
-  if (process.env.NODE_ENV !== "production") {
+export function register() {
+  if (process.env.NEXT_RUNTIME !== "nodejs") {
     return;
   }
-  if (process.env.__CRON_REGISTERED === "1") {
-    return;
-  }
-  process.env.__CRON_REGISTERED = "1";
 
   const INTERVAL = 10 * 60 * 1000; // 10 minutes
 
