@@ -1,10 +1,10 @@
-import { InfoIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import Link from "next/link";
 import { ThemeProvider } from "next-themes";
 import { HeaderAuthItem } from "@/components/auth/header-auth-item";
 import { BrandLogo } from "@/components/brand-logo";
+import { DemoBanner } from "@/components/demo-banner";
 import { HeaderNav } from "@/components/header-nav";
 import { MobileMenu } from "@/components/mobile-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -51,25 +51,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider>
             <SWRProvider>
-              {/* Notice banner */}
-              <div className="border-border border-b bg-accent/50">
-                <div className="mx-auto flex max-w-[1200px] items-center gap-2 px-6 py-2 text-accent-foreground/80 text-sm">
-                  <InfoIcon className="h-3.5 w-3.5 shrink-0" />
-                  <span>
-                    republique.vote est un projet de recherche{" "}
-                    <a
-                      className="underline hover:text-foreground"
-                      href="https://github.com/republique-vote/republique.vote"
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      open source
-                    </a>
-                    . Ce site n&apos;est pas un service officiel du gouvernement
-                    français.
-                  </span>
-                </div>
-              </div>
+              <DemoBanner />
 
               {/* Header */}
               <header className="relative border-border border-b bg-card">
