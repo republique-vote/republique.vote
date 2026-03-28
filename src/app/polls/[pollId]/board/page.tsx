@@ -11,7 +11,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { db } from "@/db";
-import { option, poll, voteRecord } from "@/db/schema";
+import { option, poll, rekorEntry, voteRecord } from "@/db/schema";
 import { verifyChain } from "@/services/poll/merkle";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +77,19 @@ export default async function BoardPage({
 
   const integrity = await verifyChain(pollId);
 
+  const rekorEntries = await db
+    .select({
+      sequence: rekorEntry.sequence,
+      logIndex: rekorEntry.logIndex,
+    })
+    .from(rekorEntry)
+    .where(eq(rekorEntry.pollId, pollId));
+
+  const rekorMap: Record<number, number> = {};
+  for (const entry of rekorEntries) {
+    rekorMap[entry.sequence] = entry.logIndex;
+  }
+
   return (
     <>
       <Breadcrumb className="mb-6">
@@ -108,6 +121,7 @@ export default async function BoardPage({
           status: p.status,
           merkleRoot: p.merkleRoot,
         }}
+        rekorMap={rekorMap}
         serverChainValid={integrity.valid}
         totalVotes={totalVotes}
       />

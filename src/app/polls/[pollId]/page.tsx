@@ -1,7 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import { ScrollText } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
@@ -13,8 +11,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { CopyableHash } from "@/components/ui/copyable-hash";
 import { db } from "@/db";
 import { blindSignatureRequest, option, poll } from "@/db/schema";
 import { auth } from "@/services/auth";
@@ -99,6 +95,7 @@ export default async function PollDetailPage({
 
       <PollDetailClient
         initialHasVoted={hasVoted}
+        initialMerkleRoot={p.merkleRoot}
         initialResults={results}
         initialVoteCount={count}
         options={options}
@@ -112,22 +109,6 @@ export default async function PollDetailPage({
           endDate: p.endDate,
         }}
       />
-
-      {p.merkleRoot && (
-        <div className="mt-8 border-t pt-4">
-          <CopyableHash
-            label="Empreinte du cahier de vote"
-            tooltip="Ce code est calculé mathématiquement à partir de tous les votes. Il évolue à chaque nouveau vote. Si quelqu'un modifie ou supprime un ancien vote, le calcul ne tombe plus juste et tout le monde peut le vérifier."
-            value={p.merkleRoot}
-          />
-          <Button asChild className="mt-3" variant="outline">
-            <Link href={`/polls/${p.id}/board`}>
-              <ScrollText className="mr-1.5 h-4 w-4" />
-              Consulter le cahier de vote
-            </Link>
-          </Button>
-        </div>
-      )}
     </>
   );
 }
