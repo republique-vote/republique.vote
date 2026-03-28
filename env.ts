@@ -15,6 +15,7 @@ export const env = createEnv({
       .url()
       .default("postgresql://postgres:postgres@localhost:5432/vote"),
     REDIS_URL: z.url().default("redis://localhost:6379"),
+    CRON_SECRET: z.string().min(1).optional(),
   },
   experimental__runtimeEnv: {},
   skipValidation: !!process.env.CI,
