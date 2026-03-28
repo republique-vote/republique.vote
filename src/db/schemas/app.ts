@@ -1,4 +1,4 @@
-import { integer, pgTable, text, unique } from "drizzle-orm/pg-core";
+import { bigint, integer, pgTable, text, unique } from "drizzle-orm/pg-core";
 
 export const poll = pgTable("poll", {
   id: text("id")
@@ -86,3 +86,18 @@ export const voteRecord = pgTable(
   },
   (table) => [unique().on(table.pollId, table.blindToken)]
 );
+
+export const rekorEntry = pgTable("rekor_entry", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  pollId: text("poll_id")
+    .notNull()
+    .references(() => poll.id),
+  sequence: integer("sequence").notNull(),
+  merkleRoot: text("merkle_root").notNull(),
+  logIndex: bigint("log_index", { mode: "number" }).notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});

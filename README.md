@@ -26,7 +26,8 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 - **Frontend.** [Next.js](https://nextjs.org) + [Shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/). Design inspiré du [DSFR](https://www.systeme-de-design.gouv.fr/) mais avec des composants libres (Radix + Tailwind) pour des raisons légales. Initialement basé sur le [template Next App Router du DSFR](https://github.com/codegouvfr/react-dsfr/tree/main/test/integration/next-appdir), une migration vers le DSFR officiel serait possible en cas d'habilitation
 - **Base de données.** PostgreSQL pour les données classiques (utilisateurs, votes, métadonnées)
 - **Authentification.** [FranceConnect](https://franceconnect.gouv.fr/) (sandbox en développement)
-- **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central.
+- **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central
+- **Transparence externe.** Chaque empreinte du cahier est publiée sur [Sigstore Rekor](https://docs.sigstore.dev/logging/overview/) (immédiat) et sur un [dépôt GitHub public](https://github.com/republique-vote/merkle-proofs) (batch toutes les 30s)
 
 ## Architecture
 
@@ -68,6 +69,14 @@ Même si quelqu'un pirate le serveur :
 - Impossible d'**effacer** des votes (le cahier est public, tout le monde peut le vérifier)
 - Impossible de **modifier** un vote (le code de toutes les lignes suivantes changerait)
 - Impossible de **savoir** qui a voté quoi (le code secret est anonyme)
+
+**Comment on prouve qu'on ne triche pas ?**
+
+En plus du cahier public, l'empreinte du cahier est envoyée automatiquement à deux endroits qu'on ne contrôle pas :
+
+1. **Le notaire (Sigstore).** À chaque vote, l'empreinte est envoyée à [Sigstore](https://docs.sigstore.dev/logging/overview/), un service public et gratuit géré par la Linux Foundation (Google, Red Hat, GitHub...). Le notaire tamponne et horodate l'empreinte. Une fois tamponné, personne ne peut modifier ou effacer cette ligne. Ni nous, ni le notaire. Vérifiable par n'importe qui sur [search.sigstore.dev](https://search.sigstore.dev).
+
+2. **Le tableau public (GitHub).** Toutes les 30 secondes, l'empreinte est aussi affichée sur un [tableau public sur GitHub](https://github.com/republique-vote/merkle-proofs). C'est comme un panneau d'affichage dans la rue : n'importe qui peut le lire, personne ne peut effacer ce qui a déjà été écrit, et chaque mise à jour est datée.
 
 **Pourquoi je ne peux pas changer mon vote en ligne ?**
 
@@ -137,7 +146,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
 - [ ] App mobile avec notifications push à chaque nouveau vote
 - [ ] Webhook configurable (les médias/assos reçoivent chaque vote en POST sur leur serveur)
-- [ ] Publication automatique du Merkle root sur un repo GitHub public (un commit par vote)
+- [x] Publication automatique du Merkle root sur Sigstore Rekor (transparency log) + GitHub (batch)
 
 ### Phase 7 — Contenu réel
 - [ ] Intégration de l'API de l'Assemblée Nationale / Sénat

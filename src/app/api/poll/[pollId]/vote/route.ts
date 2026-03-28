@@ -7,6 +7,7 @@ import {
   getOrCreateKeyPair,
   verifySignature,
 } from "@/services/blind-signature";
+import { queueMerklePublish } from "@/services/github/merkle-publish";
 import { emitBoardVote, emitVoteUpdate } from "@/services/poll/events";
 import {
   computeVoteHash,
@@ -14,6 +15,7 @@ import {
   updateMerkleRoot,
 } from "@/services/poll/merkle";
 import { getPollResults } from "@/services/poll/results";
+import { publishToRekor } from "@/services/rekor/publish";
 
 export async function POST(
   request: NextRequest,
@@ -101,6 +103,11 @@ export async function POST(
       createdAt,
       merkleRoot: hash,
     });
+
+    publishToRekor({ pollId, merkleRoot: hash, sequence }).catch((err) =>
+      console.error("[rekor] Merkle publish failed:", err)
+    );
+    queueMerklePublish({ pollId, merkleRoot: hash, sequence });
 
     return successResponse({ voted: true, sequence, hash, createdAt }, 201);
   } catch {
