@@ -100,7 +100,7 @@ function formatDateShort(dateStr: string) {
   });
 }
 
-function VerificationStatusIcon({ status }: { status: string }) {
+function VerificationStatusIcon({ status }: { status: string | undefined }) {
   if (status === "valid") {
     return <CheckCircle className="mx-auto h-4 w-4 text-green-600" />;
   }
