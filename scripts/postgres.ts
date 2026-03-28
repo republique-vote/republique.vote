@@ -4,12 +4,15 @@ import EmbeddedPostgres from "embedded-postgres";
 import postgres from "postgres";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
+import { checkPort } from "./check-port";
 
 const url = new URL(env.DATABASE_URL);
 const port = Number(url.port) || 5432;
 const user = url.username || "postgres";
 const password = url.password || "postgres";
 const dbName = url.pathname.slice(1) || "vote";
+
+checkPort(port, "PostgreSQL");
 
 async function main() {
 	const dataDir = "./tmp/pg-data";

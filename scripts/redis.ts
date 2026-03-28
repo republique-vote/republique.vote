@@ -1,8 +1,11 @@
 import "dotenv-flow/config";
 import { env } from "../env";
 import { RedisMemoryServer } from "redis-memory-server";
+import { checkPort } from "./check-port";
 
 const port = Number(new URL(env.REDIS_URL).port) || 6379;
+
+checkPort(port, "Redis");
 
 async function main() {
 	const redis = new RedisMemoryServer({
