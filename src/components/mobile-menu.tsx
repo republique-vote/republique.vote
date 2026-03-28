@@ -14,7 +14,8 @@ export function MobileMenu() {
   const pathname = usePathname();
 
   return (
-    <div className="md:hidden">
+    <div className="flex items-center gap-1 md:hidden">
+      <HeaderAuthItem compact />
       <Button
         aria-label="Menu"
         onClick={() => setOpen(!open)}

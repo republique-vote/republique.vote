@@ -1,14 +1,22 @@
 "use client";
 
 import { LogIn } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { signIn } from "@/services/auth/client";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const rawContinue = searchParams.get("continue") || "/";
+  const continueUrl =
+    rawContinue.startsWith("/") && !rawContinue.startsWith("//")
+      ? rawContinue
+      : "/";
+
   const handleFranceConnect = () => {
     signIn.oauth2({
       providerId: "franceconnect",
-      callbackURL: "/",
+      callbackURL: continueUrl,
     });
   };
 

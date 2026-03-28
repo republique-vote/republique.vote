@@ -83,7 +83,7 @@ export function AlreadyVotedAlert({ onVerify }: { onVerify: () => void }) {
   );
 }
 
-export function LoginRequiredAlert() {
+export function LoginRequiredAlert({ continueUrl }: { continueUrl: string }) {
   return (
     <div className="mb-6">
       <Alert className="mb-3" variant="warning">
@@ -94,7 +94,9 @@ export function LoginRequiredAlert() {
         </AlertDescription>
       </Alert>
       <Button asChild>
-        <Link href="/login">Se connecter</Link>
+        <Link href={`/login?continue=${encodeURIComponent(continueUrl)}`}>
+          Se connecter
+        </Link>
       </Button>
     </div>
   );

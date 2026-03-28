@@ -289,7 +289,9 @@ export function PollDetailClient({
         pollId={poll.id}
       />
 
-      {isOpen && !isAuthenticated && <LoginRequiredAlert />}
+      {isOpen && !isAuthenticated && (
+        <LoginRequiredAlert continueUrl={`/polls/${poll.id}`} />
+      )}
 
       <VoteOptions
         canVote={canVote}
