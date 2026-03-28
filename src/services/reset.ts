@@ -13,5 +13,7 @@ export async function resetAndSeed() {
   await db.delete(pollKeyPair);
   await db.update(poll).set({ merkleRoot: null });
 
-  console.log("[reset] Vote data cleared, polls preserved");
+  console.log(
+    `[reset] Vote data cleared, polls preserved (${new Date().toISOString()})`
+  );
 }
