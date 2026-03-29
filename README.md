@@ -142,10 +142,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] CI/CD (GitHub Actions : lint + build)
 
 ### Phase 6 — Observateurs & Confiance distribuée
-- [ ] CLI open source (`npx republique-observer poll-1`) pour surveiller un vote en temps réel et stocker une copie locale
-- [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
-- [ ] App mobile avec notifications push à chaque nouveau vote
-- [ ] Webhook configurable (les médias/assos reçoivent chaque vote en POST sur leur serveur)
+- [x] CLI open source (`npx republique-observer poll-1`) pour surveiller un vote en temps réel et stocker une copie locale
 - [x] Publication automatique du Merkle root sur Sigstore Rekor (transparency log) + GitHub (batch)
 
 ### Phase 7 — Contenu réel
@@ -155,8 +152,9 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 
 ### Phase 8 — Scalabilité
 - [ ] Exports en streaming (écriture ligne par ligne, pas de chargement mémoire complet)
-- [ ] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
-- [ ] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
+- [x] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
+- [x] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
+- [ ] Restructurer en monorepo propre (`apps/web`, `packages/core`, `packages/observer`)
 
 ### Phase 9 — Annulation de vote (recherche)
 - [ ] Tag de révocation caché dans le bulletin (choix chiffré + tag dérivé du secret votant)
@@ -171,6 +169,10 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
 - [ ] Intégration avec un transparency log (Sigsum/Rekor)
 - [ ] Audit de sécurité externe
+
+### Phase 11 — Applications natives
+- [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
+- [ ] App mobile avec notifications push à chaque nouveau vote
 
 ## Site
 
