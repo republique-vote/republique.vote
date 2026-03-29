@@ -156,7 +156,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [ ] Exports en streaming (écriture ligne par ligne, pas de chargement mémoire complet)
 - [x] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
 - [x] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
-- [ ] Restructurer en monorepo propre (`apps/web`, `packages/core`, `packages/observer`)
+- [ ] Restructurer en monorepo propre (`apps/web`, `packages/core`, `packages/observer`) + Turborepo
 - [ ] Publier les packages sur npm (`@republique/core`, `@republique/observer`) + changesets pour le versioning
 
 ### Phase 9 — Annulation de vote (recherche)
