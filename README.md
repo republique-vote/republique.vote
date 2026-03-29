@@ -157,6 +157,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
 - [x] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
 - [ ] Restructurer en monorepo propre (`apps/web`, `packages/core`, `packages/observer`)
+- [ ] Publier les packages sur npm (`@republique/core`, `@republique/observer`) + changesets pour le versioning
 
 ### Phase 9 — Annulation de vote (recherche)
 - [ ] Tag de révocation caché dans le bulletin (choix chiffré + tag dérivé du secret votant)
