@@ -11,6 +11,7 @@ import {
   Rss,
   Search,
   ShieldCheck,
+  Terminal,
   XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -197,6 +198,19 @@ export function BoardHeader({
               GitHub
             </a>
           </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button asChild size="sm" variant="outline">
+                <a href="/how-it-works#observer">
+                  <Terminal className="mr-1 h-3.5 w-3.5" />
+                  CLI
+                </a>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Surveiller ce vote depuis votre terminal</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

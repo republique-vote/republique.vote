@@ -1,7 +1,7 @@
 {
   "name": "@republique/observer",
   "version": "0.1.0",
-  "description": "CLI pour surveiller un vote republique.vote en temps réel et vérifier l'intégrité de la chaîne",
+  "description": "CLI pour surveiller les votes republique.vote en temps réel et vérifier l'intégrité de la chaîne",
   "type": "module",
   "bin": {
     "republique-observer": "./dist/index.js"

@@ -78,6 +78,8 @@ En plus du cahier public, l'empreinte du cahier est envoyée automatiquement à 
 
 2. **Le tableau public (GitHub).** Toutes les 30 secondes, l'empreinte est aussi affichée sur un [tableau public sur GitHub](https://github.com/republique-vote/merkle-proofs). C'est comme un panneau d'affichage dans la rue : n'importe qui peut le lire, personne ne peut effacer ce qui a déjà été écrit, et chaque mise à jour est datée.
 
+3. **L'observateur citoyen.** N'importe qui peut lancer un petit programme gratuit (`npx @republique/observer`) qui surveille tous les votes en temps réel, vérifie chaque bulletin indépendamment et en garde une copie locale. Pas besoin de nous faire confiance : vous vérifiez tout vous-même, depuis votre ordinateur. [Code source](https://github.com/republique-vote/republique.vote/tree/main/packages/observer).
+
 **Pourquoi je ne peux pas changer mon vote en ligne ?**
 
 Pour retrouver votre ancien vote et le remplacer, le système devrait pouvoir relier votre identité à votre vote. Ça casserait l'anonymat. Donc le vote en ligne est **définitif**. Si vous voulez changer d'avis, vous pouvez aller voter en bureau de vote (ou en mairie sur une borne) : le vote physique écrase le vote en ligne.
@@ -142,7 +144,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] CI/CD (GitHub Actions : lint + build)
 
 ### Phase 6 — Observateurs & Confiance distribuée
-- [x] CLI open source (`npx republique-observer poll-1`) pour surveiller un vote en temps réel et stocker une copie locale
+- [x] CLI open source (`npx @republique/observer`) pour surveiller les votes en temps réel et stocker une copie locale
 - [x] Publication automatique du Merkle root sur Sigstore Rekor (transparency log) + GitHub (batch)
 
 ### Phase 7 — Contenu réel

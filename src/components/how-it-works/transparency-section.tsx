@@ -1,4 +1,41 @@
-import { GitBranch, ShieldCheck } from "lucide-react";
+"use client";
+
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  GitBranch,
+  ShieldCheck,
+  Terminal,
+} from "lucide-react";
+import { useState } from "react";
+
+function CopyCommand({ command }: { command: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(command);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-3 bg-zinc-950 px-4 py-3 font-mono text-sm text-zinc-100">
+      <code>{command}</code>
+      <button
+        className="shrink-0 text-zinc-400 transition-colors hover:text-zinc-100"
+        onClick={handleCopy}
+        type="button"
+      >
+        {copied ? (
+          <Check className="h-4 w-4 text-green-400" />
+        ) : (
+          <Copy className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+}
 
 export function TransparencySection() {
   return (
@@ -13,7 +50,7 @@ export function TransparencySection() {
         pas, à chaque vote. Si on change quoi que ce soit après coup,
         l&apos;empreinte ne correspond plus et tout le monde le voit.
       </p>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="border border-border p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center bg-accent">
             <ShieldCheck className="h-6 w-6 text-primary" />
@@ -69,6 +106,41 @@ export function TransparencySection() {
             déjà été écrit, et chaque mise à jour est datée. Si on essayait de
             modifier un ancien affichage, tout le monde verrait la modification
             dans l&apos;historique.
+          </p>
+        </div>
+        <div className="border border-border p-6">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center bg-accent">
+            <Terminal className="h-6 w-6 text-primary" />
+          </div>
+          <h3 className="mb-2 font-bold">L&apos;observateur citoyen</h3>
+          <p className="mb-3 text-muted-foreground text-sm leading-relaxed">
+            N&apos;importe qui peut lancer un petit programme gratuit qui
+            surveille tous les votes en temps réel, vérifie chaque bulletin
+            indépendamment et en garde une copie sur son ordinateur. Ouvrez un
+            terminal et tapez :
+          </p>
+          <CopyCommand command="npx @republique/observer" />
+          <p className="mt-3 flex items-center gap-3">
+            <a
+              className="inline-flex items-center gap-1.5 font-medium text-primary text-xs underline hover:text-primary/80"
+              href="https://github.com/republique-vote/republique.vote/tree/main/packages/observer"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Code source
+              <ExternalLink className="h-3 w-3" />
+            </a>
+            <span className="text-muted-foreground text-xs">
+              Nécessite{" "}
+              <a
+                className="underline hover:text-foreground"
+                href="https://nodejs.org"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Node.js
+              </a>
+            </span>
           </p>
         </div>
       </div>
