@@ -15,9 +15,7 @@ export async function GET(
 ) {
   const { pollId } = await params;
 
-  const p = await db.query.poll.findFirst({
-    where: eq(poll.id, pollId),
-  });
+  const p = await db.query.poll.findFirst({ where: eq(poll.id, pollId) });
 
   if (!p) {
     return errorResponse("poll_not_found", 404);
@@ -37,36 +35,9 @@ export async function GET(
 
   const integrity = await verifyChain(pollId);
 
-  const meta = {
-    pollId,
-    pollTitle: p.title,
-    merkleRoot: p.merkleRoot,
-    totalVotes,
-    chainValid: integrity.valid,
-    options,
-  };
-
-  // all=true returns all votes in ASC order (for client-side verification)
-  if (request.nextUrl.searchParams.get("all") === "true") {
-    const allVotes = await db
-      .select({
-        sequence: voteRecord.sequence,
-        optionId: voteRecord.optionId,
-        blindToken: voteRecord.blindToken,
-        blindSignature: voteRecord.blindSignature,
-        hash: voteRecord.hash,
-        previousHash: voteRecord.previousHash,
-        createdAt: voteRecord.createdAt,
-      })
-      .from(voteRecord)
-      .where(eq(voteRecord.pollId, pollId))
-      .orderBy(voteRecord.sequence);
-
-    return successResponse({ ...meta, votes: allVotes });
-  }
-
-  // Paginated response (DESC order — newest first)
   const { page, limit } = getPaginationParams(request.nextUrl.searchParams);
+  const order =
+    request.nextUrl.searchParams.get("order") === "asc" ? "asc" : "desc";
   const itemLimit = limit || 50;
   const currentPage = page || 1;
   const offset = (currentPage - 1) * itemLimit;
@@ -84,14 +55,18 @@ export async function GET(
     })
     .from(voteRecord)
     .where(eq(voteRecord.pollId, pollId))
-    .orderBy(desc(voteRecord.sequence))
+    .orderBy(order === "asc" ? voteRecord.sequence : desc(voteRecord.sequence))
     .limit(itemLimit)
     .offset(offset);
 
   return successResponse({
-    ...meta,
-    votes,
-    pagination: {
+    pollId,
+    pollTitle: p.title,
+    merkleRoot: p.merkleRoot,
+    chainValid: integrity.valid,
+    options,
+    votes: {
+      items: votes,
       currentPage,
       pageCount,
       itemCount: totalVotes,

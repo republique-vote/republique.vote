@@ -3,14 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
 import { blindSignatureRequest, option, poll } from "@/db/schema";
 import { auth } from "@/services/auth";
@@ -25,9 +18,7 @@ export default async function PollDetailPage({
 }) {
   const { pollId } = await params;
 
-  const p = await db.query.poll.findFirst({
-    where: eq(poll.id, pollId),
-  });
+  const p = await db.query.poll.findFirst({ where: eq(poll.id, pollId) });
 
   if (!p) {
     notFound();
@@ -69,21 +60,13 @@ export default async function PollDetailPage({
 
   return (
     <>
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/polls">Votes</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{p.title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Breadcrumbs
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: "Votes", href: "/polls" },
+          { label: p.title },
+        ]}
+      />
 
       <div className="mb-6">
         <Badge className="mb-3" variant={isOpen ? "success" : "info"}>

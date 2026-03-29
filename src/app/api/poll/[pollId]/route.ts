@@ -12,9 +12,7 @@ export async function GET(
 ) {
   const { pollId } = await params;
 
-  const p = await db.query.poll.findFirst({
-    where: eq(poll.id, pollId),
-  });
+  const p = await db.query.poll.findFirst({ where: eq(poll.id, pollId) });
 
   if (!p) {
     return errorResponse("poll_not_found", 404);

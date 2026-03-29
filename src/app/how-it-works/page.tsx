@@ -7,29 +7,17 @@ import { TransparencySection } from "@/components/how-it-works/transparency-sect
 import { VisionSection } from "@/components/how-it-works/vision-section";
 import { VoteStepsSection } from "@/components/how-it-works/vote-steps-section";
 import { WhyOnlineSection } from "@/components/how-it-works/why-online-section";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export default function HowItWorksPage() {
   return (
     <>
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Comment ça marche</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Breadcrumbs
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: "Comment ça marche" },
+        ]}
+      />
 
       <HeroSection />
       <WhyOnlineSection />

@@ -50,26 +50,44 @@ export function VerifyVoteDialog({
     setVerifying(true);
     setResult(null);
     try {
-      const res = await fetch(`/api/poll/${pollId}/board?all=true`);
-      const { data } = await res.json();
-      const vote = data.votes.find(
-        (v: { blindToken: string }) => v.blindToken === token
-      );
-      if (vote) {
-        const optionLabel =
-          data.options?.find((o: { id: string }) => o.id === vote.optionId)
-            ?.label || vote.optionId;
-        setResult({
-          found: true,
-          sequence: vote.sequence,
-          optionLabel,
-          hash: vote.hash,
-          previousHash: vote.previousHash,
-          blindToken: vote.blindToken,
-          blindSignature: vote.blindSignature,
-          createdAt: vote.createdAt,
-        });
-      } else {
+      let page = 1;
+      let pageCount = 1;
+      let options: { id: string; label: string }[] = [];
+      let found = false;
+
+      do {
+        const res = await fetch(
+          `/api/poll/${pollId}/board?page=${page}&limit=50&order=asc`
+        );
+        const { data } = await res.json();
+        pageCount = data.votes.pageCount ?? 1;
+        if (page === 1 && data.options) {
+          options = data.options;
+        }
+
+        const vote = data.votes.items.find(
+          (v: { blindToken: string }) => v.blindToken === token
+        );
+        if (vote) {
+          const optionLabel =
+            options.find((o) => o.id === vote.optionId)?.label || vote.optionId;
+          setResult({
+            found: true,
+            sequence: vote.sequence,
+            optionLabel,
+            hash: vote.hash,
+            previousHash: vote.previousHash,
+            blindToken: vote.blindToken,
+            blindSignature: vote.blindSignature,
+            createdAt: vote.createdAt,
+          });
+          found = true;
+          break;
+        }
+        page++;
+      } while (page <= pageCount);
+
+      if (!found) {
         setResult({ found: false });
       }
     } catch {

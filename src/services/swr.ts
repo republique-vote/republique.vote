@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/lib/api-response";
+import type { ApiResponse } from "@republique/core";
 
 export class FetchError extends Error {
   status: number;

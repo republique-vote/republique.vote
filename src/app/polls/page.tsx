@@ -1,14 +1,7 @@
 import { count, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { PollListClient } from "@/components/polls/poll-list-client";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
 import { blindSignatureRequest, poll, voteRecord } from "@/db/schema";
 import { auth } from "@/services/auth";
@@ -50,17 +43,9 @@ export default async function PollsPage() {
 
   return (
     <>
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Votes</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Breadcrumbs
+        items={[{ label: "Accueil", href: "/" }, { label: "Votes" }]}
+      />
       <h1 className="font-bold text-3xl tracking-tight">Votes</h1>
       <p className="mt-2 text-lg text-muted-foreground">
         Participez aux votes en cours ou consultez les résultats des votes

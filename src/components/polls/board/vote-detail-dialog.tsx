@@ -1,5 +1,6 @@
 "use client";
 
+import type { Vote } from "@republique/core";
 import { ExternalLink } from "lucide-react";
 import { VoteDetailsCards } from "@/components/polls/vote-details-cards";
 import {
@@ -8,16 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-interface Vote {
-  blindSignature: string;
-  blindToken: string;
-  createdAt: string;
-  hash: string;
-  optionId: string;
-  previousHash: string | null;
-  sequence: number;
-}
 
 export function VoteDetailDialog({
   vote,

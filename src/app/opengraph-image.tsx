@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { UrneOgSvg } from "@/components/og/urne-svg";
 
 export const alt = "republique.vote — Le vote, partout, pour tous.";
 export const size = { width: 1200, height: 630 };
@@ -110,34 +111,7 @@ export default async function OpenGraphImage() {
         </p>
 
         {/* Urne icon */}
-        <svg
-          aria-label="Urne de vote"
-          fill="none"
-          height="88"
-          role="img"
-          viewBox="0 0 32 32"
-          width="80"
-        >
-          <rect
-            fill="#ffffff"
-            height="12"
-            opacity="0.85"
-            transform="rotate(8, 16, 8)"
-            width="8"
-            x="12"
-            y="2"
-          />
-          <rect fill="#ffffff" height="16" width="22" x="5" y="11" />
-          <rect fill="#000091" height="3" width="10" x="11" y="11" />
-          <rect
-            fill="#ffffff"
-            height="2"
-            opacity="0.5"
-            width="22"
-            x="5"
-            y="27"
-          />
-        </svg>
+        <UrneOgSvg height={88} width={80} />
       </div>
     </div>,
     {

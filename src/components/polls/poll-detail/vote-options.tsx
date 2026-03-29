@@ -1,18 +1,7 @@
 "use client";
 
+import type { PollOption, ResultData } from "@republique/core";
 import { Button } from "@/components/ui/button";
-
-interface Option {
-  id: string;
-  label: string;
-  position: number;
-}
-
-interface ResultData {
-  count: number;
-  optionId: string;
-  percentage: number;
-}
 
 export function VoteOptions({
   options,
@@ -23,7 +12,7 @@ export function VoteOptions({
   onSelect,
   onVote,
 }: {
-  options: Option[];
+  options: PollOption[];
   results: ResultData[];
   selectedOption: string;
   canVote: boolean;

@@ -2,14 +2,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BoardClient } from "@/components/polls/board-client";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
 import { option, poll, rekorEntry, voteRecord } from "@/db/schema";
 import { verifyChain } from "@/services/poll/merkle";
@@ -40,9 +33,7 @@ export default async function BoardPage({
 }) {
   const { pollId } = await params;
 
-  const p = await db.query.poll.findFirst({
-    where: eq(poll.id, pollId),
-  });
+  const p = await db.query.poll.findFirst({ where: eq(poll.id, pollId) });
 
   if (!p) {
     notFound();
@@ -92,25 +83,14 @@ export default async function BoardPage({
 
   return (
     <>
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/polls">Votes</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/polls/${pollId}`}>{p.title}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Cahier de vote</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Breadcrumbs
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: "Votes", href: "/polls" },
+          { label: p.title, href: `/polls/${pollId}` },
+          { label: "Cahier de vote" },
+        ]}
+      />
 
       <BoardClient
         initialVotes={initialVotes}

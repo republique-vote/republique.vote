@@ -1,28 +1,10 @@
 "use client";
 
+import type { Vote } from "@republique/core";
+import { formatDateShort } from "@republique/core";
 import { CheckCircle, Eye, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-interface Vote {
-  blindSignature: string;
-  blindToken: string;
-  createdAt: string;
-  hash: string;
-  optionId: string;
-  previousHash: string | null;
-  sequence: number;
-}
-
-function formatDateShort(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export function VoteMobileList({
   votes,

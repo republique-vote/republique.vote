@@ -1,32 +1,16 @@
 import { createHash } from "node:crypto";
+import type { VoteHashInput } from "@republique/core";
+import { buildVoteHashPreimage } from "@republique/core";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { poll, voteRecord } from "@/db/schema";
 
-interface VoteData {
-  blindSignature: string;
-  blindToken: string;
-  createdAt: string;
-  optionId: string;
-  pollId: string;
-  sequence: number;
-}
-
 export function computeVoteHash(
   previousHash: string | null,
-  vote: VoteData
+  vote: VoteHashInput
 ): string {
-  const data = [
-    previousHash || "",
-    vote.pollId,
-    vote.optionId,
-    vote.blindToken,
-    vote.blindSignature,
-    vote.createdAt,
-    vote.sequence.toString(),
-  ].join("|");
-
-  return createHash("sha256").update(data).digest("hex");
+  const preimage = buildVoteHashPreimage(previousHash, vote);
+  return createHash("sha256").update(preimage).digest("hex");
 }
 
 export async function getLastVoteInChain(pollId: string) {

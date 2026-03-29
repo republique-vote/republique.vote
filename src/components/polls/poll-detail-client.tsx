@@ -1,5 +1,7 @@
 "use client";
 
+import type { PollOption, ResultsResponse } from "@republique/core";
+import { formatDate } from "@republique/core";
 import { ScrollText } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -21,25 +23,6 @@ import {
   generateToken,
   toBase64,
 } from "@/services/blind-signature/client";
-
-interface Option {
-  id: string;
-  label: string;
-  position: number;
-}
-
-interface ResultData {
-  count: number;
-  label: string;
-  optionId: string;
-  percentage: number;
-}
-
-interface ResultsResponse {
-  pollId: string;
-  results: ResultData[];
-  totalVotes: number;
-}
 
 type VoteState = "idle" | "voting" | "success" | "error";
 type VoteStep = "generate" | "sign" | "submit" | "done";
@@ -98,22 +81,12 @@ function useRealtimeResults(
   return data;
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export interface PollDetailProps {
   initialHasVoted: boolean;
   initialMerkleRoot: string | null;
   initialResults: ResultsResponse | null;
   initialVoteCount: number;
-  options: Option[];
+  options: PollOption[];
   poll: {
     id: string;
     title: string;

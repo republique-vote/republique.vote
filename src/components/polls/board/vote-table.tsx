@@ -1,5 +1,7 @@
 "use client";
 
+import type { Vote } from "@republique/core";
+import { formatDateShort } from "@republique/core";
 import {
   Check,
   CheckCircle,
@@ -18,16 +20,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-interface Vote {
-  blindSignature: string;
-  blindToken: string;
-  createdAt: string;
-  hash: string;
-  optionId: string;
-  previousHash: string | null;
-  sequence: number;
-}
 
 function VerificationStatusIcon({ status }: { status: string | undefined }) {
   if (status === "valid") {
@@ -64,16 +56,6 @@ function HashCell({ value }: { value: string }) {
       )}
     </button>
   );
-}
-
-function formatDateShort(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function VoteTable({

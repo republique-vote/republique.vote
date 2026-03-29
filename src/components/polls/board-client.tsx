@@ -1,5 +1,7 @@
 "use client";
 
+import type { Vote, VoteHashInput } from "@republique/core";
+import { buildVoteHashPreimage } from "@republique/core";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BoardHeader } from "@/components/polls/board/board-header";
@@ -8,16 +10,6 @@ import { VoteMobileList } from "@/components/polls/board/vote-mobile-list";
 import { VoteTable } from "@/components/polls/board/vote-table";
 import { VerifyVoteDialog } from "@/components/polls/verify-vote-dialog";
 import { Button } from "@/components/ui/button";
-
-interface Vote {
-  blindSignature: string;
-  blindToken: string;
-  createdAt: string;
-  hash: string;
-  optionId: string;
-  previousHash: string | null;
-  sequence: number;
-}
 
 interface BoardClientProps {
   initialVotes: Vote[];
@@ -37,26 +29,10 @@ type VerifyState = "idle" | "fetching" | "verifying" | "valid" | "invalid";
 
 async function computeHashBrowser(
   previousHash: string | null,
-  vote: {
-    pollId: string;
-    optionId: string;
-    blindToken: string;
-    blindSignature: string;
-    createdAt: string;
-    sequence: number;
-  }
+  vote: VoteHashInput
 ): Promise<string> {
-  const data = [
-    previousHash || "",
-    vote.pollId,
-    vote.optionId,
-    vote.blindToken,
-    vote.blindSignature,
-    vote.createdAt,
-    vote.sequence.toString(),
-  ].join("|");
-
-  const encoded = new TextEncoder().encode(data);
+  const preimage = buildVoteHashPreimage(previousHash, vote);
+  const encoded = new TextEncoder().encode(preimage);
   const buffer = await crypto.subtle.digest("SHA-256", encoded);
   return Array.from(new Uint8Array(buffer))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -137,7 +113,7 @@ export function BoardClient({
           `/api/poll/${poll.id}/board?page=${page}&limit=${PAGE_SIZE}`
         );
         const { data } = await res.json();
-        setDisplayedVotes(data.votes);
+        setDisplayedVotes(data.votes.items);
         setCurrentPage(page);
       } catch {
         // keep current page on error
@@ -151,61 +127,61 @@ export function BoardClient({
     setVerifyState("fetching");
     setVerifiedCount(0);
 
-    let allVotes: Vote[];
+    const statusMap = new Map<number, "valid" | "invalid">();
+    let lastHash: string | null = null;
+    let verified = 0;
+    let page = 1;
+    let pageCount = 1;
+
+    setVerifyState("verifying");
+
     try {
-      const res = await fetch(`/api/poll/${poll.id}/board?all=true`);
-      const { data } = await res.json();
-      allVotes = data.votes;
+      do {
+        const res = await fetch(
+          `/api/poll/${poll.id}/board?page=${page}&limit=${PAGE_SIZE}&order=asc`
+        );
+        const { data } = await res.json();
+        pageCount = data.votes.pageCount ?? 1;
+
+        for (const vote of data.votes.items as Vote[]) {
+          if (vote.previousHash !== lastHash) {
+            statusMap.set(vote.sequence, "invalid");
+            setVoteStatus(new Map(statusMap));
+            setVerifiedCount(verified + 1);
+            setVerifyState("invalid");
+            return;
+          }
+
+          const computed = await computeHashBrowser(vote.previousHash, {
+            pollId: poll.id,
+            optionId: vote.optionId,
+            blindToken: vote.blindToken,
+            blindSignature: vote.blindSignature,
+            createdAt: vote.createdAt,
+            sequence: vote.sequence,
+          });
+
+          if (computed !== vote.hash) {
+            statusMap.set(vote.sequence, "invalid");
+            setVoteStatus(new Map(statusMap));
+            setVerifiedCount(verified + 1);
+            setVerifyState("invalid");
+            return;
+          }
+
+          statusMap.set(vote.sequence, "valid");
+          lastHash = vote.hash;
+          verified++;
+        }
+
+        setVoteStatus(new Map(statusMap));
+        setVerifiedCount(verified);
+        await new Promise((r) => setTimeout(r, 0));
+        page++;
+      } while (page <= pageCount);
     } catch {
       setVerifyState("invalid");
       return;
-    }
-
-    setVerifyState("verifying");
-    const statusMap = new Map<number, "valid" | "invalid">();
-
-    const BATCH_SIZE = 50;
-    for (let i = 0; i < allVotes.length; i += BATCH_SIZE) {
-      const batch = allVotes.slice(
-        i,
-        Math.min(i + BATCH_SIZE, allVotes.length)
-      );
-      for (const vote of batch) {
-        const expectedPreviousHash =
-          vote.sequence === 1
-            ? null
-            : (allVotes[vote.sequence - 2]?.hash ?? null);
-
-        if (vote.previousHash !== expectedPreviousHash) {
-          statusMap.set(vote.sequence, "invalid");
-          setVoteStatus(new Map(statusMap));
-          setVerifiedCount(i + batch.indexOf(vote) + 1);
-          setVerifyState("invalid");
-          return;
-        }
-
-        const computed = await computeHashBrowser(vote.previousHash, {
-          pollId: poll.id,
-          optionId: vote.optionId,
-          blindToken: vote.blindToken,
-          blindSignature: vote.blindSignature,
-          createdAt: vote.createdAt,
-          sequence: vote.sequence,
-        });
-
-        if (computed !== vote.hash) {
-          statusMap.set(vote.sequence, "invalid");
-          setVoteStatus(new Map(statusMap));
-          setVerifiedCount(i + batch.indexOf(vote) + 1);
-          setVerifyState("invalid");
-          return;
-        }
-
-        statusMap.set(vote.sequence, "valid");
-      }
-      setVoteStatus(new Map(statusMap));
-      setVerifiedCount(Math.min(i + BATCH_SIZE, allVotes.length));
-      await new Promise((r) => setTimeout(r, 0));
     }
 
     setVerifyState("valid");
