@@ -26,7 +26,9 @@ export function WhyOnlineSection() {
             <li>
               Il faut se{" "}
               <strong className="text-foreground">déplacer physiquement</strong>{" "}
-              pour voter, ce qui exclut de fait de nombreux citoyens.
+              pour voter, ce qui exclut de fait de nombreux citoyens : personnes
+              âgées, handicapées, malades, ou vivant loin de leur bureau de
+              vote.
             </li>
           </ul>
         </div>
@@ -53,7 +55,9 @@ export function WhyOnlineSection() {
             <li>
               Voter depuis{" "}
               <strong className="text-foreground">n&apos;importe où</strong>, à
-              n&apos;importe quel moment pendant la période de vote.
+              n&apos;importe quel moment pendant la période de vote. Plus besoin
+              de se déplacer : les personnes âgées, handicapées ou malades
+              peuvent voter depuis chez elles.
             </li>
           </ul>
         </div>
