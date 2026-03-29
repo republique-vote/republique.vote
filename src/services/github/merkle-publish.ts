@@ -68,7 +68,7 @@ async function flush() {
         content: Buffer.from(content).toString("base64"),
         committer: {
           name: "republique.vote",
-          email: "bot@republique.vote",
+          email: "republique-vote@users.noreply.github.com",
         },
         ...(sha ? { sha } : {}),
       });
