@@ -26,7 +26,10 @@ jobs:
         run: pnpm i
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm -w lint
+
+      - name: Build packages
+        run: pnpm --filter @republique/core build
 
       - name: Build
         run: pnpm build
