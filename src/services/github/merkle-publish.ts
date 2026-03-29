@@ -66,6 +66,10 @@ async function flush() {
         path,
         message: `🗳️ update ${params.pollId} merkle root #${params.sequence} (${shortHash})`,
         content: Buffer.from(content).toString("base64"),
+        committer: {
+          name: "republique.vote",
+          email: "bot@republique.vote",
+        },
         ...(sha ? { sha } : {}),
       });
 
