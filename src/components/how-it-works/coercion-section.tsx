@@ -19,7 +19,7 @@ const coercionScenarios = [
   {
     situation: "Objectif futur : le vote physique écrase le vote en ligne",
     response:
-      "On travaille sur un système de tag de révocation caché qui permettrait d'annuler un vote en ligne en allant voter en bureau, sans casser l'anonymat. C'est un problème de recherche ouvert.",
+      "On travaille sur un système qui permettrait d'annuler un vote en ligne en allant voter en bureau, sans que personne ne puisse savoir de quel vote il s'agit. C'est un problème de recherche ouvert.",
   },
 ];
 

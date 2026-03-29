@@ -106,7 +106,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 
 **Limite actuelle : le vote en ligne est définitif.** L'anonymat total du vote rend mathématiquement impossible l'annulation d'un vote anonyme sans information supplémentaire cachée dans le bulletin. C'est prouvé : si personne ne sait à qui appartient un vote, personne ne peut retrouver le bon vote à annuler. C'est le même choix que la Suisse.
 
-**À terme :** un système de tag de révocation caché permettrait l'annulation sans casser l'anonymat. Le bulletin contiendrait dès l'origine une information chiffrée, invisible publiquement, utilisable uniquement par le votant pour déclencher l'annulation via un comité de confiance distribué. C'est un problème de recherche actif, documenté dans [docs/vote-override-research.md](docs/vote-override-research.md).
+**À terme :** un système permettrait d'annuler un vote sans que personne ne puisse savoir de quel vote il s'agit. Le bulletin contiendrait dès l'origine une information chiffrée, invisible publiquement, utilisable uniquement par le votant pour déclencher l'annulation. C'est un problème de recherche actif, documenté dans [docs/vote-override-research.md](docs/vote-override-research.md).
 
 ## Roadmap
 
