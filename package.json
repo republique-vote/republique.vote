@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm --filter @republique/core build && next build",
     "prestart": "npx drizzle-kit push --force && tsx scripts/seed.ts",
     "start": "next start",
     "lint": "ultracite check",
