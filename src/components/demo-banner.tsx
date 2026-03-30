@@ -17,9 +17,10 @@ function formatTime(totalSeconds: number) {
 }
 
 export function DemoBanner() {
-  const [seconds, setSeconds] = useState(getSecondsUntilReset);
+  const [seconds, setSeconds] = useState<number | null>(null);
 
   useEffect(() => {
+    setSeconds(getSecondsUntilReset());
     const timer = setInterval(() => {
       setSeconds(getSecondsUntilReset());
     }, 1000);
@@ -42,7 +43,9 @@ export function DemoBanner() {
           </a>
           . Ce site n&apos;est pas un service officiel du gouvernement français.
           Réinitialisation des votes dans{" "}
-          <strong className="font-mono">{formatTime(seconds)}</strong>
+          <strong className="font-mono">
+            {seconds === null ? "--:--" : formatTime(seconds)}
+          </strong>
         </span>
       </div>
     </div>
