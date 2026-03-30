@@ -1,45 +1,19 @@
-import { count, eq } from "drizzle-orm";
-import { headers } from "next/headers";
+import { sql } from "drizzle-orm";
 import { PollListClient } from "@/components/polls/poll-list-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
-import { blindSignatureRequest, poll, voteRecord } from "@/db/schema";
-import { auth } from "@/services/auth";
+import { poll } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
 export default async function PollsPage() {
-  const rawPolls = await db
+  const [counts] = await db
     .select({
-      id: poll.id,
-      title: poll.title,
-      description: poll.description,
-      type: poll.type,
-      status: poll.status,
-      startDate: poll.startDate,
-      endDate: poll.endDate,
-      createdAt: poll.createdAt,
-      voteCount: count(voteRecord.id),
+      open: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} = 'open')`,
+      closed: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} IN ('closed', 'tallied'))`,
+      all: sql<number>`COUNT(*)`,
     })
-    .from(poll)
-    .leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
-    .groupBy(poll.id)
-    .orderBy(poll.createdAt);
-  const polls = rawPolls.map((p) => ({ ...p, voteCount: Number(p.voteCount) }));
-
-  let votedPollIds: string[] = [];
-  try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (session) {
-      const requests = await db
-        .select({ pollId: blindSignatureRequest.pollId })
-        .from(blindSignatureRequest)
-        .where(eq(blindSignatureRequest.userId, session.user.id));
-      votedPollIds = requests.map((r) => r.pollId);
-    }
-  } catch {
-    // Not authenticated
-  }
+    .from(poll);
 
   return (
     <>
@@ -51,7 +25,13 @@ export default async function PollsPage() {
         Participez aux votes en cours ou consultez les résultats des votes
         terminés.
       </p>
-      <PollListClient polls={polls} votedPollIds={votedPollIds} />
+      <PollListClient
+        counts={{
+          open: Number(counts.open),
+          closed: Number(counts.closed),
+          all: Number(counts.all),
+        }}
+      />
     </>
   );
 }
