@@ -11,7 +11,7 @@ export const poll = pgTable("poll", {
     .notNull()
     .default("draft"),
   startDate: text("start_date").notNull(),
-  endDate: text("end_date").notNull(),
+  endDate: text("end_date"),
   sourceUrl: text("source_url"),
   sourceRef: text("source_ref"),
   merkleRoot: text("merkle_root"),
@@ -86,6 +86,24 @@ export const voteRecord = pgTable(
   },
   (table) => [unique().on(table.pollId, table.blindToken)]
 );
+
+export const legislativeFile = pgTable("legislative_file", {
+  id: text("id").primaryKey(),
+  legislature: text("legislature").notNull(),
+  title: text("title").notNull(),
+  procedureType: text("procedure_type").notNull(),
+  sourceUrl: text("source_url"),
+  senateUrl: text("senate_url"),
+  pollId: text("poll_id").references(() => poll.id),
+  officialFor: integer("official_for"),
+  officialAgainst: integer("official_against"),
+  officialAbstentions: integer("official_abstentions"),
+  scrutinDate: text("scrutin_date"),
+  scrutinUid: text("scrutin_uid"),
+  syncedAt: text("synced_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
 
 export const rekorEntry = pgTable("rekor_entry", {
   id: text("id")
