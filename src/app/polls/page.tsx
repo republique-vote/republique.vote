@@ -1,10 +1,12 @@
-import { sql } from "drizzle-orm";
+import { count, desc, eq, sql } from "drizzle-orm";
 import { PollListClient } from "@/components/polls/poll-list-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
-import { poll } from "@/db/schema";
+import { poll, voteRecord } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 20;
 
 export default async function PollsPage() {
   const [counts] = await db
@@ -14,6 +16,30 @@ export default async function PollsPage() {
       all: sql<number>`COUNT(*)`,
     })
     .from(poll);
+
+  const openCount = Number(counts.open);
+
+  const initialPolls = await db
+    .select({
+      id: poll.id,
+      title: poll.title,
+      description: poll.description,
+      type: poll.type,
+      status: poll.status,
+      startDate: poll.startDate,
+      endDate: poll.endDate,
+      createdAt: poll.createdAt,
+      voteCount: count(voteRecord.id),
+    })
+    .from(poll)
+    .leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
+    .where(eq(poll.status, "open"))
+    .groupBy(poll.id)
+    .orderBy(
+      sql`CASE WHEN ${poll.endDate} IS NOT NULL THEN 0 ELSE 1 END`,
+      desc(poll.createdAt)
+    )
+    .limit(PAGE_SIZE);
 
   return (
     <>
@@ -27,9 +53,19 @@ export default async function PollsPage() {
       </p>
       <PollListClient
         counts={{
-          open: Number(counts.open),
+          open: openCount,
           closed: Number(counts.closed),
           all: Number(counts.all),
+        }}
+        initialData={{
+          items: initialPolls.map((p) => ({
+            ...p,
+            voteCount: Number(p.voteCount),
+          })),
+          currentPage: 1,
+          pageCount: Math.ceil(openCount / PAGE_SIZE),
+          itemCount: openCount,
+          itemLimit: PAGE_SIZE,
         }}
       />
     </>
