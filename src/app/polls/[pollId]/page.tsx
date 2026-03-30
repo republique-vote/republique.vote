@@ -1,11 +1,20 @@
 import { and, eq, sql } from "drizzle-orm";
+import { ExternalLink } from "lucide-react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { OfficialResult } from "@/components/polls/poll-detail/official-result";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/ui/markdown";
 import { db } from "@/db";
-import { blindSignatureRequest, option, poll } from "@/db/schema";
+import {
+  blindSignatureRequest,
+  legislativeFile,
+  option,
+  poll,
+} from "@/db/schema";
 import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
 
@@ -73,7 +82,17 @@ export default async function PollDetailPage({
           {isOpen ? "En cours" : "Terminé"}
         </Badge>
         <h1 className="font-bold text-3xl tracking-tight">{p.title}</h1>
-        <p className="mt-2 text-lg text-muted-foreground">{p.description}</p>
+        <div className="mt-2">
+          <Markdown collapsible>{p.description}</Markdown>
+        </div>
+        {p.sourceUrl && (
+          <Button asChild className="mt-3" variant="outline">
+            <a href={p.sourceUrl} rel="noopener noreferrer" target="_blank">
+              <ExternalLink className="mr-1.5 h-4 w-4" />
+              Voir sur assemblee-nationale.fr
+            </a>
+          </Button>
+        )}
       </div>
 
       <PollDetailClient
@@ -92,6 +111,43 @@ export default async function PollDetailPage({
           endDate: p.endDate,
         }}
       />
+
+      {
+        await (async () => {
+          const lf = await db.query.legislativeFile.findFirst({
+            where: eq(legislativeFile.pollId, pollId),
+          });
+          if (!lf || lf.officialFor === null) {
+            return null;
+          }
+          const citizenFor = results?.results.find((r) => r.label === "Pour");
+          const citizenAgainst = results?.results.find(
+            (r) => r.label === "Contre"
+          );
+          const citizenAbst = results?.results.find(
+            (r) => r.label === "Abstention"
+          );
+          return (
+            <OfficialResult
+              citizenResults={
+                results
+                  ? {
+                      forPercentage: citizenFor?.percentage || 0,
+                      againstPercentage: citizenAgainst?.percentage || 0,
+                      abstentionPercentage: citizenAbst?.percentage || 0,
+                      totalVotes: results.totalVotes,
+                    }
+                  : null
+              }
+              officialAbstentions={lf.officialAbstentions || 0}
+              officialAgainst={lf.officialAgainst || 0}
+              officialFor={lf.officialFor}
+              scrutinDate={lf.scrutinDate || ""}
+              sourceUrl={lf.sourceUrl}
+            />
+          );
+        })()
+      }
     </>
   );
 }
