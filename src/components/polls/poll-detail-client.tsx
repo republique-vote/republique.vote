@@ -5,6 +5,9 @@ import { formatDate } from "@republique/core";
 import { ScrollText } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
+import type { SWRSubscriptionOptions } from "swr/subscription";
+import useSWRSubscription from "swr/subscription";
 import { VoteDialog } from "@/components/polls/poll-detail/vote-dialog";
 import { VoteOptions } from "@/components/polls/poll-detail/vote-options";
 import {
@@ -71,14 +74,16 @@ function useRealtimeResults(
   pollId: string,
   initialResults: ResultsResponse | null
 ) {
-  const [data, setData] = useState<ResultsResponse | null>(initialResults);
-  useEffect(() => {
-    const eventSource = new EventSource(`/api/poll/${pollId}/results/stream`);
-    eventSource.onmessage = (event) => setData(JSON.parse(event.data));
-    eventSource.onerror = () => eventSource.close();
-    return () => eventSource.close();
-  }, [pollId]);
-  return data;
+  const { data } = useSWRSubscription(
+    `/api/poll/${pollId}/results/stream`,
+    (key: string, { next }: SWRSubscriptionOptions<ResultsResponse>) => {
+      const eventSource = new EventSource(key);
+      eventSource.onmessage = (event) => next(null, JSON.parse(event.data));
+      eventSource.onerror = () => eventSource.close();
+      return () => eventSource.close();
+    }
+  );
+  return data ?? initialResults;
 }
 
 export interface PollDetailProps {
@@ -94,7 +99,7 @@ export interface PollDetailProps {
     type: string;
     status: string;
     startDate: string;
-    endDate: string;
+    endDate: string | null;
   };
 }
 
@@ -123,10 +128,6 @@ export function PollDetailClient({
     createdAt: string;
   } | null>(null);
   const [verifyOpen, setVerifyOpen] = useState(false);
-  const [merkleRoot, setMerkleRoot] = useState<string | null>(
-    initialMerkleRoot
-  );
-
   const isOpen = poll.status === "open";
   const isAuthenticated = !!session;
   const canVote =
@@ -135,19 +136,10 @@ export function PollDetailClient({
   const results = sseResults?.results || [];
   const totalVotes = sseResults?.totalVotes || initialVoteCount;
 
-  useEffect(() => {
-    if (totalVotes === 0) {
-      return;
-    }
-    fetch(`/api/poll/${poll.id}/merkle-root`)
-      .then((r) => r.json())
-      .then(({ data }) => {
-        if (data?.merkleRoot) {
-          setMerkleRoot(data.merkleRoot);
-        }
-      })
-      .catch(() => undefined);
-  }, [totalVotes, poll.id]);
+  const { data: merkleData } = useSWR<{ merkleRoot: string }>(
+    totalVotes > 0 ? `/api/poll/${poll.id}/merkle-root` : null
+  );
+  const merkleRoot = merkleData?.merkleRoot ?? initialMerkleRoot;
 
   const handleVote = useCallback(async () => {
     if (!selectedOption) {
@@ -230,16 +222,25 @@ export function PollDetailClient({
         {totalVotes} vote{totalVotes === 1 ? "" : "s"} enregistré
         {totalVotes === 1 ? "" : "s"}
         {" · "}
-        {isOpen ? (
-          <>
-            Jusqu&apos;au {formatDate(poll.endDate)} ·{" "}
-            {countdown || "Vote terminé"}
-          </>
-        ) : (
-          <>
-            Du {formatDate(poll.startDate)} au {formatDate(poll.endDate)}
-          </>
-        )}
+        {(() => {
+          if (isOpen && poll.endDate) {
+            return (
+              <>
+                Jusqu&apos;au {formatDate(poll.endDate)} ·{" "}
+                {countdown || "Vote terminé"}
+              </>
+            );
+          }
+          if (isOpen) {
+            return <>Depuis le {formatDate(poll.startDate)}</>;
+          }
+          return (
+            <>
+              Du {formatDate(poll.startDate)}
+              {poll.endDate ? <> au {formatDate(poll.endDate)}</> : null}
+            </>
+          );
+        })()}
       </p>
 
       {voteState === "success" && (

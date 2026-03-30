@@ -3,7 +3,10 @@
 import type { Vote, VoteHashInput } from "@republique/core";
 import { buildVoteHashPreimage } from "@republique/core";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import useSWR from "swr";
+import type { SWRSubscriptionOptions } from "swr/subscription";
+import useSWRSubscription from "swr/subscription";
 import { BoardHeader } from "@/components/polls/board/board-header";
 import { VoteDetailDialog } from "@/components/polls/board/vote-detail-dialog";
 import { VoteMobileList } from "@/components/polls/board/vote-mobile-list";
@@ -59,69 +62,62 @@ export function BoardClient({
   const [detailVote, setDetailVote] = useState<Vote | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [displayedVotes, setDisplayedVotes] = useState<Vote[]>(initialVotes);
-  const [loadingPage, setLoadingPage] = useState(false);
   const [totalVotes, setTotalVotes] = useState(initialTotalVotes);
 
   const [connected, setConnected] = useState(false);
   const liveVotesRef = useRef<Vote[]>([]);
+  const currentPageRef = useRef(currentPage);
+  currentPageRef.current = currentPage;
 
-  useEffect(() => {
-    const eventSource = new EventSource(`/api/poll/${poll.id}/board/stream`);
-
-    eventSource.onopen = () => setConnected(true);
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "vote") {
-        const vote: Vote = {
-          sequence: data.sequence,
-          optionId: data.optionId,
-          blindToken: data.blindToken,
-          blindSignature: data.blindSignature,
-          hash: data.hash,
-          previousHash: data.previousHash,
-          createdAt: data.createdAt,
-        };
-        liveVotesRef.current = [vote, ...liveVotesRef.current];
-        setTotalVotes((c) => c + 1);
-        if (currentPage === 1) {
-          setDisplayedVotes((prev) => [vote, ...prev].slice(0, PAGE_SIZE));
+  useSWRSubscription(
+    `/api/poll/${poll.id}/board/stream`,
+    (key: string, { next }: SWRSubscriptionOptions<Vote | null>) => {
+      const eventSource = new EventSource(key);
+      eventSource.onopen = () => setConnected(true);
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "vote") {
+          const vote: Vote = {
+            sequence: data.sequence,
+            optionId: data.optionId,
+            blindToken: data.blindToken,
+            blindSignature: data.blindSignature,
+            hash: data.hash,
+            previousHash: data.previousHash,
+            createdAt: data.createdAt,
+          };
+          liveVotesRef.current = [vote, ...liveVotesRef.current];
+          setTotalVotes((c) => c + 1);
+          next(null, vote);
         }
-      }
-    };
+      };
+      eventSource.onerror = () => {
+        setConnected(false);
+        eventSource.close();
+      };
+      return () => {
+        eventSource.close();
+        setConnected(false);
+      };
+    }
+  );
 
-    eventSource.onerror = () => {
-      setConnected(false);
-      eventSource.close();
-    };
+  const { data: boardPage, isLoading: loadingPage } = useSWR<{
+    votes: { items: Vote[] };
+  }>(
+    currentPage > 1
+      ? `/api/poll/${poll.id}/board?page=${currentPage}&limit=${PAGE_SIZE}`
+      : null,
+    { keepPreviousData: true }
+  );
 
-    return () => {
-      eventSource.close();
-      setConnected(false);
-    };
-  }, [poll.id, currentPage]);
+  const displayedVotes =
+    currentPage === 1
+      ? [...liveVotesRef.current, ...initialVotes].slice(0, PAGE_SIZE)
+      : (boardPage?.votes.items ?? []);
 
   const pageCount = Math.ceil(totalVotes / PAGE_SIZE);
   const optionMap = new Map(options.map((o) => [o.id, o.label]));
-
-  const goToPage = useCallback(
-    async (page: number) => {
-      setLoadingPage(true);
-      try {
-        const res = await fetch(
-          `/api/poll/${poll.id}/board?page=${page}&limit=${PAGE_SIZE}`
-        );
-        const { data } = await res.json();
-        setDisplayedVotes(data.votes.items);
-        setCurrentPage(page);
-      } catch {
-        // keep current page on error
-      }
-      setLoadingPage(false);
-    },
-    [poll.id]
-  );
 
   const handleVerify = useCallback(async () => {
     setVerifyState("fetching");
@@ -240,7 +236,7 @@ export function BoardClient({
               <div className="flex items-center gap-1">
                 <Button
                   disabled={currentPage <= 1 || loadingPage}
-                  onClick={() => goToPage(currentPage - 1)}
+                  onClick={() => setCurrentPage(currentPage - 1)}
                   size="icon"
                   variant="outline"
                 >
@@ -248,7 +244,7 @@ export function BoardClient({
                 </Button>
                 <Button
                   disabled={currentPage >= pageCount || loadingPage}
-                  onClick={() => goToPage(currentPage + 1)}
+                  onClick={() => setCurrentPage(currentPage + 1)}
                   size="icon"
                   variant="outline"
                 >
