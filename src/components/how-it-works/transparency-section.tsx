@@ -1,41 +1,7 @@
 "use client";
 
-import {
-  Check,
-  Copy,
-  ExternalLink,
-  GitBranch,
-  ShieldCheck,
-  Terminal,
-} from "lucide-react";
-import { useState } from "react";
-
-function CopyCommand({ command }: { command: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(command);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="flex items-center justify-between gap-3 bg-zinc-950 px-4 py-3 font-mono text-sm text-zinc-100">
-      <code>{command}</code>
-      <button
-        className="shrink-0 text-zinc-400 transition-colors hover:text-zinc-100"
-        onClick={handleCopy}
-        type="button"
-      >
-        {copied ? (
-          <Check className="h-4 w-4 text-green-400" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </button>
-    </div>
-  );
-}
+import { ExternalLink, GitBranch, ShieldCheck, Terminal } from "lucide-react";
+import { CopyCommand } from "@/components/ui/copy-command";
 
 export function TransparencySection() {
   return (
