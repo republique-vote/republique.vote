@@ -148,8 +148,11 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] Publication automatique du Merkle root sur Sigstore Rekor (transparency log) + GitHub (batch)
 
 ### Phase 7 — Contenu réel
-- [ ] Intégration de l'API de l'Assemblée Nationale / Sénat
-- [ ] Synchronisation automatique des projets de loi et votes
+- [x] Intégration de l'API de l'Assemblée Nationale (data.assemblee-nationale.fr)
+- [x] Synchronisation automatique des projets/propositions de loi (cron 6h)
+- [x] Matching automatique des scrutins officiels avec les polls citoyens
+- [x] Comparatif visuel citoyens vs députés
+- [ ] Intégration du Sénat (data.senat.fr)
 - [ ] Notifications aux citoyens
 
 ### Phase 8 — Scalabilité
