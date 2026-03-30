@@ -152,31 +152,43 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] Synchronisation automatique des projets/propositions de loi (cron 6h)
 - [x] Matching automatique des scrutins officiels avec les polls citoyens
 - [x] Comparatif visuel citoyens vs députés
+- [x] Exposé des motifs extrait du HTML AN et affiché en markdown
+- [x] Pagination, tri (récents / plus votés) et filtre par type (Lois / Référendums / Élections)
+- [x] SSR de la première page de polls (pas de spinner au premier chargement)
+- [x] Migration des fetches client vers SWR (cache, déduplication, SSE via useSWRSubscription)
 - [ ] Intégration du Sénat (data.senat.fr)
 - [ ] Notifications aux citoyens
 
-### Phase 8 — Scalabilité
+### Phase 8 — SEO & Référencement
+- [ ] Metadata dynamiques par poll (title, description, Open Graph)
+- [ ] Sitemap XML dynamique (`/sitemap.xml`) avec tous les polls
+- [ ] Robots.txt optimisé
+- [ ] Données structurées JSON-LD (VoteAction, GovernmentOrganization)
+- [ ] Canonical URLs
+- [ ] Meta description des polls via l'exposé des motifs (texte brut tronqué)
+- [ ] Pages statiques ISR pour les polls terminés (cache long)
+
+### Phase 9 — Scalabilité
 - [ ] Exports en streaming (écriture ligne par ligne, pas de chargement mémoire complet)
 - [x] Vérification de chaîne paginée côté client (vérifier page par page au lieu de tout télécharger)
 - [x] Supprimer le paramètre `?all=true` et migrer vers du streaming/pagination partout
 - [ ] Restructurer en monorepo propre (`apps/web`, `packages/core`, `packages/observer`) + Turborepo
 - [ ] Publier les packages sur npm (`@republique/core`, `@republique/observer`) + changesets pour le versioning
 
-### Phase 9 — Annulation de vote (recherche)
+### Phase 10 — Annulation de vote (recherche)
 - [ ] Tag de révocation caché dans le bulletin (choix chiffré + tag dérivé du secret votant)
 - [ ] Preuves à divulgation nulle (ZK) de validité du bulletin
 - [ ] Comité de trustees distribué pour le matching chiffré
 - [ ] Ajustement homomorphe vérifiable du décompte (sans révéler la ligne annulée)
 - [ ] Documentation complète du protocole : [docs/vote-override-research.md](docs/vote-override-research.md)
 
-### Phase 10 — Sécurité & Audit
+### Phase 11 — Sécurité & Audit
 - [ ] Build reproductible + déploiement signé (GitHub Actions + Sigstore) pour prouver que le code en prod = le code sur GitHub
 - [ ] Dépouillement distribué (plusieurs autorités indépendantes)
 - [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
-- [ ] Intégration avec un transparency log (Sigsum/Rekor)
 - [ ] Audit de sécurité externe
 
-### Phase 11 — Applications natives
+### Phase 12 — Applications natives
 - [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
 - [ ] App mobile avec notifications push à chaque nouveau vote
 
