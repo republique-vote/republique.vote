@@ -2,9 +2,28 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
+import TurndownService from "turndown";
 import { db } from "@/db";
 import { legislativeFile, option, poll } from "@/db/schema";
 import { detectLegislature } from "./legislature";
+
+const turndown = new TurndownService({ headingStyle: "atx" });
+turndown.remove(["style", "script"]);
+
+function cleanMarkdown(md: string): string {
+  return (
+    md
+      // Remove base64 images (AN logos repeated on each page)
+      .replace(/!\[.*?\]\(data:image\/[^)]+\)/g, "")
+      // Remove page numbers like "– 1 –", "– 2 –"
+      .replace(/–\s*\d+\s*–/g, "")
+      // Remove formal salutation
+      .replace(/M(?:esdames|ESDAMES),?\s*M(?:essieurs|ESSIEURS),?\s*/g, "")
+      // Collapse multiple blank lines
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+  );
+}
 
 const BASE_URL =
   "https://data.assemblee-nationale.fr/static/openData/repository";
@@ -53,23 +72,26 @@ function findTexteAssocie(obj: unknown): string | null {
   return null;
 }
 
-function extractDepositDate(dossier: DossierData): string {
-  const actes = dossier.dossierParlementaire.actesLegislatifs;
-  if (!actes) {
-    return new Date().toISOString();
+function findFirstDate(obj: unknown): string | null {
+  if (typeof obj !== "object" || obj === null) {
+    return null;
   }
-
-  const acte = actes.acteLegislatif;
-  if (Array.isArray(acte)) {
-    const first = acte[0];
-    if (first?.dateActe) {
-      return new Date(first.dateActe).toISOString();
+  const record = obj as Record<string, unknown>;
+  if (typeof record.dateActe === "string" && record.dateActe) {
+    return record.dateActe;
+  }
+  for (const val of Object.values(record)) {
+    const found = findFirstDate(val);
+    if (found) {
+      return found;
     }
-  } else if (acte?.dateActe) {
-    return new Date(acte.dateActe).toISOString();
   }
+  return null;
+}
 
-  return new Date().toISOString();
+function extractDepositDate(dossier: DossierData): string {
+  const date = findFirstDate(dossier.dossierParlementaire.actesLegislatifs);
+  return date ? new Date(date).toISOString() : new Date().toISOString();
 }
 
 async function downloadAndExtractZip(url: string): Promise<string> {
@@ -88,7 +110,44 @@ async function downloadAndExtractZip(url: string): Promise<string> {
   return zipPath;
 }
 
-const CONCURRENCY = 50;
+const CONCURRENCY = 10;
+const EXPOSE_START_RE = /EXPOS[ÉE] DES MOTIFS/i;
+const EXPOSE_END_RE = /PROPOSITION DE LOI|PROJET DE LOI/;
+
+function extractExpose(html: string): string | null {
+  const match = html.match(EXPOSE_START_RE);
+  if (!match || match.index === undefined) {
+    return null;
+  }
+  // Skip past the heading itself
+  const afterHeading = html.substring(match.index + match[0].length);
+  const endMatch = afterHeading.search(EXPOSE_END_RE);
+  return endMatch === -1 ? afterHeading : afterHeading.substring(0, endMatch);
+}
+
+async function fetchExpose(textUid: string): Promise<string | null> {
+  if (!(textUid.startsWith("PIONANR") || textUid.startsWith("PRJLANR"))) {
+    return null;
+  }
+  try {
+    const res = await fetch(
+      `https://www.assemblee-nationale.fr/dyn/opendata/${textUid}.html`,
+      { signal: AbortSignal.timeout(10_000) }
+    );
+    if (!res.ok) {
+      return null;
+    }
+    const html = await res.text();
+    const exposeHtml = extractExpose(html);
+    if (!exposeHtml) {
+      return null;
+    }
+    const md = cleanMarkdown(turndown.turndown(exposeHtml));
+    return md || null;
+  } catch {
+    return null;
+  }
+}
 
 function pool<T>(
   items: T[],
@@ -137,26 +196,31 @@ async function importDossier(pending: PendingDossier): Promise<boolean> {
     : null;
   const senateUrl = dp.titreDossier?.senatChemin || null;
 
-  // Read document JSON to get titrePrincipal
+  // Try to fetch exposé des motifs, fallback to titrePrincipal
   let description = title;
   const textUid = findTexteAssocie(dp.actesLegislatifs);
   if (textUid) {
-    try {
-      const { readFile } = await import("node:fs/promises");
-      const docPath = join(
-        pending.extractDir,
-        "json",
-        "document",
-        `${textUid}.json`
-      );
-      const doc = JSON.parse(await readFile(docPath, "utf-8"));
-      const titrePrincipal = doc?.document?.titres?.titrePrincipal;
-      if (titrePrincipal) {
-        description =
-          titrePrincipal.charAt(0).toUpperCase() + titrePrincipal.slice(1);
+    const expose = await fetchExpose(textUid);
+    if (expose) {
+      description = expose;
+    } else {
+      try {
+        const { readFile } = await import("node:fs/promises");
+        const docPath = join(
+          pending.extractDir,
+          "json",
+          "document",
+          `${textUid}.json`
+        );
+        const doc = JSON.parse(await readFile(docPath, "utf-8"));
+        const titrePrincipal = doc?.document?.titres?.titrePrincipal;
+        if (titrePrincipal) {
+          description =
+            titrePrincipal.charAt(0).toUpperCase() + titrePrincipal.slice(1);
+        }
+      } catch {
+        // Document file may not exist
       }
-    } catch {
-      // Document file may not exist
     }
   }
 
