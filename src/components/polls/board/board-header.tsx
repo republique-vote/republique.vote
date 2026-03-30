@@ -2,6 +2,7 @@
 
 import {
   CheckCircle,
+  Download,
   FileJson,
   FileSpreadsheet,
   GitBranch,
@@ -14,9 +15,26 @@ import {
   Terminal,
   XCircle,
 } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CopyCommand } from "@/components/ui/copy-command";
 import { CopyableHash } from "@/components/ui/copyable-hash";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -48,6 +66,8 @@ export function BoardHeader({
   onVerify: () => void;
   onSearchVote: () => void;
 }) {
+  const [cliOpen, setCliOpen] = useState(false);
+
   const verifyButtonLabel = () => {
     switch (verifyState) {
       case "fetching":
@@ -155,64 +175,75 @@ export function BoardHeader({
             </p>
           </TooltipContent>
         </Tooltip>
-        <div className="ml-auto flex items-center gap-2">
-          <Button asChild size="sm" variant="outline">
-            <a href={`/api/poll/${pollId}/board/export?format=json`}>
-              <FileJson className="mr-1 h-3.5 w-3.5" />
-              JSON
-            </a>
-          </Button>
-          <Button asChild size="sm" variant="outline">
-            <a href={`/api/poll/${pollId}/board/export?format=csv`}>
-              <FileSpreadsheet className="mr-1 h-3.5 w-3.5" />
-              CSV
-            </a>
-          </Button>
-          <Button asChild size="sm" variant="outline">
-            <a
-              href={`/api/poll/${pollId}/board/stream`}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <Radio className="mr-1 h-3.5 w-3.5" />
-              SSE
-            </a>
-          </Button>
-          <Button asChild size="sm" variant="outline">
-            <a
-              href={`/api/poll/${pollId}/board/feed`}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <Rss className="mr-1 h-3.5 w-3.5 text-orange-500" />
-              RSS
-            </a>
-          </Button>
-          <Button asChild size="sm" variant="outline">
-            <a
-              href={`https://github.com/republique-vote/merkle-proofs/commits/main/polls/${pollId}`}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <GitBranch className="mr-1 h-3.5 w-3.5" />
-              GitHub
-            </a>
-          </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button asChild size="sm" variant="outline">
-                <a href="/how-it-works#observer">
-                  <Terminal className="mr-1 h-3.5 w-3.5" />
-                  CLI
-                </a>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Surveiller ce vote depuis votre terminal</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="ml-auto" size="sm" variant="outline">
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              Exporter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Télécharger</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <a href={`/api/poll/${pollId}/board/export?format=json`}>
+                <FileJson className="mr-2 h-4 w-4" /> JSON
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href={`/api/poll/${pollId}/board/export?format=csv`}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" /> CSV
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Flux en direct</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <a
+                href={`/api/poll/${pollId}/board/stream`}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <Radio className="mr-2 h-4 w-4" /> SSE (Server-Sent Events)
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href={`/api/poll/${pollId}/board/feed`}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <Rss className="mr-2 h-4 w-4 text-orange-500" /> Flux RSS
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Vérification externe</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <a
+                href={`https://github.com/republique-vote/merkle-proofs/commits/main/polls/${pollId}`}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <GitBranch className="mr-2 h-4 w-4" /> GitHub
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setCliOpen(true)}>
+              <Terminal className="mr-2 h-4 w-4" /> CLI
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+
+      <Dialog onOpenChange={setCliOpen} open={cliOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Surveiller ce vote depuis votre terminal</DialogTitle>
+            <DialogDescription>
+              Lancez cette commande pour vérifier les votes en temps réel,
+              indépendamment du serveur.
+            </DialogDescription>
+          </DialogHeader>
+          <CopyCommand command={`npx @republique/observer ${pollId}`} />
+        </DialogContent>
+      </Dialog>
 
       {/* Progress bar */}
       {verifyState === "verifying" && (
