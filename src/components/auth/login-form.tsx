@@ -1,8 +1,7 @@
 "use client";
 
-import { LogIn } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { FranceConnectButton } from "@/components/auth/franceconnect-button";
 import { signIn } from "@/services/auth/client";
 
 export function LoginForm() {
@@ -22,11 +21,8 @@ export function LoginForm() {
 
   return (
     <div className="mt-8 rounded-sm border border-border bg-card p-6">
-      <Button className="w-full" onClick={handleFranceConnect} size="lg">
-        <LogIn className="mr-2 h-4 w-4" />
-        S&apos;identifier avec FranceConnect
-      </Button>
-      <p className="mt-4 text-muted-foreground text-xs leading-relaxed">
+      <FranceConnectButton onClick={handleFranceConnect} />
+      <p className="mt-4 text-center text-muted-foreground text-xs leading-relaxed">
         En développement, un simulateur FranceConnect sera utilisé avec des
         comptes de test fictifs.
       </p>
