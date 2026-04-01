@@ -156,16 +156,14 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [x] Pagination, tri (récents / plus votés) et filtre par type (Lois / Référendums / Élections)
 - [x] SSR de la première page de polls (pas de spinner au premier chargement)
 - [x] Migration des fetches client vers SWR (cache, déduplication, SSE via useSWRSubscription)
-- [ ] Intégration du Sénat (data.senat.fr)
-- [ ] Notifications aux citoyens
 
 ### Phase 8 — SEO & Référencement
-- [ ] Metadata dynamiques par poll (title, description, Open Graph)
+- [x] Metadata dynamiques par poll (title, description, Open Graph)
 - [ ] Sitemap XML dynamique (`/sitemap.xml`) avec tous les polls
 - [ ] Robots.txt optimisé
 - [ ] Données structurées JSON-LD (VoteAction, GovernmentOrganization)
 - [ ] Canonical URLs
-- [ ] Meta description des polls via l'exposé des motifs (texte brut tronqué)
+- [x] Meta description des polls via l'exposé des motifs (texte brut tronqué)
 - [ ] Pages statiques ISR pour les polls terminés (cache long)
 
 ### Phase 9 — Scalabilité
@@ -188,7 +186,11 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
 - [ ] Audit de sécurité externe
 
-### Phase 12 — Applications natives
+### Phase 12 — Engagement citoyen
+- [ ] Notifications aux citoyens (nouveau texte déposé, résultat officiel, fin de vote)
+- [ ] Intégration du Sénat (data.senat.fr) — textes déposés uniquement au Sénat, faible priorité
+
+### Phase 13 — Applications natives
 - [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
 - [ ] App mobile avec notifications push à chaque nouveau vote
 
