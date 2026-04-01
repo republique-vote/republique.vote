@@ -5,6 +5,7 @@ import { BoardClient } from "@/components/polls/board-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
 import { option, poll, rekorEntry, voteRecord } from "@/db/schema";
+import { constructMetadata } from "@/lib/metadata";
 import { verifyChain } from "@/services/poll/merkle";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,16 @@ export async function generateMetadata({
   params: Promise<{ pollId: string }>;
 }): Promise<Metadata> {
   const { pollId } = await params;
+  const p = await db.query.poll.findFirst({ where: eq(poll.id, pollId) });
+  if (!p) {
+    return {};
+  }
   return {
+    ...constructMetadata({
+      title: `Cahier de vote — ${p.title}`,
+      description: `Registre public des votes pour : ${p.title}`,
+    }),
+    robots: { index: false },
     alternates: {
       types: {
         "application/rss+xml": `/api/poll/${pollId}/board/feed`,

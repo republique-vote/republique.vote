@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { ExternalLink } from "lucide-react";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { OfficialResult } from "@/components/polls/poll-detail/official-result";
@@ -15,10 +16,29 @@ import {
   option,
   poll,
 } from "@/db/schema";
+import { constructMetadata } from "@/lib/metadata";
 import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ pollId: string }>;
+}): Promise<Metadata> {
+  const { pollId } = await params;
+  const p = await db.query.poll.findFirst({ where: eq(poll.id, pollId) });
+  if (!p) {
+    return {};
+  }
+  return constructMetadata({
+    title: p.title,
+    description: p.description,
+    ogType: "article",
+    pollType: p.type,
+  });
+}
 
 export default async function PollDetailPage({
   params,

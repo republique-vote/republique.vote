@@ -3,8 +3,15 @@ import { PollListClient } from "@/components/polls/poll-list-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
 import { poll, voteRecord } from "@/db/schema";
+import { constructMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = constructMetadata({
+  title: "Lois, référendums et élections citoyennes — Votes en cours",
+  description:
+    "Votez sur les textes de loi débattus à l'Assemblée nationale. Chaque vote est anonyme, publié publiquement et vérifiable par tous.",
+});
 
 const PAGE_SIZE = 20;
 

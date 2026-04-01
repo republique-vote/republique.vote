@@ -17,7 +17,8 @@ const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: {
-    default: "republique.vote — Le vote, partout, pour tous.",
+    default:
+      "Plateforme de vote en ligne transparente et vérifiable pour les citoyens français",
     template: "%s | republique.vote",
   },
   description:
