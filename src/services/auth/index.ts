@@ -28,11 +28,26 @@ export const auth = betterAuth({
             acr_values: "eidas1",
             nonce: randomBytes(16).toString("hex"),
           }),
-          mapProfileToUser: (profile) => ({
-            name: `${profile.given_name} ${profile.family_name}`,
-            email: profile.email,
-            image: undefined,
-          }),
+          getUserInfo: async (tokens) => {
+            // FranceConnect returns userinfo as a signed JWT, not JSON.
+            // better-auth's default handler expects JSON and fails silently.
+            // We decode the JWT manually to extract all claims including email.
+            const res = await fetch(env.FC_USERINFO_URL, {
+              headers: { Authorization: `Bearer ${tokens.accessToken}` },
+            });
+            const body = await res.text();
+            const payload = body.split(".")[1];
+            const claims = JSON.parse(
+              Buffer.from(payload, "base64url").toString()
+            );
+            return {
+              id: claims.sub as string,
+              email: claims.email as string,
+              emailVerified: (claims.email_verified as boolean) ?? false,
+              name: `${claims.given_name} ${claims.family_name}`,
+              image: undefined,
+            };
+          },
         },
       ],
     }),
