@@ -11,6 +11,11 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema }),
   secret: env.AUTH_SECRET,
   baseURL: env.AUTH_BASE_URL,
+  account: {
+    accountLinking: {
+      trustedProviders: ["franceconnect"],
+    },
+  },
   plugins: [
     nextCookies(),
     genericOAuth({
