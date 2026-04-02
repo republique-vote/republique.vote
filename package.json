@@ -27,6 +27,7 @@
     "dotenv-flow": "^4.1.0",
     "drizzle-orm": "^0.45.1",
     "ioredis": "^5.10.1",
+    "jose": "^6.2.2",
     "lucide-react": "^1.6.0",
     "next": "16.2.1",
     "next-themes": "^0.4.6",

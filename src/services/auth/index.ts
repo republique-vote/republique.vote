@@ -4,6 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { env } from "env";
+import { decodeJwt } from "jose";
 import { db } from "@/db";
 import * as schema from "@/db/schemas/auth";
 
@@ -41,10 +42,7 @@ export const auth = betterAuth({
               headers: { Authorization: `Bearer ${tokens.accessToken}` },
             });
             const body = await res.text();
-            const payload = body.split(".")[1];
-            const claims = JSON.parse(
-              Buffer.from(payload, "base64url").toString()
-            );
+            const claims = decodeJwt(body);
             return {
               id: claims.sub as string,
               email: claims.email as string,
