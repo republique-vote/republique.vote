@@ -36,6 +36,10 @@ export async function POST(
     return errorResponse("poll_not_open", 400);
   }
 
+  if (p.endDate && new Date(p.endDate).getTime() <= Date.now()) {
+    return errorResponse("poll_not_open", 400);
+  }
+
   const existing = await db.query.blindSignatureRequest.findFirst({
     where: and(
       eq(blindSignatureRequest.pollId, pollId),

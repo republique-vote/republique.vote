@@ -71,12 +71,21 @@ const STATUS_VARIANT: Record<
   draft: "outline",
 };
 
+function getEffectiveStatus(poll: PollListItem): string {
+  if (
+    poll.status === "open" &&
+    poll.endDate &&
+    new Date(poll.endDate).getTime() <= Date.now()
+  ) {
+    return "closed";
+  }
+  return poll.status;
+}
+
 function getTimeLabel(poll: PollListItem) {
-  if (poll.status === "open" && poll.endDate) {
+  const status = getEffectiveStatus(poll);
+  if (status === "open" && poll.endDate) {
     const diff = new Date(poll.endDate).getTime() - Date.now();
-    if (diff <= 0) {
-      return "Terminé";
-    }
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     if (days > 0) {
       return `${days}j restant${days > 1 ? "s" : ""}`;
@@ -87,7 +96,7 @@ function getTimeLabel(poll: PollListItem) {
     }
     return "< 1h";
   }
-  if ((poll.status === "closed" || poll.status === "tallied") && poll.endDate) {
+  if ((status === "closed" || status === "tallied") && poll.endDate) {
     return `Terminé le ${new Date(poll.endDate).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}`;
   }
   return null;
@@ -103,9 +112,9 @@ function PollCard({ poll: p }: { poll: PollListItem }) {
         <div className="mb-3 flex items-center gap-2">
           <Badge
             className="text-xs"
-            variant={STATUS_VARIANT[p.status] || "secondary"}
+            variant={STATUS_VARIANT[getEffectiveStatus(p)] || "secondary"}
           >
-            {STATUS_LABELS[p.status] || p.status}
+            {STATUS_LABELS[getEffectiveStatus(p)] || p.status}
           </Badge>
           <Tooltip>
             <TooltipTrigger asChild>

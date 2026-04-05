@@ -35,6 +35,10 @@ export async function POST(
     return errorResponse("poll_not_open", 400);
   }
 
+  if (p.endDate && new Date(p.endDate).getTime() <= Date.now()) {
+    return errorResponse("poll_not_open", 400);
+  }
+
   const body = await request.json();
   const { optionId, token, signature } = body as {
     optionId: string;

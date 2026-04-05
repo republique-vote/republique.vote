@@ -128,7 +128,9 @@ export function PollDetailClient({
     createdAt: string;
   } | null>(null);
   const [verifyOpen, setVerifyOpen] = useState(false);
-  const isOpen = poll.status === "open";
+  const isOpen =
+    poll.status === "open" &&
+    (!poll.endDate || new Date(poll.endDate).getTime() > Date.now());
   const isAuthenticated = !!session;
   const canVote =
     isOpen && isAuthenticated && !hasVoted && voteState !== "success";

@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
 
   const [counts] = await db
     .select({
-      open: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} = 'open')`,
-      closed: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} IN ('closed', 'tallied'))`,
+      open: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} = 'open' AND (${poll.endDate} IS NULL OR ${poll.endDate} > NOW()))`,
+      closed: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} IN ('closed', 'tallied') OR (${poll.status} = 'open' AND ${poll.endDate} <= NOW()))`,
       all: sql<number>`COUNT(*)`,
     })
     .from(poll)

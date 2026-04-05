@@ -15,10 +15,22 @@ export async function GET(request: NextRequest) {
   const currentPage = page || 1;
   const offset = (currentPage - 1) * itemLimit;
 
+  function buildStatusFilter() {
+    if (status === "open") {
+      return sql`${poll.status} = 'open' AND (${poll.endDate} IS NULL OR ${poll.endDate} > NOW())`;
+    }
+    if (status === "closed") {
+      return sql`(${poll.status} IN ('closed', 'tallied') OR (${poll.status} = 'open' AND ${poll.endDate} <= NOW()))`;
+    }
+    if (status) {
+      return eq(poll.status, status as "draft" | "open" | "closed" | "tallied");
+    }
+    return undefined;
+  }
+  const statusFilter = buildStatusFilter();
+
   const filters = and(
-    status
-      ? eq(poll.status, status as "draft" | "open" | "closed" | "tallied")
-      : undefined,
+    statusFilter,
     type ? eq(poll.type, type as "law" | "referendum" | "election") : undefined
   );
 
