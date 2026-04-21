@@ -180,17 +180,27 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 - [ ] Ajustement homomorphe vérifiable du décompte (sans révéler la ligne annulée)
 - [ ] Documentation complète du protocole : [docs/vote-override-research.md](docs/vote-override-research.md)
 
-### Phase 11 — Sécurité & Audit
-- [ ] Build reproductible + déploiement signé (GitHub Actions + Sigstore) pour prouver que le code en prod = le code sur GitHub
-- [ ] Dépouillement distribué (plusieurs autorités indépendantes)
-- [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
-- [ ] Audit de sécurité externe
+### Phase 11 — Chiffrement & Confidentialité serveur
+- [ ] Chiffrement des choix de vote côté client avant soumission (le serveur ne voit jamais le vote en clair)
+- [ ] Architecture split-server : serveur d'identité (blind signatures) séparé du serveur de vote (aucun des deux n'a les deux informations)
+- [ ] Suppression automatique de la table `blindSignatureRequest` après clôture du scrutin (le lien userId/pollId ne persiste pas)
+- [ ] Stockage de la clé privée RSA dans un HSM (Hardware Security Module) au lieu de la base de données
+- [ ] Clés RSA éphémères par scrutin avec rotation et destruction post-clôture
 
-### Phase 12 — Engagement citoyen
+### Phase 12 — Sécurité & Audit
+- [ ] Build reproductible + déploiement signé (GitHub Actions + Sigstore) pour prouver que le code en prod = le code sur GitHub
+- [ ] Dépouillement distribué (plusieurs autorités indépendantes via secret sharing / MPC)
+- [ ] Ancrage du Merkle root sur une blockchain publique (Ethereum L2 ou Bitcoin OP_RETURN)
+- [ ] Audit de sécurité externe par un tiers indépendant
+- [ ] Suite de tests cryptographiques exhaustive (blind signatures, hash chain, vérification)
+- [ ] Analyse formelle du protocole (modèle symbolique type ProVerif/Tamarin, ou collaboration académique)
+- [ ] Arbre de Merkle binaire (vérification O(log n) au lieu de O(n) pour la chaîne linéaire actuelle)
+
+### Phase 13 — Engagement citoyen
 - [ ] Notifications aux citoyens (nouveau texte déposé, résultat officiel, fin de vote)
 - [ ] Intégration du Sénat (data.senat.fr) — textes déposés uniquement au Sénat, faible priorité
 
-### Phase 13 — Applications natives
+### Phase 14 — Applications natives
 - [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
 - [ ] App mobile avec notifications push à chaque nouveau vote
 
