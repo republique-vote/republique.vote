@@ -2,6 +2,43 @@
 
 Plateforme de vote en ligne transparente pour les citoyens français.
 
+> ## ⚠️ Projet en pause
+>
+> **Le site `republique.vote` n'est plus en ligne depuis mai 2026.** Le code reste public à des fins d'archive et de documentation.
+>
+> Raisons :
+>
+> 1. **Refus d'habilitation FranceConnect** par la DINUM (demande n°94477, refusée le 15 avril 2026). Sans FranceConnect, impossible de garantir l'unicité du vote ("1 personne = 1 vote") sans collecter soi-même des pièces d'identité, ce qui serait contraire au principe de minimisation des données du RGPD.
+>
+> 2. **Recours gracieux rejeté le 27 juin 2026.** La DINUM a estimé qu'aucun des textes invoqués (règlement européen eIDAS 2, recommandation CM/Rec(2017)5 du Conseil de l'Europe, délibération CNIL n°2019-053/2026-045, articles L. 62, R. 60 et R. 176-3 du code électoral, articles R. 2314-5 à R. 2314-18 du code du travail, loi organique n°2013-1114, décret n°2014-1488, article 3 de la Constitution, décision CC n°2003-468 DC) ne créait d'obligation spécifique pour une plateforme privée de vote citoyen en ligne.
+>
+> 3. **Avertissement pénal** : dans sa réponse, la DINUM a signalé que l'apparence du site (proche du DSFR + bouton FranceConnect du bac à sable) était susceptible de constituer l'infraction prévue à l'article 433-13 du code pénal (un an d'emprisonnement et 15 000 € d'amende).
+>
+> ### Ce que ça dit du paysage français
+>
+> Pour qu'une personne morale de droit privé obtienne l'habilitation FranceConnect, il faut citer un texte qui *oblige explicitement* la vérification d'identité pour son activité. En pratique, les seuls textes qui créent cette obligation sont ceux de la lutte anti-blanchiment (article L. 561-2 du code monétaire et financier). Cela couvre les banques, assurances, agents immobiliers, casinos, marchands d'art, notaires, etc.
+>
+> **Aucun texte n'impose la vérification d'identité pour le vote citoyen en ligne.** Le règlement européen eIDAS 2 mentionne pourtant explicitement le vote électronique comme cas d'usage légitime de l'identité numérique (considérant 68), et les standards du Conseil de l'Europe imposent l'authentification des votants. Mais ces textes ne sont pas considérés par la DINUM comme créant une obligation directe.
+>
+> Concrètement : une plateforme de paris en ligne ou de courtage en cryptos peut obtenir FranceConnect, mais pas une plateforme de démocratie participative.
+>
+> ### Pistes contactées (sans suite favorable)
+>
+> - **DINUM** : recours gracieux refusé (avril–juin 2026)
+> - **Véronique Cortier (Loria/INRIA)**, autrice de [Belenios](https://www.belenios.org/) : intéressée mais pas dans leurs projets de porter une habilitation
+> - **ANCT / Incubateur des Territoires** : pas de réponse
+> - **Députés et sénateurs** (Antoine Léaument, Jean-Pierre Bataille, Damien Michallet président CSNP, Stéphane Travert membre CSNP) : pas de réponse
+>
+> ### Alternatives techniques envisagées
+>
+> Solutions privées avec vérification d'identité légère sans FranceConnect (toutes payantes ou avec compromis) : [Didit](https://didit.me/) (500 vérifs/mois gratuites), [World ID](https://world.org/world-id) (proof of personhood), [BrightID](https://www.brightid.org/), [Gitcoin Passport](https://passport.xyz/). Le projet n'a pas été pivoté vers ces solutions par manque de temps.
+>
+> ### Et maintenant ?
+>
+> Le code reste public sous licence AGPL-3.0. Quiconque souhaite le forker, le reprendre, ou en faire un projet plus mature avec un partenaire public (collectivité, laboratoire de recherche, association ayant une obligation légale de vérification d'identité) est libre de le faire. Le projet aura eu le mérite de mettre en lumière le vide juridique entre les ambitions affichées du règlement eIDAS 2 et la réalité de l'accès à FranceConnect en France.
+>
+> Le portefeuille européen d'identité numérique (EUDI Wallet), prévu pour fin 2026, pourrait changer la donne en mettant l'identité numérique sous le contrôle exclusif du citoyen, sans validation préalable d'une autorité.
+
 ## Le problème
 
 1. **Pas de vote en ligne en France.** En 2026, il est toujours impossible de voter en ligne pour les élections et référendums. Le seul moyen est de se déplacer physiquement dans un bureau de vote.
