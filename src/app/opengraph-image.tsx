@@ -18,7 +18,7 @@ export default async function OpenGraphImage() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        backgroundColor: "#000091",
+        backgroundColor: "#5b2a91",
         color: "#ffffff",
         padding: "80px",
         fontFamily: "Figtree",
@@ -81,7 +81,7 @@ export default async function OpenGraphImage() {
           style={{
             fontSize: 34,
             fontWeight: 400,
-            color: "#c3c3f5",
+            color: "#d8c8f4",
             lineHeight: 1.4,
             maxWidth: "700px",
           }}
@@ -103,7 +103,7 @@ export default async function OpenGraphImage() {
           style={{
             fontSize: 16,
             fontWeight: 400,
-            color: "#8585f6",
+            color: "#c9adf2",
           }}
         >
           Projet de recherche open source. Ce site n&apos;est pas un service

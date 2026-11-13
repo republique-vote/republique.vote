@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        backgroundColor: "#000091",
+        backgroundColor: "#5b2a91",
         color: "#ffffff",
         padding: "80px",
         fontFamily: "Figtree",
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
               .VOTE
             </span>
           </div>
-          <p style={{ fontSize: 14, color: "#8585f6" }}>
+          <p style={{ fontSize: 14, color: "#c9adf2" }}>
             Projet de recherche open source
           </p>
         </div>

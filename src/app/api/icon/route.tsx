@@ -10,7 +10,7 @@ export function GET() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#000091",
+        backgroundColor: "#5b2a91",
       }}
     >
       <UrneIconSvg height={780} width={720} />

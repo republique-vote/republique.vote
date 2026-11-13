@@ -33,10 +33,10 @@ export function GET(request: NextRequest) {
   <title>Mock FranceConnect - Connexion</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-    h1 { color: #000091; font-size: 1.5rem; }
-    .banner { background: #f5f5fe; border-left: 4px solid #000091; padding: 12px; margin-bottom: 24px; font-size: 0.9rem; }
+    h1 { color: #5b2a91; font-size: 1.5rem; }
+    .banner { background: #f4effa; border-left: 4px solid #5b2a91; padding: 12px; margin-bottom: 24px; font-size: 0.9rem; }
     .user-card { border: 1px solid #ddd; padding: 16px; margin: 8px 0; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
-    .user-card:hover { background: #f0f0ff; border-color: #000091; }
+    .user-card:hover { background: #ebe2f6; border-color: #5b2a91; }
     .user-card h3 { margin: 0 0 4px; }
     .user-card p { margin: 0; color: #666; font-size: 0.85rem; }
     .user-card .login { margin-top: 4px; color: #999; font-size: 0.8rem; }

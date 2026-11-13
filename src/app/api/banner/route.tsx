@@ -8,7 +8,7 @@ export function GET() {
         width: "100%",
         height: "100%",
         display: "flex",
-        backgroundColor: "#000091",
+        backgroundColor: "#5b2a91",
         color: "#ffffff",
         fontFamily: "sans-serif",
       }}
@@ -43,7 +43,7 @@ export function GET() {
         <p
           style={{
             fontSize: 36,
-            color: "#c3c3f5",
+            color: "#d8c8f4",
             lineHeight: 1.4,
             marginBottom: "48px",
           }}
@@ -56,14 +56,14 @@ export function GET() {
             style={{
               display: "flex",
               flexDirection: "column",
-              borderLeft: "6px solid #8585f6",
+              borderLeft: "6px solid #c9adf2",
               paddingLeft: "24px",
             }}
           >
             <span
               style={{
                 fontSize: 26,
-                color: "#8585f6",
+                color: "#c9adf2",
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "2px",
@@ -71,7 +71,7 @@ export function GET() {
             >
               Anonymat
             </span>
-            <span style={{ fontSize: 24, color: "#c3c3f5" }}>
+            <span style={{ fontSize: 24, color: "#d8c8f4" }}>
               Blind signatures RSA-PSS
             </span>
           </div>
@@ -79,14 +79,14 @@ export function GET() {
             style={{
               display: "flex",
               flexDirection: "column",
-              borderLeft: "6px solid #8585f6",
+              borderLeft: "6px solid #c9adf2",
               paddingLeft: "24px",
             }}
           >
             <span
               style={{
                 fontSize: 26,
-                color: "#8585f6",
+                color: "#c9adf2",
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "2px",
@@ -94,7 +94,7 @@ export function GET() {
             >
               Vérifiable
             </span>
-            <span style={{ fontSize: 24, color: "#c3c3f5" }}>
+            <span style={{ fontSize: 24, color: "#d8c8f4" }}>
               Merkle tree public
             </span>
           </div>
@@ -102,14 +102,14 @@ export function GET() {
             style={{
               display: "flex",
               flexDirection: "column",
-              borderLeft: "6px solid #8585f6",
+              borderLeft: "6px solid #c9adf2",
               paddingLeft: "24px",
             }}
           >
             <span
               style={{
                 fontSize: 26,
-                color: "#8585f6",
+                color: "#c9adf2",
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "2px",
@@ -117,7 +117,7 @@ export function GET() {
             >
               Transparent
             </span>
-            <span style={{ fontSize: 24, color: "#c3c3f5" }}>
+            <span style={{ fontSize: 24, color: "#d8c8f4" }}>
               Sigstore + GitHub
             </span>
           </div>
@@ -125,14 +125,14 @@ export function GET() {
             style={{
               display: "flex",
               flexDirection: "column",
-              borderLeft: "6px solid #8585f6",
+              borderLeft: "6px solid #c9adf2",
               paddingLeft: "24px",
             }}
           >
             <span
               style={{
                 fontSize: 26,
-                color: "#8585f6",
+                color: "#c9adf2",
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "2px",
@@ -140,7 +140,7 @@ export function GET() {
             >
               Open source
             </span>
-            <span style={{ fontSize: 24, color: "#c3c3f5" }}>AGPL-3.0</span>
+            <span style={{ fontSize: 24, color: "#d8c8f4" }}>AGPL-3.0</span>
           </div>
         </div>
       </div>

@@ -39,7 +39,7 @@ export function UrneIconSvg({ width, height }: UrneSvgProps) {
       {/* Urne body */}
       <rect fill="#ffffff" height="14" rx="0" width="18" x="2" y="8" />
       {/* Fente */}
-      <rect fill="#000091" height="2" rx="0" width="8" x="7" y="8" />
+      <rect fill="#5b2a91" height="2" rx="0" width="8" x="7" y="8" />
       {/* Shadow line */}
       <rect
         fill="#ffffff"
@@ -75,7 +75,7 @@ export function UrneOgSvg({ width, height }: UrneSvgProps) {
         y="2"
       />
       <rect fill="#ffffff" height="16" width="22" x="5" y="11" />
-      <rect fill="#000091" height="3" width="10" x="11" y="11" />
+      <rect fill="#5b2a91" height="3" width="10" x="11" y="11" />
       <rect fill="#ffffff" height="2" opacity="0.5" width="22" x="5" y="27" />
     </svg>
   );

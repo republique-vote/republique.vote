@@ -43,7 +43,7 @@ export async function GET(
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#000091",
+        backgroundColor: "#5b2a91",
         color: "#ffffff",
         padding: "96px 128px",
         fontFamily: "Figtree",
@@ -95,7 +95,7 @@ export async function GET(
           justifyContent: "center",
         }}
       >
-        <p style={{ fontSize: 30, color: "#c3c3f5", marginBottom: "12px" }}>
+        <p style={{ fontSize: 30, color: "#d8c8f4", marginBottom: "12px" }}>
           {p.title}
         </p>
         <p
@@ -123,7 +123,7 @@ export async function GET(
             <span
               style={{
                 fontSize: 16,
-                color: "#8585f6",
+                color: "#c9adf2",
                 marginBottom: "6px",
                 textTransform: "uppercase",
                 letterSpacing: "0.5px",
@@ -153,7 +153,7 @@ export async function GET(
             <span
               style={{
                 fontSize: 16,
-                color: "#8585f6",
+                color: "#c9adf2",
                 marginBottom: "6px",
                 textTransform: "uppercase",
                 letterSpacing: "0.5px",
@@ -184,7 +184,7 @@ export async function GET(
             <span
               style={{
                 fontSize: 16,
-                color: "#8585f6",
+                color: "#c9adf2",
                 marginBottom: "6px",
                 textTransform: "uppercase",
                 letterSpacing: "0.5px",
@@ -198,7 +198,7 @@ export async function GET(
       </div>
 
       {/* Footer */}
-      <p style={{ fontSize: 18, color: "#8585f6", marginTop: "auto" }}>
+      <p style={{ fontSize: 18, color: "#c9adf2", marginTop: "auto" }}>
         Conservez cette preuve. Elle permet de retrouver votre vote dans le
         registre public et de vérifier qu&apos;il n&apos;a pas été modifié. Elle
         ne révèle pas le contenu du vote.
