@@ -2,17 +2,17 @@
 
 Plateforme de vote en ligne transparente pour les citoyens français.
 
-> ## ⚠️ Projet en pause
+> ## 🔄 Projet en cours de relance
 >
-> **Le site `republique.vote` n'est plus en ligne depuis mai 2026.** Le code reste public à des fins d'archive et de documentation.
+> **Le site `republique.vote` n'est plus en ligne depuis mai 2026.** Le projet avait été mis en pause après le refus de FranceConnect. Il repart avec une vérification d'identité par carte d'identité qui ne dépend d'aucune autorisation (voir [Authentification](#authentification)). Le site n'est pas encore redéployé.
 >
-> Raisons :
+> ### Pourquoi FranceConnect a été abandonné
 >
-> 1. **Refus d'habilitation FranceConnect** par la DINUM (demande n°94477, refusée le 15 avril 2026). Sans FranceConnect, impossible de garantir l'unicité du vote ("1 personne = 1 vote") sans collecter soi-même des pièces d'identité, ce qui serait contraire au principe de minimisation des données du RGPD.
+> 1. **Refus d'habilitation FranceConnect** par la DINUM (demande n°94477, refusée le 15 avril 2026). À l'époque, sans FranceConnect, nous ne voyions pas comment garantir l'unicité du vote ("1 personne = 1 vote") sans collecter nous-mêmes des pièces d'identité, ce qui serait contraire au principe de minimisation des données du RGPD.
 >
 > 2. **Recours gracieux rejeté le 27 juin 2026.** La DINUM a estimé qu'aucun des textes invoqués (règlement européen eIDAS 2, recommandation CM/Rec(2017)5 du Conseil de l'Europe, délibération CNIL n°2019-053/2026-045, articles L. 62, R. 60 et R. 176-3 du code électoral, articles R. 2314-5 à R. 2314-18 du code du travail, loi organique n°2013-1114, décret n°2014-1488, article 3 de la Constitution, décision CC n°2003-468 DC) ne créait d'obligation spécifique pour une plateforme privée de vote citoyen en ligne.
 >
-> 3. **Avertissement pénal** : dans sa réponse, la DINUM a signalé que l'apparence du site (proche du DSFR + bouton FranceConnect du bac à sable) était susceptible de constituer l'infraction prévue à l'article 433-13 du code pénal (un an d'emprisonnement et 15 000 € d'amende).
+> 3. **Avertissement pénal** : dans sa réponse, la DINUM a signalé que l'apparence du site (proche du DSFR + bouton FranceConnect du bac à sable) était susceptible de constituer l'infraction prévue à l'article 433-13 du code pénal (un an d'emprisonnement et 15 000 € d'amende). Depuis, la palette de couleurs bleue proche du DSFR a été remplacée par du violet, et le bouton FranceConnect a été retiré.
 >
 > ### Ce que ça dit du paysage français
 >
@@ -29,15 +29,17 @@ Plateforme de vote en ligne transparente pour les citoyens français.
 > - **ANCT / Incubateur des Territoires** : pas de réponse
 > - **Députés et sénateurs** (Antoine Léaument, Jean-Pierre Bataille, Damien Michallet président CSNP, Stéphane Travert membre CSNP) : pas de réponse
 >
-> ### Alternatives techniques envisagées
+> ### La solution retenue
 >
-> Solutions privées avec vérification d'identité légère sans FranceConnect (toutes payantes ou avec compromis) : [Didit](https://didit.me/) (500 vérifs/mois gratuites), [World ID](https://world.org/world-id) (proof of personhood), [BrightID](https://www.brightid.org/), [Gitcoin Passport](https://passport.xyz/). Le projet n'a pas été pivoté vers ces solutions par manque de temps.
+> La carte d'identité française contient une puce dont les données sont signées par l'État, avec des certificats publics. N'importe qui peut donc vérifier qu'une carte est authentique, sans rien demander à personne.
 >
-> ### Et maintenant ?
+> Le citoyen scanne sa carte avec l'application open source [ZKPassport](https://zkpassport.id/). Elle produit une preuve à divulgation nulle de connaissance : « je suis français, majeur, et c'est bien mon visage ». Nous vérifions cette preuve nous-mêmes, gratuitement, sans intermédiaire ni habilitation.
 >
-> Le code reste public sous licence AGPL-3.0. Quiconque souhaite le forker, le reprendre, ou en faire un projet plus mature avec un partenaire public (collectivité, laboratoire de recherche, association ayant une obligation légale de vérification d'identité) est libre de le faire. Le projet aura eu le mérite de mettre en lumière le vide juridique entre les ambitions affichées du règlement eIDAS 2 et la réalité de l'accès à FranceConnect en France.
+> Les autres pistes étudiées : [L'Identité Numérique La Poste](https://www.docaposte.com/solutions/verification-identite) (accessible sans FranceConnect, mais payante et sur devis), [Self](https://self.xyz/) (même principe que ZKPassport, mais crédits payants et sans reconnaissance faciale), et des solutions de « proof of personhood » qui ne prouvent pas la nationalité ([World ID](https://world.org/world-id), [BrightID](https://www.brightid.org/), [Gitcoin Passport](https://passport.xyz/)).
 >
-> Le portefeuille européen d'identité numérique (EUDI Wallet), prévu pour fin 2026, pourrait changer la donne en mettant l'identité numérique sous le contrôle exclusif du citoyen, sans validation préalable d'une autorité.
+> Le portefeuille européen d'identité numérique (EUDI Wallet), attendu fin 2026, pourra s'ajouter comme seconde porte d'entrée.
+>
+> Le projet aura eu le mérite de mettre en lumière le vide juridique entre les ambitions affichées du règlement eIDAS 2 et la réalité de l'accès à FranceConnect en France.
 
 ## Le problème
 
@@ -62,7 +64,7 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 
 - **Frontend.** [Next.js](https://nextjs.org) + [Shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/). Design inspiré du [DSFR](https://www.systeme-de-design.gouv.fr/) mais avec des composants libres (Radix + Tailwind) pour des raisons légales. Initialement basé sur le [template Next App Router du DSFR](https://github.com/codegouvfr/react-dsfr/tree/main/test/integration/next-appdir), une migration vers le DSFR officiel serait possible en cas d'habilitation
 - **Base de données.** PostgreSQL pour les données classiques (utilisateurs, votes, métadonnées)
-- **Authentification.** [FranceConnect](https://franceconnect.gouv.fr/) (sandbox en développement)
+- **Authentification.** [ZKPassport](https://zkpassport.id/) : preuve à divulgation nulle de connaissance à partir de la puce de la carte d'identité, vérifiée sur notre serveur
 - **Bulletin board public.** Log append-only avec Merkle tree pour les votes. Chaque vote est signé et publié publiquement. L'intégrité est vérifiable par tous, sans faire confiance à un serveur central
 - **Transparence externe.** Chaque empreinte du cahier est publiée sur [Sigstore Rekor](https://docs.sigstore.dev/logging/overview/) (immédiat) et sur un [dépôt GitHub public](https://github.com/republique-vote/merkle-proofs) (batch toutes les 30s)
 
@@ -70,7 +72,23 @@ L'idée à terme : chaque projet de loi proposé par les députés, chaque réf�
 
 ### Authentification
 
-**FranceConnect** pour vérifier l'identité du citoyen (identité certifiée par l'État).
+Le citoyen scanne sa **carte d'identité française** avec l'application [ZKPassport](https://zkpassport.id/). La preuve est vérifiée sur notre serveur et confirme quatre choses :
+
+- la carte est authentique (signée par l'État français) et c'est une carte d'identité ;
+- la personne est de nationalité française ;
+- elle est majeure ;
+- son visage correspond à la photo stockée dans la puce (une carte prêtée ne passe pas).
+
+**Un citoyen, un compte.** Pour empêcher les comptes en double, la preuve révèle aussi nom, prénoms, date de naissance et sexe. Le serveur en calcule une empreinte (HMAC avec une clé secrète), puis jette ces données : elles ne sont jamais stockées. Le compte ne contient que cette empreinte et l'identifiant de la carte.
+
+- Carte renouvelée ou perdue puis remplacée : même empreinte, donc même compte. La nouvelle carte remplace l'ancienne.
+- Une ancienne carte qui réapparaît (carte déclarée perdue mais conservée, ou homonyme parfait) : le compte est gelé le temps d'une vérification.
+
+**Ce qui n'est pas encore parfait :**
+
+- Notre serveur voit passer nom et date de naissance au moment de l'inscription. Le vote, lui, reste anonyme grâce à la signature aveugle (voir plus bas).
+- Les personnes qui n'ont que l'ancienne carte cartonnée, ou pas de smartphone avec NFC, ne peuvent pas encore s'inscrire.
+- ZKPassport n'a pas encore eu d'audit de sécurité externe.
 
 ### Concept
 
@@ -78,7 +96,7 @@ Tout le monde peut vérifier que les résultats sont bons, mais personne ne peut
 
 **Comment ça marche :**
 
-1. **Vous vous connectez.** Vous prouvez qui vous êtes avec FranceConnect (le même système que pour les impôts ou la CAF). Le système sait que vous avez le droit de voter.
+1. **Vous vous connectez.** Vous scannez votre carte d'identité avec votre téléphone. Une preuve mathématique confirme que vous êtes un citoyen français majeur. Le système sait que vous avez le droit de voter.
 
 2. **Vous recevez un code secret.** Le système vous donne un code secret unique (techniquement : une "blind signature"). Ce code prouve que vous avez le droit de voter, mais il est **impossible de savoir à qui il appartient**. Imaginez : on vérifie votre identité à l'entrée, puis on vous donne un code sans nom. Une fois que vous l'avez, plus aucun lien entre vous et ce code. Tout ça se passe automatiquement en arrière-plan quand vous cliquez sur "Voter".
 
@@ -149,7 +167,7 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 
 ### Phase 1 — Fondations
 - [x] Initialiser le projet Next.js + DSFR
-- [x] Intégrer FranceConnect (mock local, en attente d'habilitation pour la sandbox officielle)
+- [x] Intégrer FranceConnect (mock local, abandonné après le refus d'habilitation de la DINUM)
 - [x] Modéliser la base de données (PostgreSQL)
 - [x] Concevoir le système de blind signatures
 
@@ -240,6 +258,16 @@ C'est le problème le plus difficile du vote en ligne. Aucun pays au monde ne l'
 ### Phase 14 — Applications natives
 - [ ] App desktop (Tauri) pour les non-devs : interface visuelle, surveillance en tâche de fond, alertes en cas d'anomalie
 - [ ] App mobile avec notifications push à chaque nouveau vote
+
+### Phase 15 — Identité sans FranceConnect
+- [x] Connexion par carte d'identité via ZKPassport (preuve vérifiée localement, reconnaissance faciale)
+- [x] Empreinte d'identité (HMAC) : un compte par citoyen, même après renouvellement ou perte de carte
+- [x] Retrait de FranceConnect et de la palette proche du DSFR
+- [ ] Départage des homonymes parfaits (justificatif France Identité, qui contient le lieu de naissance)
+- [ ] Délai aléatoire avant l'envoi du vote, pour empêcher de relier connexion et vote par l'heure
+- [ ] Vérifier nous-mêmes que la carte est signée par le certificat officiel de l'État français
+- [ ] Autres portes d'entrée : justificatif France Identité, puis EUDI Wallet
+- [ ] Redéploiement de republique.vote
 
 ## Site
 
