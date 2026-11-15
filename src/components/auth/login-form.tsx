@@ -1,11 +1,17 @@
 "use client";
 
 import type { RequestSuccess } from "@zkpassport/sdk";
+import { HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { FranceConnectUnavailable } from "@/components/auth/franceconnect-unavailable";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ZkPassportFlow } from "@/components/zkpassport/zkpassport-flow";
 import { TEST_CITIZENS } from "@/services/zkpassport/test-citizens";
 
@@ -54,11 +60,26 @@ export function LoginForm() {
     // Two columns on desktop: the available method next to the others
     <div className="mt-8 grid items-start gap-4 md:grid-cols-2">
       <section className="space-y-4 border border-border bg-card p-4">
-        <h2 className="font-medium text-sm">
-          Carte d'identité{" "}
-          <span className="font-normal text-muted-foreground">
-            avec l'application ZKPassport
-          </span>
+        <h2 className="flex items-center gap-2 font-medium text-sm">
+          Carte d'identité
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="cursor-help" type="button">
+                <Badge variant="outline">
+                  Application ZKPassport
+                  <HelpCircle />
+                </Badge>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                Application open source qui lit la puce de votre carte
+                d'identité et produit une preuve mathématique : nous apprenons
+                que vous êtes un citoyen français majeur, sans recevoir votre
+                carte.
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </h2>
         <ZkPassportFlow onProof={signInWithProof}>
           <p className="text-muted-foreground">Connexion en cours…</p>
