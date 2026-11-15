@@ -16,7 +16,13 @@ function toTitleCase(value: string) {
     .replace(WORD_START, (match) => match.toUpperCase());
 }
 
-// fullname is "<given names> <lastname>": keep the first given name only
+// French convention: first given name, then the last name in capitals
+export function formatDisplayName(givenNames: string, lastname: string) {
+  const firstName = givenNames.trim().split(WHITESPACE)[0] ?? "";
+  return `${toTitleCase(firstName)} ${lastname.trim().toUpperCase()}`.trim();
+}
+
+// fullname is "<given names> <lastname>"
 export function displayNameFromProof(result: QueryResult) {
   const fullname = result.fullname?.disclose?.result?.trim();
   const lastname = result.lastname?.disclose?.result?.trim();
@@ -26,8 +32,7 @@ export function displayNameFromProof(result: QueryResult) {
   const givenNames = fullname.endsWith(lastname)
     ? fullname.slice(0, -lastname.length).trim()
     : fullname;
-  const firstName = givenNames.split(WHITESPACE)[0] ?? "";
-  return toTitleCase(`${firstName} ${lastname}`.trim());
+  return formatDisplayName(givenNames, lastname);
 }
 
 function notify() {

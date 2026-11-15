@@ -15,8 +15,10 @@ import {
 import { ZkPassportFlow } from "@/components/zkpassport/zkpassport-flow";
 import {
   displayNameFromProof,
+  formatDisplayName,
   saveDisplayName,
 } from "@/services/zkpassport/display-name";
+import type { CitizenIdentity } from "@/services/zkpassport/identity";
 import { TEST_CITIZENS } from "@/services/zkpassport/test-citizens";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -106,11 +108,13 @@ export function LoginForm() {
 function TestCitizens() {
   const [error, setError] = useState<string | null>(null);
 
-  const signInAs = async (citizenId: string, description: string) => {
+  const signInAs = async (citizenId: string, identity: CitizenIdentity) => {
     setError(null);
     try {
       await postSignIn("/zkpassport/test-sign-in", { citizenId });
-      saveDisplayName(description);
+      saveDisplayName(
+        formatDisplayName(identity.givenNames, identity.lastname)
+      );
       redirectAfterSignIn();
     } catch (err) {
       setError((err as Error).message);
@@ -127,7 +131,7 @@ function TestCitizens() {
         {TEST_CITIZENS.map((citizen) => (
           <Button
             key={citizen.id}
-            onClick={() => signInAs(citizen.id, citizen.description)}
+            onClick={() => signInAs(citizen.id, citizen.identity)}
             size="sm"
             type="button"
             variant="outline"
