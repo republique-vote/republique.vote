@@ -5,12 +5,6 @@ export const env = createEnv({
   server: {
     AUTH_SECRET: z.string().min(1),
     AUTH_BASE_URL: z.url(),
-    FC_CLIENT_ID: z.string().min(1),
-    FC_CLIENT_SECRET: z.string().min(1),
-    FC_ISSUER: z.string().min(1),
-    FC_AUTHORIZATION_URL: z.url(),
-    FC_TOKEN_URL: z.url(),
-    FC_USERINFO_URL: z.url(),
     DATABASE_URL: z
       .url()
       .default("postgresql://postgres:postgres@localhost:5432/vote"),
@@ -18,7 +12,7 @@ export const env = createEnv({
     CRON_SECRET: z.string().min(1).optional(),
     GITHUB_TOKEN: z.string().min(1).optional(),
     GITHUB_MERKLE_REPO: z.string().min(1).optional(),
-    IDENTITY_KEY_SECRET: z.string().min(32).optional(),
+    IDENTITY_KEY_SECRET: z.string().min(32),
   },
   experimental__runtimeEnv: {},
   skipValidation: !!process.env.CI,

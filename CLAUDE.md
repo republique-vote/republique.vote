@@ -61,7 +61,8 @@ Shadcn/ui (Radix primitives) + Tailwind CSS v4. Design inspired by DSFR (French 
 
 ### Services Layer (`src/services/`)
 
-- `auth/` — Better Auth instance (`index.ts`) + client hooks (`client.ts`)
+- `auth/` — Better Auth instance (`index.ts`), zkPassport sign-in plugin (`zkpassport-plugin.ts`) + client hooks (`client.ts`)
+- `zkpassport/` — proof query shared by browser and server (`query.ts`), server verification (`verify.ts`), identity key HMAC (`identity.ts`), card ↔ account resolution (`citizen.ts`), fictional dev citizens (`test-citizens.ts`)
 - `blind-signature/` — RSA-PSS key management + signing (`index.ts`) + client-side blinding (`client.ts`)
 - `poll/` — fetch (`fetch.ts`), results aggregation (`results.ts`), Redis pub/sub events (`events.ts`), Merkle tree hashing (`merkle.ts`)
 - `rekor/` — publish merkle root to Sigstore Rekor transparency log after each vote
@@ -72,7 +73,7 @@ Shadcn/ui (Radix primitives) + Tailwind CSS v4. Design inspired by DSFR (French 
 ### Cryptographic Vote Flow
 
 1. Client generates random 32-byte token, blinds it with poll's RSA public key
-2. Client POSTs blinded token to `/api/poll/[pollId]/blind-sign` (requires FranceConnect auth)
+2. Client POSTs blinded token to `/api/poll/[pollId]/blind-sign` (requires zkPassport auth)
 3. Server signs blindly (one request per user-poll), returns blind signature
 4. Client unblinds → valid signature on original token
 5. Client POSTs vote with token + signature to `/api/poll/[pollId]/vote` (no auth — signature is the proof)
@@ -98,9 +99,13 @@ Key tables: `poll`, `option`, `pollKeyPair`, `blindSignatureRequest` (one per us
 
 `src/instrumentation.ts` registers a `setInterval` (10 min) that clears vote data in production. Clock-aligned to :00/:10/:20 etc. Banner with live countdown in `src/components/demo-banner.tsx`.
 
-### Mock FranceConnect
+### zkPassport Authentication
 
-Development auth at `/api/mock-fc/*`. Test users in `src/app/api/mock-fc/test-users.ts`. Click a user card to login — no real credentials needed.
+Citizens sign in by scanning their French national ID card with the ZKPassport app (QR code on `/login`). The zero-knowledge proof requires French nationality, a national ID card, age 18+ and a strict facematch, and is verified locally on the server (`POST /api/auth/zkpassport/sign-in`).
+
+Accounts hold no identity: the `citizen` table stores an identity key (HMAC of names, birthdate and gender with `IDENTITY_KEY_SECRET`) and the current card's salted zkPassport identifier. A new card of a known identity replaces the old one (renewal, lost card); a replaced card showing up again freezes the account (`conflict`).
+
+In development, fictional citizens on `/login` sign in through `/api/auth/zkpassport/test-sign-in`, and `/dev/zkpassport` shows what a real card discloses without creating a session.
 
 ## API Response Format
 

@@ -49,3 +49,27 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// One row per citizen. Only keyed hashes are stored, never the identity:
+// identityKey survives card renewals, documentId is the current card.
+export const citizen = pgTable("citizen", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  identityKey: text("identity_key").notNull().unique(),
+  documentId: text("document_id").notNull().unique(),
+  conflict: boolean("conflict").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Cards replaced by a newer one. Seeing one again means two cards of the
+// same identity are in use: a lost card kept after its replacement, or a
+// perfect homonym.
+export const retiredDocument = pgTable("retired_document", {
+  documentId: text("document_id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  retiredAt: timestamp("retired_at").notNull().defaultNow(),
+});

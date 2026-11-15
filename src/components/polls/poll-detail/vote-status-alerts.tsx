@@ -90,7 +90,7 @@ export function LoginRequiredAlert({ continueUrl }: { continueUrl: string }) {
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Connexion requise</AlertTitle>
         <AlertDescription>
-          Vous devez vous identifier via FranceConnect pour voter.
+          Vous devez vous identifier avec votre carte d'identité pour voter.
         </AlertDescription>
       </Alert>
       <Button asChild>

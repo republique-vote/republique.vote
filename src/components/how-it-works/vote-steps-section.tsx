@@ -12,7 +12,7 @@ const steps = [
     title: "Vous vous connectez",
     icon: UserCheck,
     description:
-      "Vous prouvez qui vous êtes avec FranceConnect (le même système que pour les impôts ou la CAF). Le système sait que vous avez le droit de voter.",
+      "Vous scannez votre carte d'identité avec votre téléphone. Une preuve mathématique confirme que vous êtes un citoyen français majeur, et le système sait que vous avez le droit de voter.",
   },
   {
     number: 2,

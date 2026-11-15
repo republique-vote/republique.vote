@@ -1,58 +1,14 @@
-import { randomBytes } from "node:crypto";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { env } from "env";
-import { decodeJwt } from "jose";
 import { db } from "@/db";
 import * as schema from "@/db/schemas/auth";
+import { zkPassportAuth } from "@/services/auth/zkpassport-plugin";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema }),
   secret: env.AUTH_SECRET,
   baseURL: env.AUTH_BASE_URL,
-  account: {
-    accountLinking: {
-      trustedProviders: ["franceconnect"],
-    },
-  },
-  plugins: [
-    nextCookies(),
-    genericOAuth({
-      config: [
-        {
-          providerId: "franceconnect",
-          clientId: env.FC_CLIENT_ID,
-          clientSecret: env.FC_CLIENT_SECRET,
-          authorizationUrl: env.FC_AUTHORIZATION_URL,
-          tokenUrl: env.FC_TOKEN_URL,
-          userInfoUrl: env.FC_USERINFO_URL,
-          scopes: ["openid", "profile", "email"],
-          pkce: false,
-          authorizationUrlParams: () => ({
-            acr_values: "eidas1",
-            nonce: randomBytes(16).toString("hex"),
-          }),
-          getUserInfo: async (tokens) => {
-            // FranceConnect returns userinfo as a signed JWT, not JSON.
-            // better-auth's default handler expects JSON and fails silently.
-            // We decode the JWT manually to extract all claims including email.
-            const res = await fetch(env.FC_USERINFO_URL, {
-              headers: { Authorization: `Bearer ${tokens.accessToken}` },
-            });
-            const body = await res.text();
-            const claims = decodeJwt(body);
-            return {
-              id: claims.sub as string,
-              email: claims.email as string,
-              emailVerified: (claims.email_verified as boolean) ?? false,
-              name: `${claims.given_name} ${claims.family_name}`,
-              image: undefined,
-            };
-          },
-        },
-      ],
-    }),
-  ],
+  plugins: [nextCookies(), zkPassportAuth()],
 });

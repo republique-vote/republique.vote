@@ -44,8 +44,8 @@ export default function Page() {
             </div>
             <h3 className="mb-2 font-bold text-lg">Anonyme</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Votre identité est vérifiée via FranceConnect, mais votre vote
-              reste impossible à relier à vous.
+              Votre nationalité est vérifiée avec votre carte d'identité, mais
+              votre vote reste impossible à relier à vous.
             </p>
           </div>
           <div className="group">
