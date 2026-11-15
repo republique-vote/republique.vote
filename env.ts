@@ -18,6 +18,7 @@ export const env = createEnv({
     CRON_SECRET: z.string().min(1).optional(),
     GITHUB_TOKEN: z.string().min(1).optional(),
     GITHUB_MERKLE_REPO: z.string().min(1).optional(),
+    IDENTITY_KEY_SECRET: z.string().min(32).optional(),
   },
   experimental__runtimeEnv: {},
   skipValidation: !!process.env.CI,
