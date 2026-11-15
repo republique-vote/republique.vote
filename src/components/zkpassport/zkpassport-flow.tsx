@@ -11,6 +11,7 @@ import {
 import QRCode from "react-qr-code";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   requireFrenchAdultIdCard,
   ZKPASSPORT_NULLIFIER_TYPE,
@@ -29,7 +30,6 @@ type Step =
   | { kind: "error"; message: string };
 
 const STEP_LABELS: Partial<Record<Step["kind"], string>> = {
-  loading: "Préparation de la requête…",
   received: "Requête reçue sur le téléphone. Acceptez-la dans l'application.",
   generating: "Génération de la preuve sur le téléphone…",
   verifying: "Vérification de la preuve…",
@@ -117,7 +117,7 @@ function ZkPassportRequest({
   return (
     <div className="space-y-6">
       {step.kind === "done" ? children : <StepView step={step} />}
-      {step.kind === "waiting" ? null : (
+      {step.kind === "waiting" || step.kind === "loading" ? null : (
         <Button onClick={onRestart} type="button" variant="outline">
           Recommencer
         </Button>
@@ -129,6 +129,11 @@ function ZkPassportRequest({
 function StepView({ step }: { step: Step }) {
   if (step.kind === "waiting") {
     return <WaitingView url={step.url} />;
+  }
+
+  // Same layout as the QR code view, so nothing moves once the request is ready
+  if (step.kind === "loading") {
+    return <WaitingView />;
   }
 
   if (step.kind === "rejected") {
@@ -168,13 +173,18 @@ function useIsMobile() {
   );
 }
 
-function WaitingView({ url }: { url: string }) {
+// QR code plus its padding and border
+const QR_BOX_SIZE = 274;
+
+function WaitingView({ url }: { url?: string }) {
   const isMobile = useIsMobile();
 
-  const qrCode = (
+  const qrCode = url ? (
     <div className="inline-block border border-border bg-white p-4">
       <QRCode size={240} value={url} />
     </div>
+  ) : (
+    <Skeleton borderRadius="0" height={QR_BOX_SIZE} width={QR_BOX_SIZE} />
   );
 
   if (isMobile) {
@@ -183,9 +193,13 @@ function WaitingView({ url }: { url: string }) {
         <p className="text-muted-foreground">
           Ouvrez l'application ZKPassport, puis scannez votre carte d'identité.
         </p>
-        <Button asChild className="w-full" size="lg">
-          <a href={url}>Ouvrir ZKPassport</a>
-        </Button>
+        {url ? (
+          <Button asChild className="w-full" size="lg">
+            <a href={url}>Ouvrir ZKPassport</a>
+          </Button>
+        ) : (
+          <Skeleton borderRadius="0" height="2.25rem" />
+        )}
         <details className="text-sm">
           <summary className="cursor-pointer text-muted-foreground">
             ZKPassport est installé sur un autre téléphone ?
