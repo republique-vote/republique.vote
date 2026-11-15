@@ -15,9 +15,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { signOut, useSession } from "@/services/auth/client";
+import {
+  saveDisplayName,
+  useDisplayName,
+} from "@/services/zkpassport/display-name";
 
 export function HeaderAuthItem({ compact = false }: { compact?: boolean }) {
   const { data: session, isPending } = useSession();
+  // Kept in this browser only: the server stores no name
+  const displayName = useDisplayName();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -35,7 +41,9 @@ export function HeaderAuthItem({ compact = false }: { compact?: boolean }) {
             type="button"
           >
             <UserCircle className="h-4 w-4" />
-            {compact ? session.user.name?.split(" ")[0] : session.user.name}
+            {compact
+              ? (displayName ?? session.user.name).split(" ")[0]
+              : (displayName ?? session.user.name)}
           </button>
         </DialogTrigger>
         <DialogContent>
@@ -51,7 +59,14 @@ export function HeaderAuthItem({ compact = false }: { compact?: boolean }) {
             </Button>
             <Button
               onClick={() =>
-                signOut({ fetchOptions: { onSuccess: () => router.refresh() } })
+                signOut({
+                  fetchOptions: {
+                    onSuccess: () => {
+                      saveDisplayName(null);
+                      router.refresh();
+                    },
+                  },
+                })
               }
             >
               Se déconnecter

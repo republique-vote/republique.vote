@@ -13,6 +13,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ZkPassportFlow } from "@/components/zkpassport/zkpassport-flow";
+import {
+  displayNameFromProof,
+  saveDisplayName,
+} from "@/services/zkpassport/display-name";
 import { TEST_CITIZENS } from "@/services/zkpassport/test-citizens";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -53,6 +57,7 @@ function redirectAfterSignIn() {
 export function LoginForm() {
   const signInWithProof = async ({ proofs, result }: RequestSuccess) => {
     await postSignIn("/zkpassport/sign-in", { proofs, result });
+    saveDisplayName(displayNameFromProof(result));
     redirectAfterSignIn();
   };
 
@@ -101,10 +106,11 @@ export function LoginForm() {
 function TestCitizens() {
   const [error, setError] = useState<string | null>(null);
 
-  const signInAs = async (citizenId: string) => {
+  const signInAs = async (citizenId: string, description: string) => {
     setError(null);
     try {
       await postSignIn("/zkpassport/test-sign-in", { citizenId });
+      saveDisplayName(description);
       redirectAfterSignIn();
     } catch (err) {
       setError((err as Error).message);
@@ -121,7 +127,7 @@ function TestCitizens() {
         {TEST_CITIZENS.map((citizen) => (
           <Button
             key={citizen.id}
-            onClick={() => signInAs(citizen.id)}
+            onClick={() => signInAs(citizen.id, citizen.description)}
             size="sm"
             type="button"
             variant="outline"
