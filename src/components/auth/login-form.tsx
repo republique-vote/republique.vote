@@ -49,7 +49,8 @@ export function LoginForm() {
   };
 
   return (
-    <div className="mt-8 space-y-4">
+    // Two columns on desktop: the available method next to the others
+    <div className="mt-8 grid items-start gap-4 md:grid-cols-2">
       <section className="space-y-6 border border-border bg-card p-6">
         <h2 className="font-medium text-sm">
           Carte d'identité{" "}
@@ -66,10 +67,12 @@ export function LoginForm() {
           conservés. Votre vote reste impossible à relier à votre identité.
         </p>
       </section>
-      <FranceConnectUnavailable />
-      {process.env.NODE_ENV === "production" ? null : (
-        <TestCitizens continueUrl={continueUrl} />
-      )}
+      <div className="space-y-4">
+        <FranceConnectUnavailable />
+        {process.env.NODE_ENV === "production" ? null : (
+          <TestCitizens continueUrl={continueUrl} />
+        )}
+      </div>
     </div>
   );
 }
