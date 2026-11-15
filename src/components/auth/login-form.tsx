@@ -3,6 +3,7 @@
 import type { RequestSuccess } from "@zkpassport/sdk";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { FranceConnectUnavailable } from "@/components/auth/franceconnect-unavailable";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ZkPassportFlow } from "@/components/zkpassport/zkpassport-flow";
@@ -57,6 +58,7 @@ export function LoginForm() {
         uniquement à empêcher les comptes en double : ils ne sont jamais
         conservés. Votre vote reste impossible à relier à votre identité.
       </p>
+      <FranceConnectUnavailable />
       {process.env.NODE_ENV === "production" ? null : (
         <TestCitizens continueUrl={continueUrl} />
       )}
