@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+
 // Text only on purpose: the official FranceConnect button and logo are
 // reserved to authorized services
 export function FranceConnectUnavailable() {
@@ -6,8 +8,9 @@ export function FranceConnectUnavailable() {
       aria-disabled="true"
       className="space-y-2 border border-border border-dashed p-4 text-muted-foreground opacity-70"
     >
-      <p className="font-medium text-sm">
-        FranceConnect <span className="font-normal">— indisponible</span>
+      <p className="flex items-center gap-2 font-medium text-sm">
+        FranceConnect
+        <Badge variant="outline">Indisponible</Badge>
       </p>
       <p className="text-xs leading-relaxed">
         Notre demande d'habilitation FranceConnect (n° 94477) a été refusée par
