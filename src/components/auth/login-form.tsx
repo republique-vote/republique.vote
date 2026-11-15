@@ -49,15 +49,23 @@ export function LoginForm() {
   };
 
   return (
-    <div className="mt-8 space-y-6 rounded-sm border border-border bg-card p-6">
-      <ZkPassportFlow onProof={signInWithProof}>
-        <p className="text-muted-foreground">Connexion en cours…</p>
-      </ZkPassportFlow>
-      <p className="text-muted-foreground text-xs leading-relaxed">
-        Votre nom, vos prénoms, votre date de naissance et votre sexe servent
-        uniquement à empêcher les comptes en double : ils ne sont jamais
-        conservés. Votre vote reste impossible à relier à votre identité.
-      </p>
+    <div className="mt-8 space-y-4">
+      <section className="space-y-6 border border-border bg-card p-6">
+        <h2 className="font-medium text-sm">
+          Carte d'identité{" "}
+          <span className="font-normal text-muted-foreground">
+            avec l'application ZKPassport
+          </span>
+        </h2>
+        <ZkPassportFlow onProof={signInWithProof}>
+          <p className="text-muted-foreground">Connexion en cours…</p>
+        </ZkPassportFlow>
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          Votre nom, vos prénoms, votre date de naissance et votre sexe servent
+          uniquement à empêcher les comptes en double : ils ne sont jamais
+          conservés. Votre vote reste impossible à relier à votre identité.
+        </p>
+      </section>
       <FranceConnectUnavailable />
       {process.env.NODE_ENV === "production" ? null : (
         <TestCitizens continueUrl={continueUrl} />
@@ -80,7 +88,7 @@ function TestCitizens({ continueUrl }: { continueUrl: string }) {
   };
 
   return (
-    <div className="space-y-3 border-border border-t pt-6">
+    <div className="space-y-3 border border-border border-dashed p-4">
       <p className="font-medium text-sm">Citoyens fictifs (développement)</p>
       <div className="flex flex-wrap gap-2">
         {TEST_CITIZENS.map((citizen) => (
