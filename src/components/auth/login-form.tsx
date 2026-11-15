@@ -1,7 +1,6 @@
 "use client";
 
 import type { RequestSuccess } from "@zkpassport/sdk";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FranceConnectUnavailable } from "@/components/auth/franceconnect-unavailable";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -31,21 +30,23 @@ async function postSignIn(path: string, body: unknown) {
   }
 }
 
-function useContinueUrl() {
-  const searchParams = useSearchParams();
-  const rawContinue = searchParams.get("continue") || "/";
-  return rawContinue.startsWith("/") && !rawContinue.startsWith("//")
-    ? rawContinue
-    : "/";
+// Read at sign-in time rather than with useSearchParams, which would force
+// the whole form to render client-side only on a static page
+function redirectAfterSignIn() {
+  const rawContinue =
+    new URLSearchParams(window.location.search).get("continue") || "/";
+  const continueUrl =
+    rawContinue.startsWith("/") && !rawContinue.startsWith("//")
+      ? rawContinue
+      : "/";
+  // Full reload so every component picks up the new session
+  window.location.assign(continueUrl);
 }
 
 export function LoginForm() {
-  const continueUrl = useContinueUrl();
-
   const signInWithProof = async ({ proofs, result }: RequestSuccess) => {
     await postSignIn("/zkpassport/sign-in", { proofs, result });
-    // Full reload so every component picks up the new session
-    window.location.assign(continueUrl);
+    redirectAfterSignIn();
   };
 
   return (
@@ -69,22 +70,20 @@ export function LoginForm() {
       </section>
       <div className="space-y-4">
         <FranceConnectUnavailable />
-        {process.env.NODE_ENV === "production" ? null : (
-          <TestCitizens continueUrl={continueUrl} />
-        )}
+        {process.env.NODE_ENV === "production" ? null : <TestCitizens />}
       </div>
     </div>
   );
 }
 
-function TestCitizens({ continueUrl }: { continueUrl: string }) {
+function TestCitizens() {
   const [error, setError] = useState<string | null>(null);
 
   const signInAs = async (citizenId: string) => {
     setError(null);
     try {
       await postSignIn("/zkpassport/test-sign-in", { citizenId });
-      window.location.assign(continueUrl);
+      redirectAfterSignIn();
     } catch (err) {
       setError((err as Error).message);
     }

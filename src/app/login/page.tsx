@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 
 export default function LoginPage() {
@@ -8,9 +7,7 @@ export default function LoginPage() {
       <p className="mt-3 max-w-lg text-lg text-muted-foreground leading-relaxed">
         Identifiez-vous pour accéder aux votes et participer.
       </p>
-      <Suspense>
-        <LoginForm />
-      </Suspense>
+      <LoginForm />
     </div>
   );
 }

@@ -1,13 +1,7 @@
 "use client";
 
 import { type RequestSuccess, ZKPassport } from "@zkpassport/sdk";
-import {
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -156,29 +150,13 @@ function StepView({ step }: { step: Step }) {
   return <p className="text-muted-foreground">{STEP_LABELS[step.kind]}</p>;
 }
 
-// A touch-first device is most likely the phone that holds the app
-const MOBILE_QUERY = "(pointer: coarse)";
-
-function subscribeToPointer(onChange: () => void) {
-  const media = window.matchMedia(MOBILE_QUERY);
-  media.addEventListener("change", onChange);
-  return () => media.removeEventListener("change", onChange);
-}
-
-function useIsMobile() {
-  return useSyncExternalStore(
-    subscribeToPointer,
-    () => window.matchMedia(MOBILE_QUERY).matches,
-    () => false
-  );
-}
-
 // QR code plus its padding and border
 const QR_BOX_SIZE = 274;
 
+// Both layouts are rendered and CSS picks one: a touch-first device is most
+// likely the phone that holds the app. Deciding in CSS rather than JS means
+// the server HTML is already right, with no switch after hydration.
 function WaitingView({ url }: { url?: string }) {
-  const isMobile = useIsMobile();
-
   const qrCode = url ? (
     <div className="inline-block border border-border bg-white p-4">
       <QRCode size={240} value={url} />
@@ -187,9 +165,9 @@ function WaitingView({ url }: { url?: string }) {
     <Skeleton borderRadius="0" height={QR_BOX_SIZE} width={QR_BOX_SIZE} />
   );
 
-  if (isMobile) {
-    return (
-      <div className="space-y-4">
+  return (
+    <>
+      <div className="pointer-coarse:block hidden space-y-4">
         <p className="text-muted-foreground">
           Ouvrez l'application ZKPassport, puis scannez votre carte d'identité.
         </p>
@@ -207,16 +185,13 @@ function WaitingView({ url }: { url?: string }) {
           <div className="mt-4">{qrCode}</div>
         </details>
       </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <p className="text-muted-foreground">
-        Scannez ce QR code avec l'application ZKPassport sur votre téléphone,
-        puis scannez votre carte d'identité.
-      </p>
-      {qrCode}
-    </div>
+      <div className="pointer-coarse:hidden space-y-4">
+        <p className="text-muted-foreground">
+          Scannez ce QR code avec l'application ZKPassport sur votre téléphone,
+          puis scannez votre carte d'identité.
+        </p>
+        {qrCode}
+      </div>
+    </>
   );
 }
