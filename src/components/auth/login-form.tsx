@@ -4,6 +4,7 @@ import type { RequestSuccess } from "@zkpassport/sdk";
 import { useState } from "react";
 import { FranceConnectUnavailable } from "@/components/auth/franceconnect-unavailable";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ZkPassportFlow } from "@/components/zkpassport/zkpassport-flow";
 import { TEST_CITIZENS } from "@/services/zkpassport/test-citizens";
@@ -52,7 +53,7 @@ export function LoginForm() {
   return (
     // Two columns on desktop: the available method next to the others
     <div className="mt-8 grid items-start gap-4 md:grid-cols-2">
-      <section className="space-y-6 border border-border bg-card p-6">
+      <section className="space-y-4 border border-border bg-card p-4">
         <h2 className="font-medium text-sm">
           Carte d'identité{" "}
           <span className="font-normal text-muted-foreground">
@@ -91,7 +92,10 @@ function TestCitizens() {
 
   return (
     <div className="space-y-3 border border-border border-dashed p-4">
-      <p className="font-medium text-sm">Citoyens fictifs (développement)</p>
+      <p className="flex items-center gap-2 font-medium text-sm">
+        Citoyens fictifs
+        <Badge variant="outline">Développement</Badge>
+      </p>
       <div className="flex flex-wrap gap-2">
         {TEST_CITIZENS.map((citizen) => (
           <Button
