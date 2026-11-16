@@ -10,6 +10,7 @@
     "lint": "ultracite check",
     "lint:fix": "ultracite fix",
     "seed": "tsx scripts/seed.ts",
+    "sync:assembly": "tsx scripts/sync-assembly.ts",
     "db:push": "npx drizzle-kit push",
     "db:dev": "concurrently -n pgsql,redis -c blue,red \"pnpm run postgres\" \"pnpm run redis\"",
     "postgres": "tsx scripts/postgres.ts",
