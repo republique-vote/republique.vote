@@ -14,6 +14,7 @@
     "sync:authors": "tsx scripts/sync-authors.ts",
     "sync:votes": "tsx scripts/sync-votes.ts",
     "sync:senate": "tsx scripts/sync-senate.ts",
+    "sync:journeys": "tsx scripts/sync-journeys.ts",
     "extract:hemicycle": "tsx scripts/extract-hemicycle.ts && tsx scripts/extract-senate-hemicycle.ts",
     "summarize": "tsx scripts/summarize.ts",
     "summarize:prototype": "tsx scripts/summarize-prototype.ts",

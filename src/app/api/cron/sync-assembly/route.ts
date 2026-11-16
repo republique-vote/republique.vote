@@ -2,6 +2,7 @@ import { env } from "env";
 import type { NextRequest } from "next/server";
 import { errorResponse, successResponse } from "@/lib/api-response";
 import { syncAuthors } from "@/services/assembly/authors";
+import { syncJourneys } from "@/services/assembly/journey";
 import { syncScrutins } from "@/services/assembly/scrutins";
 import { syncDossiers } from "@/services/assembly/sync";
 import { syncScrutinVotes } from "@/services/assembly/votes";
@@ -17,18 +18,20 @@ export async function GET(request: NextRequest) {
 
   const newDossiers = await syncDossiers();
   const matchedScrutins = await syncScrutins();
+  const updatedJourneys = await syncJourneys();
   const pollsWithAuthors = await syncAuthors();
   const pollsWithVotes = await syncScrutinVotes();
   const billsWithSenateVote = await syncSenateVotes();
   const pollsWithSenators = await syncSenateNominativeVotes();
 
   console.log(
-    `[assembly] Synchro: ${newDossiers} nouveaux dossiers, ${matchedScrutins} scrutins matchés, auteurs ajoutés à ${pollsWithAuthors} votes, votes nominatifs ajoutés à ${pollsWithVotes} votes, vote du Sénat sur ${billsWithSenateVote} textes, votes des sénateurs sur ${pollsWithSenators} votes (${new Date().toISOString()})`
+    `[assembly] Synchro: ${newDossiers} nouveaux dossiers, ${matchedScrutins} scrutins matchés, parcours mis à jour pour ${updatedJourneys} textes, auteurs ajoutés à ${pollsWithAuthors} votes, votes nominatifs ajoutés à ${pollsWithVotes} votes, vote du Sénat sur ${billsWithSenateVote} textes, votes des sénateurs sur ${pollsWithSenators} votes (${new Date().toISOString()})`
   );
 
   return successResponse({
     newDossiers,
     matchedScrutins,
+    updatedJourneys,
     pollsWithAuthors,
     pollsWithVotes,
     billsWithSenateVote,

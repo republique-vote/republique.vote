@@ -1,5 +1,6 @@
 import "dotenv-flow/config";
 import { syncAuthors } from "../src/services/assembly/authors";
+import { syncJourneys } from "../src/services/assembly/journey";
 import { syncScrutins } from "../src/services/assembly/scrutins";
 import { syncDossiers } from "../src/services/assembly/sync";
 import { syncScrutinVotes } from "../src/services/assembly/votes";
@@ -14,6 +15,9 @@ async function main() {
 
   const matchedScrutins = await syncScrutins();
   console.log(`[assembly] ${matchedScrutins} scrutins matched`);
+
+  const updatedJourneys = await syncJourneys();
+  console.log(`[assembly] Path updated for ${updatedJourneys} bills`);
 
   const pollsWithAuthors = await syncAuthors();
   console.log(`[assembly] Authors added to ${pollsWithAuthors} polls`);

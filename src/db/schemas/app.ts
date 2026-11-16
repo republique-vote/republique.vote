@@ -6,6 +6,7 @@ import {
   text,
   unique,
 } from "drizzle-orm/pg-core";
+import type { JourneyStep } from "@/services/assembly/journey";
 
 export const poll = pgTable("poll", {
   id: text("id")
@@ -107,6 +108,8 @@ export const legislativeFile = pgTable("legislative_file", {
   officialAbstentions: integer("official_abstentions"),
   scrutinDate: text("scrutin_date"),
   scrutinUid: text("scrutin_uid"),
+  // Stages of the bill in Parliament, refreshed at each sync
+  journey: jsonb("journey").$type<JourneyStep[]>(),
   // Latest public vote of the Senate on the whole text, null when the Senate
   // has not voted it by public ballot (show of hands, or not examined yet)
   senateFor: integer("senate_for"),
