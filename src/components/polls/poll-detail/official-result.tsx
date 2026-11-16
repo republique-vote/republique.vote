@@ -12,7 +12,8 @@ interface OfficialResultProps {
   officialAgainst: number;
   officialFor: number;
   scrutinDate: string;
-  sourceUrl: string | null;
+  // Page of the scrutin itself, the bill page is already linked above
+  scrutinUrl: string | null;
 }
 
 export function OfficialResult({
@@ -20,7 +21,7 @@ export function OfficialResult({
   officialAgainst,
   officialAbstentions,
   scrutinDate,
-  sourceUrl,
+  scrutinUrl,
   citizenResults,
 }: OfficialResultProps) {
   const officialTotal = officialFor + officialAgainst + officialAbstentions;
@@ -60,14 +61,14 @@ export function OfficialResult({
             {adopted ? "Adopté" : "Rejeté"} le {formatDate(scrutinDate)} (
             {officialTotal} votants)
           </p>
-          {sourceUrl && (
+          {scrutinUrl && (
             <a
               className="mt-1 inline-flex items-center gap-1 text-primary text-xs hover:underline"
-              href={sourceUrl}
+              href={scrutinUrl}
               rel="noopener noreferrer"
               target="_blank"
             >
-              Voir sur assemblee-nationale.fr
+              Voir le détail du scrutin
               <ExternalLink className="h-3 w-3" />
             </a>
           )}

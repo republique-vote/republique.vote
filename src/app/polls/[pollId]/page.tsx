@@ -28,6 +28,16 @@ import { getPollResults } from "@/services/poll/results";
 
 export const dynamic = "force-dynamic";
 
+const SCRUTIN_UID = /^VTANR5L(\d+)V(\d+)$/;
+
+// "VTANR5L17V9807" is scrutin 9807 of the 17th legislature
+function scrutinPageUrl(uid: string | null) {
+  const match = uid ? SCRUTIN_UID.exec(uid) : null;
+  return match
+    ? `https://www.assemblee-nationale.fr/dyn/${match[1]}/scrutins/${match[2]}`
+    : null;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -189,7 +199,7 @@ export default async function PollDetailPage({
                   officialAgainst={lf.officialAgainst || 0}
                   officialFor={lf.officialFor}
                   scrutinDate={lf.scrutinDate || ""}
-                  sourceUrl={lf.sourceUrl}
+                  scrutinUrl={scrutinPageUrl(lf.scrutinUid)}
                 />
               );
             })()
