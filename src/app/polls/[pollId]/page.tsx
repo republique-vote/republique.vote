@@ -9,6 +9,7 @@ import {
 } from "@/components/polls/poll-detail/official-result";
 import { ParliamentVotes } from "@/components/polls/poll-detail/parliament-votes";
 import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
+import { PollJourney } from "@/components/polls/poll-detail/poll-journey";
 import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
@@ -115,6 +116,9 @@ export default async function PollDetailPage({
   });
 
   const authors = await findPollAuthors(pollId);
+  const lf = await db.query.legislativeFile.findFirst({
+    where: eq(legislativeFile.pollId, pollId),
+  });
   const [scrutinVotes, senateVotes] = await Promise.all([
     findScrutinVotes(pollId),
     findSenateVotes(pollId),
@@ -205,13 +209,11 @@ export default async function PollDetailPage({
                 </a>
               </Button>
             )}
+            {lf?.journey ? <PollJourney steps={lf.journey} /> : null}
           </div>
 
           {
             await (async () => {
-              const lf = await db.query.legislativeFile.findFirst({
-                where: eq(legislativeFile.pollId, pollId),
-              });
               const deputies = lf ? deputiesVote(lf) : null;
               const senators = lf ? senatorsVote(lf) : null;
               if (!(deputies || senators)) {
