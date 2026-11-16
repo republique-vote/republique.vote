@@ -19,7 +19,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@ai-sdk/mistral": "^4.0.87",
+    "@ai-sdk/google": "^4.0.121",
     "@cloudflare/blindrsa-ts": "^0.4.5",
     "@republique/core": "workspace:*",
     "@sigstore/rekor-types": "^4.0.0",

@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@ai-sdk/mistral':
-        specifier: ^4.0.87
-        version: 4.0.87(zod@4.3.6)
+      '@ai-sdk/google':
+        specifier: ^4.0.121
+        version: 4.0.121(zod@4.3.6)
       '@cloudflare/blindrsa-ts':
         specifier: ^0.4.5
         version: 0.4.5
@@ -200,15 +200,11 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/mistral@4.0.87':
-    resolution: {integrity: sha512-urCiujtNJnoVyhRvn9tZXkCT4Dbe6t/Kjl5S275OHHErHxrKm3uJEs4iAJG2JjNbU06rLGbpAN5B79zqROYitQ==}
+  '@ai-sdk/google@4.0.121':
+    resolution: {integrity: sha512-K4aC8ZTe/dXegkaE2TxD1Ln2BaNFV4iTI57BykEcoS2KjBihaC3mu+UcmNZyY5yaoBJlLVGcxPhItF32TU6fLg==}
     engines: {node: '>=22'}
     peerDependencies:
-      livekit-client: ^2.23.0
       zod: ^3.25.76 || ^4.1.8
-    peerDependenciesMeta:
-      livekit-client:
-        optional: true
 
   '@ai-sdk/provider-utils@5.0.81':
     resolution: {integrity: sha512-pfvvdQ3d1WxdBuug/mnGEP6E48cPokwD8dMBnsFeeAUp0/rb/H2aj0f3mwOiY62gu/Cu5GO44e+SE5nDHyBWMA==}
@@ -5894,7 +5890,7 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.3.6
 
-  '@ai-sdk/mistral@4.0.87(zod@4.3.6)':
+  '@ai-sdk/google@4.0.121(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.38
       '@ai-sdk/provider-utils': 5.0.81(zod@4.3.6)

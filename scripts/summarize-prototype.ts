@@ -3,23 +3,22 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import postgres from "postgres";
 import { env } from "../env";
-import { summarizeBill } from "../src/services/summary/mistral";
 import { SUMMARY_PROMPT_VERSION } from "../src/services/summary/prompt";
 import {
   PROTOTYPE_FILE,
   type PrototypeEntry,
 } from "../src/services/summary/prototype";
+import { summarizeBill } from "../src/services/summary/summarize";
 
 const SAMPLE_SIZE = Number(process.argv[2] ?? 20);
-// Stays under the free tier limit of about one request per second
+// Spaces requests out to stay under the free tier rate limit
 const DELAY_MS = 1200;
 
 async function main() {
-  const apiKey = process.env.MISTRAL_API_KEY;
-  if (!apiKey) {
-    throw new Error("MISTRAL_API_KEY is missing from .env");
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is missing from .env");
   }
-  const model = process.env.MISTRAL_MODEL ?? "mistral-small-latest";
+  const model = process.env.SUMMARY_MODEL ?? "gemini-flash-lite-latest";
 
   const sql = postgres(env.DATABASE_URL);
   // Random bills with a real explanatory memorandum, short and long alike
@@ -39,7 +38,6 @@ async function main() {
     const start = Date.now();
     try {
       const summary = await summarizeBill({
-        apiKey,
         model,
         title: p.title,
         description: p.description,

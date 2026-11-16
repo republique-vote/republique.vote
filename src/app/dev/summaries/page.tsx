@@ -49,7 +49,7 @@ export default function SummariesPrototypePage() {
         <Alert className="mt-8" variant="info">
           <AlertTitle>Aucun résumé généré</AlertTitle>
           <AlertDescription>
-            Ajoutez MISTRAL_API_KEY dans .env puis lancez pnpm
+            Ajoutez GOOGLE_GENERATIVE_AI_API_KEY dans .env puis lancez pnpm
             summarize:prototype.
           </AlertDescription>
         </Alert>

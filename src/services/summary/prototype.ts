@@ -1,4 +1,4 @@
-import type { BillSummary } from "@/services/summary/mistral";
+import type { BillSummary } from "@/services/summary/summarize";
 
 // Prototype output, kept out of git (tmp/ is ignored) until the summaries
 // are judged good enough to be stored in the database

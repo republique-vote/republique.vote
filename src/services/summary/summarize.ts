@@ -1,4 +1,4 @@
-import { createMistral } from "@ai-sdk/mistral";
+import { google } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import { z } from "zod/v4";
 import {
@@ -28,21 +28,21 @@ export const billSummarySchema = z.object({
 
 export type BillSummary = z.infer<typeof billSummarySchema>;
 
+// Free tier friendly: the provider reads GOOGLE_GENERATIVE_AI_API_KEY, and
+// swapping provider only means changing this model
+const DEFAULT_MODEL = "gemini-flash-lite-latest";
+
 export async function summarizeBill({
-  apiKey,
-  model,
+  model = DEFAULT_MODEL,
   title,
   description,
 }: {
-  apiKey: string;
-  model: string;
+  model?: string;
   title: string;
   description: string;
 }): Promise<BillSummary> {
-  const mistral = createMistral({ apiKey });
-
   const { output } = await generateText({
-    model: mistral(model),
+    model: google(model),
     system: SUMMARY_SYSTEM_PROMPT,
     prompt: buildSummaryUserPrompt(title, description),
     output: Output.object({ schema: billSummarySchema }),
