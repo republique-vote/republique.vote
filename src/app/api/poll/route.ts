@@ -17,10 +17,10 @@ export async function GET(request: NextRequest) {
 
   function buildStatusFilter() {
     if (status === "open") {
-      return sql`${poll.status} = 'open' AND (${poll.endDate} IS NULL OR ${poll.endDate} > NOW())`;
+      return sql`${poll.status} = 'open' AND (${poll.endDate} IS NULL OR ${poll.endDate}::timestamptz > NOW())`;
     }
     if (status === "closed") {
-      return sql`(${poll.status} IN ('closed', 'tallied') OR (${poll.status} = 'open' AND ${poll.endDate} <= NOW()))`;
+      return sql`(${poll.status} IN ('closed', 'tallied') OR (${poll.status} = 'open' AND ${poll.endDate}::timestamptz <= NOW()))`;
     }
     if (status) {
       return eq(poll.status, status as "draft" | "open" | "closed" | "tallied");
