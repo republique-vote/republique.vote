@@ -221,6 +221,7 @@ export async function findScrutinVotes(pollId: string) {
         id: deputy.id,
         firstName: deputy.firstName,
         lastName: deputy.lastName,
+        photoLegislature: deputy.photoLegislature,
         groupRef: scrutinVote.groupRef,
         position: scrutinVote.position,
         seat: scrutinVote.seat,

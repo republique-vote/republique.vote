@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DeputyAvatar } from "@/components/polls/poll-detail/deputy-avatar";
 import { VOTE_FILL_CLASSES } from "@/components/polls/poll-detail/vote-colors";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,6 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { deputyPhotoUrl } from "@/services/assembly/photo";
 
 type SeatPosition = "for" | "against" | "abstention" | "nonVoting" | "absent";
 
@@ -29,12 +31,14 @@ export interface HemicycleVote {
   groupRef: string;
   id: string;
   lastName: string;
+  photoLegislature: string | null;
   position: SeatPosition;
 }
 
 interface Seat {
   groupName: string;
   label: string;
+  photoUrl: string | null;
   position: SeatPosition;
   voterId: string | null;
   x: number;
@@ -147,6 +151,7 @@ export function DeputyHemicycle({
           position: v.position,
           voterId: v.id,
           label: fullName(v),
+          photoUrl: deputyPhotoUrl(v.id, v.photoLegislature),
         }));
       const absent = Math.max(group.members - members.length, 0);
       return [
@@ -154,6 +159,7 @@ export function DeputyHemicycle({
         ...Array.from({ length: absent }, () => ({
           position: "absent" as const,
           voterId: null,
+          photoUrl: null,
           // The group roster could not be matched: no name rather than a wrong one
           label: "Député absent",
         })),
@@ -250,7 +256,18 @@ export function DeputyHemicycle({
                 }}
               />
             </TooltipTrigger>
-            <TooltipContent className="pointer-events-none" sideOffset={4}>
+            <TooltipContent
+              className="pointer-events-none"
+              collisionPadding={8}
+              sideOffset={4}
+            >
+              {activeSeat.voterId ? (
+                <DeputyAvatar
+                  name={activeSeat.label}
+                  photoUrl={activeSeat.photoUrl}
+                  size={32}
+                />
+              ) : null}
               <p>
                 <span className="font-medium">{activeSeat.label}</span>
                 <br />
