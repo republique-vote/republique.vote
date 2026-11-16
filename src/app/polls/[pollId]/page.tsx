@@ -110,7 +110,7 @@ export default async function PollDetailPage({
       />
 
       {/* Two columns on desktop: the vote stays in view while reading */}
-      <div className="pb-24 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10 lg:pb-0">
+      <div className="pb-24 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6 lg:pb-0">
         <div className="min-w-0">
           <div className="mb-6">
             <Badge className="mb-3" variant={isOpen ? "success" : "info"}>
