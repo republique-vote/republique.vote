@@ -65,7 +65,11 @@ function ongoingLabel(step: JourneyStep) {
   if (labels.includes("Rapport de la commission")) {
     return "Examiné en commission";
   }
-  return "En attente d'examen";
+  // Nothing happened since the text was tabled
+  if (labels.every((label) => label === "Dépôt")) {
+    return "En attente d'examen";
+  }
+  return "En cours";
 }
 
 export function PollJourney({ steps }: { steps: JourneyStep[] }) {
@@ -103,24 +107,26 @@ export function PollJourney({ steps }: { steps: JourneyStep[] }) {
                     <Badge variant="outline">{ongoingLabel(step)}</Badge>
                   ) : null}
                 </div>
+                {/* Dates in a fixed-width column, so labels line up across
+                    every stage */}
                 <ul className="mt-1.5 space-y-1 text-muted-foreground text-xs">
-                  {entries.map((entry) =>
-                    entry.label ? (
-                      <li key={`${entry.date}-${entry.label}`}>
-                        {formatDay(entry.date)} · {entry.label}
-                      </li>
-                    ) : (
-                      <li
-                        className="flex flex-wrap items-center gap-1.5"
-                        key={`${entry.date}-outcome`}
-                      >
-                        {formatDay(entry.date)} ·
+                  {entries.map((entry) => (
+                    <li
+                      className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2"
+                      key={`${entry.date}-${entry.label || "outcome"}`}
+                    >
+                      <span className="whitespace-nowrap tabular-nums">
+                        {formatDay(entry.date)}
+                      </span>
+                      {entry.label ? (
+                        <span>{entry.label}</span>
+                      ) : (
                         <Badge variant={outcomeVariant(step.outcome ?? "")}>
                           {outcomeLabel(step.outcome ?? "")}
                         </Badge>
-                      </li>
-                    )
-                  )}
+                      )}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </li>
