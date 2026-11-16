@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/tooltip";
 
 interface PollListItem {
+  // Deputies who voted on the text at the Assemblée, null when not voted there
+  deputyVoters: number | null;
   description: string;
   endDate: string | null;
   id: string;
@@ -137,6 +139,9 @@ function PollCard({ poll: p }: { poll: PollListItem }) {
           </Tooltip>
           <span className="text-muted-foreground text-xs">
             {p.voteCount} vote{p.voteCount === 1 ? "" : "s"}
+            {p.deputyVoters === null
+              ? ""
+              : ` · ${p.deputyVoters} député${p.deputyVoters > 1 ? "s" : ""}`}
           </span>
           {getTimeLabel(p) && (
             <span className="text-muted-foreground text-xs">

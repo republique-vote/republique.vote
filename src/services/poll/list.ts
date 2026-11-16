@@ -1,6 +1,6 @@
 import { and, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { poll, pollSummary, voteRecord } from "@/db/schema";
+import { legislativeFile, poll, pollSummary, voteRecord } from "@/db/schema";
 
 export type PollType = "law" | "referendum" | "election";
 export type PollListStatus = "open" | "closed" | "draft" | "tallied" | null;
@@ -10,6 +10,12 @@ export type PollListSort = "recent" | "votes";
 // updates its status
 const OPEN = sql`${poll.status} = 'open' AND (${poll.endDate} IS NULL OR ${poll.endDate}::timestamptz > NOW())`;
 const CLOSED = sql`(${poll.status} IN ('closed', 'tallied') OR (${poll.status} = 'open' AND ${poll.endDate}::timestamptz <= NOW()))`;
+
+// Deputies who took part in the final vote of the Assemblée, null when the text
+// was never voted there
+const DEPUTY_VOTERS = sql<
+  number | null
+>`${legislativeFile.officialFor} + ${legislativeFile.officialAgainst} + ${legislativeFile.officialAbstentions}`;
 
 function statusFilter(status: PollListStatus) {
   if (status === "open") {
@@ -57,15 +63,23 @@ export async function listPolls({
       createdAt: poll.createdAt,
       voteCount: count(voteRecord.id),
       simpleSentence: pollSummary.simpleSentence,
+      deputyVoters: DEPUTY_VOTERS,
     })
     .from(poll)
     .leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
     .leftJoin(pollSummary, eq(pollSummary.pollId, poll.id))
+    .leftJoin(legislativeFile, eq(legislativeFile.pollId, poll.id))
     .where(filters)
-    .groupBy(poll.id, pollSummary.simpleSentence)
+    .groupBy(poll.id, pollSummary.simpleSentence, legislativeFile.id)
     .orderBy(
+      // Citizen votes first, then turnout at the Assemblée: until citizens
+      // vote, the texts most voted by deputies come first
       ...(sort === "votes"
-        ? [desc(count(voteRecord.id)), desc(poll.createdAt)]
+        ? [
+            desc(count(voteRecord.id)),
+            sql`${DEPUTY_VOTERS} DESC NULLS LAST`,
+            desc(poll.createdAt),
+          ]
         : [
             sql`CASE WHEN ${poll.endDate} IS NOT NULL THEN 0 ELSE 1 END`,
             desc(poll.createdAt),
@@ -75,7 +89,11 @@ export async function listPolls({
     .offset((page - 1) * limit);
 
   return {
-    items: polls.map((p) => ({ ...p, voteCount: Number(p.voteCount) })),
+    items: polls.map((p) => ({
+      ...p,
+      voteCount: Number(p.voteCount),
+      deputyVoters: p.deputyVoters === null ? null : Number(p.deputyVoters),
+    })),
     currentPage: page,
     pageCount: Math.ceil(itemCount / limit),
     itemCount,
