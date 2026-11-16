@@ -54,11 +54,41 @@ export function register() {
     }
   }
 
+  // Plain-language summaries for new polls, right after each sync. Capped per
+  // run so a large backlog spreads over several runs within the free quota.
+  const SUMMARY_BATCH = 150;
+  let summarizing = false;
+
+  async function summarizeNewPolls() {
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY || summarizing) {
+      return;
+    }
+    summarizing = true;
+    try {
+      const { summarizePendingPolls } = await import(
+        "@/services/summary/store"
+      );
+      const { done, failed } = await summarizePendingPolls({
+        limit: SUMMARY_BATCH,
+      });
+      console.log(`[summary] ${done} summaries stored, ${failed} failed`);
+    } catch (err) {
+      console.error("[summary] Batch failed:", err);
+    } finally {
+      summarizing = false;
+    }
+  }
+
+  async function syncAndSummarize() {
+    await syncAssembly();
+    await summarizeNewPolls();
+  }
+
   // Run first sync after 30 seconds (let the server start)
   setTimeout(() => {
-    syncAssembly();
-    setInterval(syncAssembly, SYNC_INTERVAL);
+    syncAndSummarize();
+    setInterval(syncAndSummarize, SYNC_INTERVAL);
   }, 30_000);
 
-  console.log("[assembly] Sync scheduled every 6 hours");
+  console.log("[assembly] Sync and summaries scheduled every 6 hours");
 }
