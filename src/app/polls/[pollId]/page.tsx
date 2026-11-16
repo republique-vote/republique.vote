@@ -78,11 +78,13 @@ export default async function PollDetailPage({
   const results = await getPollResults(pollId);
 
   let hasVoted = false;
+  let isAuthenticated = false;
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
     if (session) {
+      isAuthenticated = true;
       const request = await db.query.blindSignatureRequest.findFirst({
         where: and(
           eq(blindSignatureRequest.pollId, pollId),
@@ -142,6 +144,7 @@ export default async function PollDetailPage({
 
       <PollDetailClient
         initialHasVoted={hasVoted}
+        initialIsAuthenticated={isAuthenticated}
         initialMerkleRoot={p.merkleRoot}
         initialResults={results}
         initialVoteCount={count}

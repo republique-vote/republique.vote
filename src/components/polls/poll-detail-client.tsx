@@ -19,6 +19,7 @@ import {
 import { VerifyVoteDialog } from "@/components/polls/verify-vote-dialog";
 import { Button } from "@/components/ui/button";
 import { CopyableHash } from "@/components/ui/copyable-hash";
+import { useHydrated } from "@/lib/use-hydrated";
 import { useSession } from "@/services/auth/client";
 import {
   blindToken,
@@ -88,6 +89,7 @@ function useRealtimeResults(
 
 export interface PollDetailProps {
   initialHasVoted: boolean;
+  initialIsAuthenticated: boolean;
   initialMerkleRoot: string | null;
   initialResults: ResultsResponse | null;
   initialVoteCount: number;
@@ -108,10 +110,11 @@ export function PollDetailClient({
   options,
   initialResults,
   initialHasVoted,
+  initialIsAuthenticated,
   initialVoteCount,
   initialMerkleRoot,
 }: PollDetailProps) {
-  const { data: session } = useSession();
+  const { data: session, isPending: sessionPending } = useSession();
   const sseResults = useRealtimeResults(poll.id, initialResults);
   const countdown = useCountdown(poll.endDate);
 
@@ -131,7 +134,11 @@ export function PollDetailClient({
   const isOpen =
     poll.status === "open" &&
     (!poll.endDate || new Date(poll.endDate).getTime() > Date.now());
-  const isAuthenticated = !!session;
+  const hydrated = useHydrated();
+  // Until hydrated and the client session loads, trust the server: rendering
+  // differently than the server HTML breaks hydration
+  const isAuthenticated =
+    !hydrated || sessionPending ? initialIsAuthenticated : !!session;
   const canVote =
     isOpen && isAuthenticated && !hasVoted && voteState !== "success";
 

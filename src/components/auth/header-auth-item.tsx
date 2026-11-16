@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useHydrated } from "@/lib/use-hydrated";
 import { signOut, useSession } from "@/services/auth/client";
 import {
   saveDisplayName,
@@ -27,8 +28,10 @@ export function HeaderAuthItem({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const hydrated = useHydrated();
 
-  if (isPending) {
+  // The server cannot know the client session: render nothing until hydrated
+  if (!hydrated || isPending) {
     return null;
   }
 
