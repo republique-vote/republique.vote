@@ -64,7 +64,8 @@ const TYPE_LABELS: Record<string, string> = {
 
 const TYPE_DESCRIPTIONS: Record<string, string> = {
   law: "Texte déposé par un député ou le gouvernement pour créer ou modifier une loi.",
-  referendum: "Question soumise directement au vote des citoyens.",
+  referendum:
+    "Question soumise directement au vote des citoyens, ou proposition de loi qui peut l'être (référendum d'initiative partagée).",
   election: "Élection d'une personne à une fonction.",
 };
 

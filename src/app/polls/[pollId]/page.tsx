@@ -11,6 +11,7 @@ import { ParliamentVotes } from "@/components/polls/poll-detail/parliament-votes
 import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
 import { PollJourney } from "@/components/polls/poll-detail/poll-journey";
 import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
+import { SharedInitiativeNotice } from "@/components/polls/poll-detail/shared-initiative-notice";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -27,6 +28,7 @@ import { constructMetadata } from "@/lib/metadata";
 import { findPollAuthors } from "@/services/assembly/authors";
 import { findCongressVotes } from "@/services/assembly/congress";
 import { deputyPhotoUrl } from "@/services/assembly/photo";
+import { SHARED_INITIATIVE_PROCEDURE } from "@/services/assembly/sync";
 import { findScrutinVotes } from "@/services/assembly/votes";
 import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
@@ -195,6 +197,11 @@ export default async function PollDetailPage({
               {isOpen ? "En cours" : "Terminé"}
             </Badge>
             <h1 className="font-bold text-3xl tracking-tight">{p.title}</h1>
+            {lf?.procedureType === SHARED_INITIATIVE_PROCEDURE ? (
+              <div className="mt-4">
+                <SharedInitiativeNotice />
+              </div>
+            ) : null}
             {summary ? (
               <div className="mt-4">
                 <PollSummary pollId={p.id} summary={summary} />

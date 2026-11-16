@@ -138,6 +138,11 @@ const CONCURRENCY = 10;
 
 // Every kind of bill citizens can vote on. Left out: resolutions, inquiry
 // commissions, information missions, petitions and confidence votes (49.3)
+// A shared initiative referendum: the bill is put to a referendum when one
+// voter in ten supports it
+export const SHARED_INITIATIVE_PROCEDURE =
+  "Proposition de loi présentée en application de l'article 11 de la Constitution";
+
 const VOTABLE_PROCEDURES = new Set([
   "Proposition de loi ordinaire",
   "Projet de loi ordinaire",
@@ -148,8 +153,7 @@ const VOTABLE_PROCEDURES = new Set([
   "Projet de loi de finances rectificative",
   "Projet de loi de financement de la sécurité sociale",
   "Projet de loi relative aux résultats de la gestion et portant approbation des comptes",
-  // Shared initiative referendum (référendum d'initiative partagée)
-  "Proposition de loi présentée en application de l'article 11 de la Constitution",
+  SHARED_INITIATIVE_PROCEDURE,
 ]);
 const EXPOSE_START_RE = /EXPOS[ÉE] DES MOTIFS/i;
 const EXPOSE_END_RE = /PROPOSITION DE LOI|PROJET DE LOI/;
@@ -269,7 +273,7 @@ async function importDossier(pending: PendingDossier): Promise<boolean> {
     id: pollId,
     title,
     description,
-    type: "law",
+    type: proc === SHARED_INITIATIVE_PROCEDURE ? "referendum" : "law",
     status: "open",
     startDate: depositDate,
     endDate: null,
@@ -338,8 +342,21 @@ export async function importDossierById(legislature: string, uid: string) {
   return importDossier({ data, legislature, extractDir });
 }
 
+// Shared initiative referendums imported as laws before they had their type
+async function normalizeSharedInitiatives() {
+  await db.execute(sql`
+    UPDATE ${poll} SET type = 'referendum'
+    WHERE ${poll.type} = 'law'
+      AND ${poll.id} IN (
+        SELECT ${legislativeFile.pollId} FROM ${legislativeFile}
+        WHERE ${legislativeFile.procedureType} = ${SHARED_INITIATIVE_PROCEDURE}
+      )
+  `);
+}
+
 export async function syncDossiers(): Promise<number> {
   await normalizeDepositDates();
+  await normalizeSharedInitiatives();
   const legislature = await detectLegislature();
   const extractDir = await extractDossiersArchive(legislature);
 
