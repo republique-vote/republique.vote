@@ -39,14 +39,16 @@ function outcomeVariant(outcome: string): BadgeVariant {
 // The next stage when the rules of procedure make it certain: after a vote in
 // one chamber the text goes to the other one, and a text adopted in the same
 // words by both chambers is then promulgated
-function nextStage(steps: JourneyStep[]) {
+function nextStage(steps: JourneyStep[], constitutional: boolean) {
   const last = steps.at(-1);
   if (!last?.outcome || steps.some((s) => s.code === "PROM")) {
     return null;
   }
   const reading = READING.exec(last.code);
   if (reading && ADOPTED_AS_IS.test(last.outcome)) {
-    return "Promulgation";
+    // A constitutional revision adopted in the same words by both chambers
+    // still needs the Congrès or a referendum
+    return constitutional ? "Congrès ou référendum" : "Promulgation";
   }
   if (reading && ADOPTED.test(last.outcome)) {
     return reading[1] === "AN"
@@ -72,11 +74,17 @@ function ongoingLabel(step: JourneyStep) {
   return "En cours";
 }
 
-export function PollJourney({ steps }: { steps: JourneyStep[] }) {
+export function PollJourney({
+  constitutional,
+  steps,
+}: {
+  constitutional: boolean;
+  steps: JourneyStep[];
+}) {
   if (steps.length === 0) {
     return null;
   }
-  const next = nextStage(steps);
+  const next = nextStage(steps, constitutional);
 
   return (
     <section className="mt-6 border border-border p-4">

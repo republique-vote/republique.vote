@@ -84,8 +84,9 @@ function buildPlan(plan: Record<number, [number, number]>, radius: number) {
     y,
   }));
   const margin = radius + 2;
-  const xs = seats.map((p) => p.x);
-  const ys = seats.map((p) => p.y);
+  // An empty plan still needs finite bounds
+  const xs = seats.length ? seats.map((p) => p.x) : [0];
+  const ys = seats.length ? seats.map((p) => p.y) : [0];
   return {
     seats,
     radius,
@@ -117,6 +118,16 @@ const CHAMBERS = {
     hasAbsent: false,
     note: "Au Sénat, un membre de chaque groupe vote souvent pour tout son groupe : le vote affiché est alors la position du groupe, pas toujours celle de chaque sénateur.",
     searchPlaceholder: "Chercher un sénateur",
+  },
+  congress: {
+    // Versailles has no published seat plan: groups and search only
+    plan: buildPlan({}, 5),
+    title: "Comment a voté le Congrès",
+    ariaLabel: "Vote de chaque parlementaire au Congrès",
+    member: "parlementaire",
+    hasAbsent: false,
+    note: "Le Congrès réunit les députés et les sénateurs à Versailles. Une révision de la Constitution doit y obtenir les trois cinquièmes des suffrages exprimés.",
+    searchPlaceholder: "Chercher un député ou un sénateur",
   },
 } as const;
 
@@ -329,7 +340,7 @@ export function Hemicycle({
         {placed > 0 && unplaced > 0
           ? ` ${unplaced} ${config.member}${unplaced > 1 ? "s" : ""} dont la place n'est pas connue ${unplaced > 1 ? "sont comptés" : "est compté"} seulement dans le détail par groupe.`
           : ""}
-        {placed === 0
+        {placed === 0 && plan.seats.length > 0
           ? " Les places ne sont pas publiées pour ce scrutin : le détail par groupe et la recherche restent disponibles."
           : ""}
       </p>

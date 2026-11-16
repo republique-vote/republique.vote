@@ -25,6 +25,7 @@ import {
 } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
 import { findPollAuthors } from "@/services/assembly/authors";
+import { findCongressVotes } from "@/services/assembly/congress";
 import { deputyPhotoUrl } from "@/services/assembly/photo";
 import { findScrutinVotes } from "@/services/assembly/votes";
 import { auth } from "@/services/auth";
@@ -63,6 +64,22 @@ function deputiesVote(lf: LegislativeFile): ChamberVote | null {
     abstentions: lf.officialAbstentions ?? 0,
     date: lf.scrutinDate ?? "",
     url: scrutinPageUrl(lf.scrutinUid),
+  };
+}
+
+// Constitutional revision voted by both chambers together at Versailles
+function congressVote(lf: LegislativeFile): ChamberVote | null {
+  if (lf.congressFor === null) {
+    return null;
+  }
+  return {
+    for: lf.congressFor,
+    against: lf.congressAgainst ?? 0,
+    abstentions: lf.congressAbstentions ?? 0,
+    date: lf.congressScrutinDate ?? "",
+    required: lf.congressRequired,
+    // The Assemblée publishes no page per scrutin of the Congrès
+    url: null,
   };
 }
 
@@ -118,9 +135,10 @@ export default async function PollDetailPage({
   const lf = await db.query.legislativeFile.findFirst({
     where: eq(legislativeFile.pollId, pollId),
   });
-  const [scrutinVotes, senateVotes] = await Promise.all([
+  const [scrutinVotes, senateVotes, congressVotes] = await Promise.all([
     findScrutinVotes(pollId),
     findSenateVotes(pollId),
+    findCongressVotes(pollId),
   ]);
 
   const options = await db
@@ -206,7 +224,8 @@ export default async function PollDetailPage({
             await (async () => {
               const deputies = lf ? deputiesVote(lf) : null;
               const senators = lf ? senatorsVote(lf) : null;
-              if (!(deputies || senators)) {
+              const congress = lf ? congressVote(lf) : null;
+              if (!(deputies || senators || congress)) {
                 return null;
               }
               const citizenFor = results?.results.find(
@@ -230,6 +249,7 @@ export default async function PollDetailPage({
                         }
                       : null
                   }
+                  congress={congress}
                   deputies={deputies}
                   senators={senators}
                 />
@@ -237,6 +257,19 @@ export default async function PollDetailPage({
             })()
           }
           <ParliamentVotes
+            congress={
+              congressVotes.votes.length > 0
+                ? {
+                    groups: congressVotes.groups,
+                    votes: congressVotes.votes.map((v) => ({
+                      ...v,
+                      photoUrl: deputyPhotoUrl(v.id, v.photoLegislature),
+                      // Versailles has no published seat plan
+                      seat: null,
+                    })),
+                  }
+                : null
+            }
             deputies={
               scrutinVotes.groups.length > 0
                 ? {
@@ -250,7 +283,12 @@ export default async function PollDetailPage({
             }
             senators={senateVotes.votes.length > 0 ? senateVotes : null}
           />
-          {lf?.journey ? <PollJourney steps={lf.journey} /> : null}
+          {lf?.journey ? (
+            <PollJourney
+              constitutional={lf.procedureType.includes("constitutionnelle")}
+              steps={lf.journey}
+            />
+          ) : null}
         </div>
 
         <aside className="lg:sticky lg:top-6" id="vote">

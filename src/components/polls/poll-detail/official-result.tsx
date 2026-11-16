@@ -9,6 +9,8 @@ export interface ChamberVote {
   // Day of the vote: the open data gives no time
   date: string;
   for: number;
+  // Votes needed to adopt, e.g. three fifths of the votes cast at the Congrès
+  required?: number | null;
   // Page of the scrutin itself, the bill page is already linked above
   url: string | null;
 }
@@ -20,19 +22,25 @@ interface OfficialResultProps {
     abstentionPercentage: number;
     totalVotes: number;
   } | null;
+  congress: ChamberVote | null;
   deputies: ChamberVote | null;
   senators: ChamberVote | null;
 }
 
+// Four results read better as two rows of two
 const GRID_COLUMNS: Record<number, string> = {
   2: "md:grid-cols-2",
   3: "md:grid-cols-3",
+  4: "md:grid-cols-2",
 };
 
 function ChamberResult({ title, vote }: { title: string; vote: ChamberVote }) {
   const total = vote.for + vote.against + vote.abstentions;
+  const adopted = vote.required
+    ? vote.for >= vote.required
+    : vote.for > vote.against;
   return (
-    <div className="p-5">
+    <div className="bg-background p-5">
       <p className="mb-3 font-medium text-sm">{title}</p>
       <div className="space-y-2">
         <ResultBar
@@ -55,8 +63,9 @@ function ChamberResult({ title, vote }: { title: string; vote: ChamberVote }) {
         />
       </div>
       <p className="mt-3 text-muted-foreground text-xs">
-        {vote.for > vote.against ? "Adopté" : "Rejeté"} le{" "}
-        {formatDay(vote.date)} ({total} votants)
+        {adopted ? "Adopté" : "Rejeté"} le {formatDay(vote.date)} ({total}{" "}
+        votants
+        {vote.required ? `, ${vote.required} voix pour requises` : ""})
       </p>
       {vote.url && (
         <a
@@ -74,14 +83,17 @@ function ChamberResult({ title, vote }: { title: string; vote: ChamberVote }) {
 }
 
 export function OfficialResult({
+  congress,
   deputies,
   senators,
   citizenResults,
 }: OfficialResultProps) {
-  const columns = 1 + (deputies ? 1 : 0) + (senators ? 1 : 0);
-  const chambers = [deputies && "députés", senators && "sénateurs"].filter(
-    Boolean
-  );
+  const chambers = [
+    deputies && "députés",
+    senators && "sénateurs",
+    congress && "Congrès",
+  ].filter(Boolean);
+  const columns = 1 + chambers.length;
 
   return (
     <div className="mt-6 border border-border">
@@ -91,8 +103,10 @@ export function OfficialResult({
         </h3>
       </div>
 
+      {/* The 1px gap shows the border color between cells, whatever the
+          number of rows */}
       <div
-        className={`grid grid-cols-1 divide-y divide-border md:divide-x md:divide-y-0 ${GRID_COLUMNS[columns] ?? ""}`}
+        className={`grid grid-cols-1 gap-px bg-border ${GRID_COLUMNS[columns] ?? ""}`}
       >
         {deputies ? (
           <ChamberResult title="Résultat des députés" vote={deputies} />
@@ -100,9 +114,12 @@ export function OfficialResult({
         {senators ? (
           <ChamberResult title="Résultat des sénateurs" vote={senators} />
         ) : null}
+        {congress ? (
+          <ChamberResult title="Résultat du Congrès" vote={congress} />
+        ) : null}
 
         {/* Citizens */}
-        <div className="p-5">
+        <div className="bg-background p-5">
           <p className="mb-3 font-medium text-sm">Résultat des citoyens</p>
           {citizenResults && citizenResults.totalVotes > 0 ? (
             <>
