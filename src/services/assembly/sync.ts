@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import TurndownService from "turndown";
 import { db } from "@/db";
 import { legislativeFile, option, poll } from "@/db/schema";
@@ -89,9 +89,30 @@ function findFirstDate(obj: unknown): string | null {
   return null;
 }
 
+// Day of the deposit: the open data gives no time, and its dates carry the
+// Paris offset ("2025-02-04T00:00:00.000+01:00"), so the first 10 characters
+// are the day in Paris
 function extractDepositDate(dossier: DossierData): string {
   const date = findFirstDate(dossier.dossierParlementaire.actesLegislatifs);
-  return date ? new Date(date).toISOString() : new Date().toISOString();
+  return date ? date.slice(0, 10) : parisDay(new Date());
+}
+
+function parisDay(date: Date) {
+  return date.toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
+}
+
+// Bills imported before deposit dates were stored as days had a made-up
+// midnight time: keep only the day in Paris
+async function normalizeDepositDates() {
+  await db.execute(sql`
+    UPDATE ${poll}
+    SET start_date = to_char(${poll.startDate}::timestamptz AT TIME ZONE 'Europe/Paris', 'YYYY-MM-DD')
+    WHERE length(${poll.startDate}) > 10
+      AND ${poll.id} IN (
+        SELECT ${legislativeFile.pollId} FROM ${legislativeFile}
+        WHERE ${legislativeFile.pollId} IS NOT NULL
+      )
+  `);
 }
 
 export async function downloadAndExtractZip(
@@ -294,6 +315,7 @@ export async function extractDossiersArchive(legislature: string) {
 }
 
 export async function syncDossiers(): Promise<number> {
+  await normalizeDepositDates();
   const legislature = await detectLegislature();
   const extractDir = await extractDossiersArchive(legislature);
 
