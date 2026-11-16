@@ -9,7 +9,10 @@ import {
   type PrototypeEntry,
   type PrototypeFile,
 } from "../src/services/summary/prototype";
-import { summarizeBill } from "../src/services/summary/summarize";
+import {
+  DEFAULT_SUMMARY_MODEL,
+  summarizeBill,
+} from "../src/services/summary/summarize";
 
 const NUMBER_ARG = /^\d+$/;
 // --same reruns the bills of the previous run, to compare prompt versions
@@ -31,7 +34,7 @@ async function main() {
   if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is missing from .env");
   }
-  const model = process.env.SUMMARY_MODEL ?? "gemini-flash-lite-latest";
+  const model = DEFAULT_SUMMARY_MODEL;
 
   const previousRun = SAME_BILLS ? readPreviousRun() : null;
   if (SAME_BILLS && !previousRun) {

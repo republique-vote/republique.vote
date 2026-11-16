@@ -30,10 +30,11 @@ export type BillSummary = z.infer<typeof billSummarySchema>;
 
 // Free tier friendly: the provider reads GOOGLE_GENERATIVE_AI_API_KEY, and
 // swapping provider only means changing this model
-const DEFAULT_MODEL = "gemini-flash-lite-latest";
+export const DEFAULT_SUMMARY_MODEL =
+  process.env.SUMMARY_MODEL ?? "gemini-flash-lite-latest";
 
 export async function summarizeBill({
-  model = DEFAULT_MODEL,
+  model = DEFAULT_SUMMARY_MODEL,
   title,
   description,
 }: {

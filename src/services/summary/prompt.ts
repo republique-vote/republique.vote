@@ -1,6 +1,6 @@
 // Published with the code on purpose: anyone can check how summaries are
 // written. Bump the version whenever the instructions change.
-export const SUMMARY_PROMPT_VERSION = "2026-11-16.2";
+export const SUMMARY_PROMPT_VERSION = "2026-11-16.3";
 
 // Long explanatory memorandums are cut: the opening states the intent
 const MAX_DESCRIPTION_CHARS = 12_000;
@@ -14,7 +14,7 @@ Règles :
 4. Écris simplement, pour un élève de collège : phrases courtes, mots courants, sigles expliqués.
 5. N'utilise pas de tiret long (—).
 6. Le titre en clair décrit le mécanisme proposé, sans verbe ni mot qui juge ou dramatise (par exemple "punir", "sauver", "lutter contre", "protéger"). Préfère "Créer une amende journalière en cas de..." à "Punir...".
-7. La liste des changements décrit uniquement ce que le texte modifie concrètement, jamais pourquoi. Pas de "pour...", "afin de..." ni de jugement des auteurs dans cette liste : les raisons restent dans le résumé, attribuées aux auteurs.
+7. La liste des changements décrit uniquement ce que le texte modifie concrètement, jamais pourquoi. Pas de "pour...", "afin de..." ni de jugement des auteurs dans cette liste : les raisons restent dans le résumé, attribuées aux auteurs. Chaque changement commence par un verbe à l'infinitif ("Créer...", "Supprimer...", "Augmenter...").
 8. Le titre en clair fait 80 caractères maximum, le résumé 3 ou 4 phrases, et la liste des changements 2 ou 3 éléments.`;
 
 export function buildSummaryUserPrompt(title: string, description: string) {
