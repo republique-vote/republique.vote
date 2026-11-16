@@ -100,6 +100,14 @@ function layoutSeats(total: number) {
   return { seats: seats.sort((a, b) => b.angle - a.angle), spacing };
 }
 
+// Thicker outline on the active seat, thin one on empty (absent) seats
+function seatStroke(seat: Seat, isActive: boolean) {
+  if (isActive) {
+    return 2;
+  }
+  return seat.position === "absent" ? 1 : 0;
+}
+
 function fullName(vote: HemicycleVote) {
   return `${vote.firstName} ${vote.lastName.toUpperCase()}`;
 }
@@ -112,6 +120,8 @@ export function DeputyHemicycle({
   votes: HemicycleVote[];
 }) {
   const [query, setQuery] = useState("");
+  // Seat under the pointer (or last tapped on touch screens)
+  const [active, setActive] = useState<number | null>(null);
 
   // Real left-to-right placement: seats are numbered from the right
   const ordered = useMemo(
@@ -171,38 +181,65 @@ export function DeputyHemicycle({
   const highlighted = new Set(matches.map((m) => m.id));
   // Leaves a visible gap between neighbouring seats
   const seatRadius = round(seats.spacing * 0.4);
+  const viewBox = {
+    x: -seatRadius - 1,
+    y: -seatRadius - 1,
+    width: OUTER_RADIUS * 2 + seatRadius * 2 + 2,
+    height: OUTER_RADIUS + seatRadius * 2 + 2,
+  };
+  const activeSeat = active === null ? null : seats.list[active];
 
   return (
     <section className="mt-6 space-y-4 border border-border p-4">
       <h2 className="font-medium text-sm">Comment ont voté les députés</h2>
 
-      <svg
-        aria-label="Hémicycle : vote de chaque député, groupes placés de gauche à droite comme dans l'Assemblée"
-        className="w-full"
-        role="img"
-        viewBox={`${-seatRadius - 1} ${-seatRadius - 1} ${OUTER_RADIUS * 2 + seatRadius * 2 + 2} ${OUTER_RADIUS + seatRadius * 2 + 2}`}
-      >
-        {seats.list.map((seat, i) => (
-          <circle
-            className={`${POSITION_CLASSES[seat.position]} ${
-              highlighted.size > 0 &&
-              !(seat.voterId && highlighted.has(seat.voterId))
-                ? "opacity-20"
-                : ""
-            }`}
-            cx={seat.x}
-            cy={seat.y}
-            // biome-ignore lint/suspicious/noArrayIndexKey: seats have no identity beyond their place
-            key={i}
-            r={seatRadius}
-            strokeWidth={seat.position === "absent" ? 1 : 0}
+      <div className="relative">
+        <svg
+          aria-label="Hémicycle : vote de chaque député, groupes placés de gauche à droite comme dans l'Assemblée"
+          className="w-full"
+          onPointerLeave={() => setActive(null)}
+          onPointerOver={(event) => {
+            const index = (event.target as SVGElement).dataset.seat;
+            if (index !== undefined) {
+              setActive(Number(index));
+            }
+          }}
+          role="img"
+          viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
+        >
+          {seats.list.map((seat, i) => (
+            <circle
+              className={`${POSITION_CLASSES[seat.position]} ${
+                highlighted.size > 0 &&
+                !(seat.voterId && highlighted.has(seat.voterId))
+                  ? "opacity-20"
+                  : ""
+              } ${active === i ? "stroke-foreground" : ""}`}
+              cx={seat.x}
+              cy={seat.y}
+              data-seat={i}
+              // biome-ignore lint/suspicious/noArrayIndexKey: seats have no identity beyond their place
+              key={i}
+              r={seatRadius}
+              strokeWidth={seatStroke(seat, active === i)}
+            />
+          ))}
+        </svg>
+        {activeSeat ? (
+          <div
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap border border-border bg-popover px-2.5 py-1.5 text-popover-foreground text-xs shadow-md"
+            style={{
+              left: `${((activeSeat.x - viewBox.x) / viewBox.width) * 100}%`,
+              top: `calc(${((activeSeat.y - viewBox.y) / viewBox.height) * 100}% - ${seatRadius + 4}px)`,
+            }}
           >
-            <title>
-              {`${seat.label} · ${seat.groupName} · ${POSITION_LABELS[seat.position]}`}
-            </title>
-          </circle>
-        ))}
-      </svg>
+            <p className="font-medium">{activeSeat.label}</p>
+            <p className="text-muted-foreground">
+              {activeSeat.groupName} · {POSITION_LABELS[activeSeat.position]}
+            </p>
+          </div>
+        ) : null}
+      </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
         {POSITION_ORDER.map((position) => (
