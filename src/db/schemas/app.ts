@@ -252,3 +252,38 @@ export const scrutinVote = pgTable(
   },
   (t) => [unique().on(t.pollId, t.deputyId)]
 );
+
+export const senator = pgTable("senator", {
+  // Senate matricule, e.g. "19591F"
+  id: text("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  // Official photo, only known for sitting senators
+  photoUrl: text("photo_url"),
+  syncedAt: text("synced_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
+// How each senator voted on the latest public vote of the Senate on the whole
+// text, with their political group on that day and their seat when published
+export const senateVote = pgTable(
+  "senate_vote",
+  {
+    pollId: text("poll_id")
+      .notNull()
+      .references(() => poll.id, { onDelete: "cascade" }),
+    // Scrutin the rows come from, e.g. "2025-95": a later reading replaces them
+    scrutinRef: text("scrutin_ref").notNull(),
+    senatorId: text("senator_id")
+      .notNull()
+      .references(() => senator.id),
+    groupCode: text("group_code").notNull(),
+    groupName: text("group_name").notNull(),
+    position: text("position", {
+      enum: ["for", "against", "abstention", "nonVoting"],
+    }).notNull(),
+    seat: integer("seat"),
+  },
+  (t) => [unique().on(t.pollId, t.senatorId)]
+);
