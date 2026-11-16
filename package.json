@@ -11,6 +11,7 @@
     "lint:fix": "ultracite fix",
     "seed": "tsx scripts/seed.ts",
     "sync:assembly": "tsx scripts/sync-assembly.ts",
+    "summarize:prototype": "tsx scripts/summarize-prototype.ts",
     "db:push": "npx drizzle-kit push",
     "db:dev": "concurrently -n pgsql,redis -c blue,red \"pnpm run postgres\" \"pnpm run redis\"",
     "postgres": "tsx scripts/postgres.ts",
@@ -18,11 +19,13 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@ai-sdk/mistral": "^4.0.87",
     "@cloudflare/blindrsa-ts": "^0.4.5",
     "@republique/core": "workspace:*",
     "@sigstore/rekor-types": "^4.0.0",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@zkpassport/sdk": "^0.20.1",
+    "ai": "^7.0.173",
     "better-auth": "^1.5.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
