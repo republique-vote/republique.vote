@@ -114,6 +114,22 @@ export async function downloadAndExtractZip(
 }
 
 const CONCURRENCY = 10;
+
+// Every kind of bill citizens can vote on. Left out: resolutions, inquiry
+// commissions, information missions, petitions and confidence votes (49.3)
+const VOTABLE_PROCEDURES = new Set([
+  "Proposition de loi ordinaire",
+  "Projet de loi ordinaire",
+  "Projet ou proposition de loi constitutionnelle",
+  "Projet ou proposition de loi organique",
+  "Projet de ratification des traités et conventions",
+  "Projet de loi de finances de l'année",
+  "Projet de loi de finances rectificative",
+  "Projet de loi de financement de la sécurité sociale",
+  "Projet de loi relative aux résultats de la gestion et portant approbation des comptes",
+  // Shared initiative referendum (référendum d'initiative partagée)
+  "Proposition de loi présentée en application de l'article 11 de la Constitution",
+]);
 const EXPOSE_START_RE = /EXPOS[ÉE] DES MOTIFS/i;
 const EXPOSE_END_RE = /PROPOSITION DE LOI|PROJET DE LOI/;
 
@@ -297,15 +313,9 @@ export async function syncDossiers(): Promise<number> {
     const data: DossierData = JSON.parse(raw);
     const dp = data.dossierParlementaire;
 
-    if (dp["@xsi:type"] !== "DossierLegislatif_Type") {
-      continue;
-    }
-
+    // Allowed by procedure name: some legislative dossiers have no type
     const proc = dp.procedureParlementaire?.libelle || "";
-    if (
-      proc !== "Projet de loi ordinaire" &&
-      proc !== "Proposition de loi ordinaire"
-    ) {
+    if (!VOTABLE_PROCEDURES.has(proc)) {
       continue;
     }
 
