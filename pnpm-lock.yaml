@@ -153,6 +153,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@date-fns/tz':
+        specifier: ^1.5.0
+        version: 1.5.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -519,6 +522,9 @@ packages:
   '@cloudflare/blindrsa-ts@0.4.5':
     resolution: {integrity: sha512-fwVlqM/tWdic+rmDlRUxjo442R1p7ac5j9H2kmif7xzYD4RPvzh0yaEW/RooP6tYV78QOos3Iq1PKYQTJyLa8g==}
     engines: {node: '>=24'}
+
+  '@date-fns/tz@1.5.0':
+    resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
 
   '@dotenvx/dotenvx@1.57.2':
     resolution: {integrity: sha512-lv9+UZPnl/KOvShepevLWm3+/wc1It5kgO5Q580evnvOFMZcgKVEYFwxlL7Ohl9my1yjTsWo28N3PJYUEO8wFQ==}
@@ -6241,6 +6247,8 @@ snapshots:
   '@cloudflare/blindrsa-ts@0.4.5':
     dependencies:
       sjcl: 1.0.8
+
+  '@date-fns/tz@1.5.0': {}
 
   '@dotenvx/dotenvx@1.57.2':
     dependencies:

@@ -1,6 +1,6 @@
 "use client";
 
-import type { PaginatedData } from "@republique/core";
+import { formatDay, type PaginatedData } from "@republique/core";
 import {
   ArrowRight,
   ChevronLeft,
@@ -99,7 +99,7 @@ function getTimeLabel(poll: PollListItem) {
     return "< 1h";
   }
   if ((status === "closed" || status === "tallied") && poll.endDate) {
-    return `Terminé le ${new Date(poll.endDate).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}`;
+    return `Terminé le ${formatDay(poll.endDate)}`;
   }
   return null;
 }

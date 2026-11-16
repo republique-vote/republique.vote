@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateShort } from "@republique/core";
 import {
   Calendar,
   Hash,
@@ -96,9 +97,7 @@ export function VoteDetailsCards({
           label="Date d'enregistrement"
           tooltip="Le moment exact où votre vote a été inscrit dans le registre public."
         >
-          <p className="font-semibold text-sm">
-            {new Date(createdAt).toLocaleString("fr-FR")}
-          </p>
+          <p className="font-semibold text-sm">{formatDateShort(createdAt)}</p>
         </InfoCard>
       )}
       {/* Full-width hash fields */}
