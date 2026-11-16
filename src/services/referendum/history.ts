@@ -200,7 +200,7 @@ export const HISTORICAL_REFERENDUMS: HistoricalReferendum[] = [
 
 function description(r: HistoricalReferendum) {
   const question = r.question ? `\n\nQuestion posée : « ${r.question} »` : "";
-  return `Référendum organisé en application de ${r.basis}. Les électeurs étaient appelés à approuver ou rejeter ${r.subject}.${question}\n\nEt vous, qu'auriez-vous voté ?`;
+  return `Référendum organisé en application de ${r.basis}. Les électeurs étaient appelés à approuver ou rejeter ${r.subject}.${question}`;
 }
 
 function officialResult(r: HistoricalReferendum) {
@@ -217,8 +217,20 @@ function officialResult(r: HistoricalReferendum) {
   };
 }
 
-// Creates the missing historical referendums. They stay open: the point is to
-// compare today's citizens with the voters of the time
+// Past referendums are archives: closed on the day of the vote, with no
+// citizen vote, dated to their time in the poll list
+function archive(r: HistoricalReferendum) {
+  return {
+    title: r.title,
+    description: description(r),
+    status: "closed" as const,
+    startDate: r.date,
+    endDate: r.date,
+    createdAt: r.date,
+  };
+}
+
+// Creates the missing historical referendums
 export async function seedHistoricalReferendums(): Promise<number> {
   let created = 0;
   for (const r of HISTORICAL_REFERENDUMS) {
@@ -228,10 +240,7 @@ export async function seedHistoricalReferendums(): Promise<number> {
     });
     // Corrections to the text or figures reach referendums already created
     if (existing) {
-      await db
-        .update(poll)
-        .set({ title: r.title, description: description(r) })
-        .where(eq(poll.id, existing.id));
+      await db.update(poll).set(archive(r)).where(eq(poll.id, existing.id));
       await db
         .update(referendumResult)
         .set(officialResult(r))
@@ -242,16 +251,8 @@ export async function seedHistoricalReferendums(): Promise<number> {
     await db.transaction(async (tx) => {
       await tx.insert(poll).values({
         id: pollId,
-        title: r.title,
-        description: description(r),
+        ...archive(r),
         type: "referendum",
-        status: "open",
-        // The citizen vote opens today; the referendum date orders the list
-        startDate: new Date().toLocaleDateString("sv-SE", {
-          timeZone: "Europe/Paris",
-        }),
-        createdAt: r.date,
-        endDate: null,
         // The official result block links the proclamation
         sourceUrl: null,
         sourceRef,

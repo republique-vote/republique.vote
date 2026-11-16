@@ -273,12 +273,6 @@ export default async function PollDetailPage({
               );
             })()
           }
-          {pastReferendum ? (
-            <ReferendumResult
-              citizenResults={results?.results ?? null}
-              result={pastReferendum}
-            />
-          ) : null}
           <ParliamentVotes
             congress={
               congressVotes.votes.length > 0
@@ -315,23 +309,27 @@ export default async function PollDetailPage({
         </div>
 
         <aside className="lg:sticky lg:top-6" id="vote">
-          <PollDetailClient
-            initialHasVoted={hasVoted}
-            initialIsAuthenticated={isAuthenticated}
-            initialMerkleRoot={p.merkleRoot}
-            initialResults={results}
-            initialVoteCount={count}
-            options={options}
-            poll={{
-              id: p.id,
-              title: p.title,
-              description: p.description,
-              type: p.type,
-              status: p.status,
-              startDate: p.startDate,
-              endDate: p.endDate,
-            }}
-          />
+          {pastReferendum ? (
+            <ReferendumResult result={pastReferendum} />
+          ) : (
+            <PollDetailClient
+              initialHasVoted={hasVoted}
+              initialIsAuthenticated={isAuthenticated}
+              initialMerkleRoot={p.merkleRoot}
+              initialResults={results}
+              initialVoteCount={count}
+              options={options}
+              poll={{
+                id: p.id,
+                title: p.title,
+                description: p.description,
+                type: p.type,
+                status: p.status,
+                startDate: p.startDate,
+                endDate: p.endDate,
+              }}
+            />
+          )}
           <OfficialSources
             assemblyUrl={p.sourceUrl}
             senateUrl={lf?.senateUrl ?? null}

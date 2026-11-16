@@ -1,6 +1,7 @@
 import { formatDate } from "@republique/core";
 import { ExternalLink } from "lucide-react";
 import { VOTE_BG_CLASSES } from "@/components/polls/poll-detail/vote-colors";
+import { Badge } from "@/components/ui/badge";
 
 export interface ReferendumResultData {
   blankAndNull: number;
@@ -52,95 +53,58 @@ function Bar({
   );
 }
 
-// The official result of a past referendum next to the votes of citizens
-// today on the same question
-export function ReferendumResult({
-  citizenResults,
-  result,
-}: {
-  citizenResults: { label: string; percentage: number }[] | null;
-  result: ReferendumResultData;
-}) {
-  const year = result.date.slice(0, 4);
+// The official result of a past referendum, in place of the vote block:
+// these referendums are archives, not open to a citizen vote
+export function ReferendumResult({ result }: { result: ReferendumResultData }) {
   const adopted = result.yes > result.no;
-  const hasCitizenVotes =
-    citizenResults?.some((r) => r.percentage > 0) ?? false;
 
   return (
-    <div className="mt-6 border border-border">
-      <div className="border-border border-b bg-accent/30 px-5 py-3">
-        <h3 className="font-bold text-sm">
-          Comparatif citoyens d'aujourd'hui / électeurs de {year}
-        </h3>
+    <section className="border border-border bg-card p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="font-medium text-sm">Résultat officiel</h2>
+        <Badge variant={adopted ? "success" : "destructive"}>
+          {adopted ? "Adopté" : "Rejeté"}
+        </Badge>
       </div>
-      <div className="grid grid-cols-1 gap-px bg-border md:grid-cols-2">
-        <div className="bg-background p-5">
-          <p className="mb-3 font-medium text-sm">Résultat officiel</p>
-          <div className="space-y-2">
-            <Bar
-              color={VOTE_BG_CLASSES.for}
-              count={result.yes}
-              label="Oui"
-              share={percent(result.yes, result.expressed)}
-            />
-            <Bar
-              color={VOTE_BG_CLASSES.against}
-              count={result.no}
-              label="Non"
-              share={percent(result.no, result.expressed)}
-            />
-          </div>
-          <p className="mt-3 text-muted-foreground text-xs leading-relaxed">
-            {adopted ? "Adopté" : "Rejeté"} le {formatDate(result.date)}, en
-            pourcentage des suffrages exprimés. Participation de{" "}
-            {percents.format(percent(result.voters, result.registered))} % (
-            {numbers.format(result.voters)} votants sur{" "}
-            {numbers.format(result.registered)} inscrits),{" "}
-            {numbers.format(result.blankAndNull)} bulletins blancs ou nuls.
-          </p>
-          {result.scopeNote ? (
-            <p className="mt-2 text-muted-foreground text-xs leading-relaxed">
-              {result.scopeNote}
-            </p>
-          ) : null}
-          <a
-            className="mt-2 inline-flex items-center gap-1 text-primary text-xs hover:underline"
-            href={result.sourceUrl}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Voir la proclamation des résultats
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        </div>
-
-        <div className="bg-background p-5">
-          <p className="mb-3 font-medium text-sm">
-            Résultat des citoyens d'aujourd'hui
-          </p>
-          {citizenResults && hasCitizenVotes ? (
-            <div className="space-y-2">
-              {citizenResults.map((r) => (
-                <Bar
-                  color={
-                    {
-                      Oui: VOTE_BG_CLASSES.for,
-                      Non: VOTE_BG_CLASSES.against,
-                    }[r.label] ?? "bg-muted-foreground"
-                  }
-                  key={r.label}
-                  label={r.label}
-                  share={r.percentage}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">
-              Aucun vote citoyen pour le moment.
-            </p>
-          )}
-        </div>
+      <p className="mt-1 mb-4 text-muted-foreground text-xs">
+        Référendum du {formatDate(result.date)}, en pourcentage des suffrages
+        exprimés
+      </p>
+      <div className="space-y-2">
+        <Bar
+          color={VOTE_BG_CLASSES.for}
+          count={result.yes}
+          label="Oui"
+          share={percent(result.yes, result.expressed)}
+        />
+        <Bar
+          color={VOTE_BG_CLASSES.against}
+          count={result.no}
+          label="Non"
+          share={percent(result.no, result.expressed)}
+        />
       </div>
-    </div>
+      <p className="mt-3 text-muted-foreground text-xs leading-relaxed">
+        Participation de{" "}
+        {percents.format(percent(result.voters, result.registered))} % (
+        {numbers.format(result.voters)} votants sur{" "}
+        {numbers.format(result.registered)} inscrits),{" "}
+        {numbers.format(result.blankAndNull)} bulletins blancs ou nuls.
+      </p>
+      {result.scopeNote ? (
+        <p className="mt-2 text-muted-foreground text-xs leading-relaxed">
+          {result.scopeNote}
+        </p>
+      ) : null}
+      <a
+        className="mt-2 inline-flex items-center gap-1 text-primary text-xs hover:underline"
+        href={result.sourceUrl}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        Voir la proclamation des résultats
+        <ExternalLink className="h-3 w-3" />
+      </a>
+    </section>
   );
 }
