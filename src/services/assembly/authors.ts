@@ -22,12 +22,18 @@ interface MinistryMandate extends GroupMandate {
   quality: string;
 }
 
+interface SeatMandate extends GroupMandate {
+  seat: number;
+}
+
 interface Actor {
   firstName: string;
   groups: GroupMandate[];
   lastName: string;
   ministries: MinistryMandate[];
   photoLegislature: string | null;
+  // Assigned seats in the hemicycle, one per Assemblée mandate
+  seats: SeatMandate[];
 }
 
 interface Group {
@@ -55,6 +61,7 @@ interface RawMandate {
   dateFin: string | null;
   infosQualite?: { libQualite?: string };
   legislature: string | null;
+  mandature?: { placeHemicycle?: string | null };
   organes: { organeRef: string };
   typeOrgane: string;
 }
@@ -105,6 +112,21 @@ async function downloadActors(legislature: string) {
           start: m.dateDebut,
           end: m.dateFin,
         })),
+      seats: mandates
+        .filter((m) => m.typeOrgane === "ASSEMBLEE")
+        .flatMap((m) => {
+          const seat = Number(m.mandature?.placeHemicycle);
+          return seat > 0
+            ? [
+                {
+                  organeRef: m.organes.organeRef,
+                  start: m.dateDebut,
+                  end: m.dateFin,
+                  seat,
+                },
+              ]
+            : [];
+        }),
       ministries: mandates
         .filter((m) => m.typeOrgane === "MINISTERE")
         .map((m) => ({
@@ -143,6 +165,11 @@ function activeAt<T extends GroupMandate>(mandates: T[], date: string) {
   return mandates.find(
     (m) => m.start <= day && (m.end === null || m.end >= day)
   );
+}
+
+// Seat of a member of parliament on a given day
+export function seatAt(actor: Actor, date: string) {
+  return activeAt(actor.seats, date)?.seat ?? null;
 }
 
 // Government role when signing, e.g. "Premier ministre" or "Ministre de la

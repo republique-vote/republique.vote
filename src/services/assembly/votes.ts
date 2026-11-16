@@ -8,7 +8,7 @@ import {
   scrutinGroup,
   scrutinVote,
 } from "@/db/schema";
-import { loadActors, upsertDeputy } from "./authors";
+import { loadActors, seatAt, upsertDeputy } from "./authors";
 import { detectLegislature } from "./legislature";
 import { extractScrutinsArchive } from "./scrutins";
 
@@ -79,7 +79,8 @@ async function storeGroup(
   pollId: string,
   g: RawGroup,
   { actors, groups }: Awaited<ReturnType<typeof loadActors>>,
-  membersByGroup: Map<string, string[]>
+  membersByGroup: Map<string, string[]>,
+  { date, takenSeats }: { date: string; takenSeats: Set<number> }
 ) {
   const voters = POSITION_KEYS.flatMap(([key, position]) =>
     asArray(g.vote.decompteNominatif[key]?.votant).map((voter) => ({
@@ -141,6 +142,7 @@ async function storeGroup(
       continue;
     }
     await upsertDeputy(tx, id, actor);
+    const seat = seatAt(actor, date);
     await tx
       .insert(scrutinVote)
       .values({
@@ -148,7 +150,9 @@ async function storeGroup(
         deputyId: id,
         groupRef: g.organeRef,
         position: "absent",
-        seat: null,
+        // Not in the scrutin: their assigned seat, unless the scrutin shows
+        // someone else in it (the seat changed since)
+        seat: seat !== null && !takenSeats.has(seat) ? seat : null,
       })
       .onConflictDoNothing();
   }
@@ -201,10 +205,22 @@ export async function syncScrutinVotes(): Promise<number> {
     }
 
     const membersByGroup = groupMembersAt(actors, scrutinDate);
+    const takenSeats = new Set(
+      rawGroups.flatMap((g) =>
+        POSITION_KEYS.flatMap(([key]) =>
+          asArray(g.vote.decompteNominatif[key]?.votant)
+            .map(seatNumber)
+            .filter((seat): seat is number => seat !== null)
+        )
+      )
+    );
 
     await db.transaction(async (tx) => {
       for (const g of rawGroups) {
-        await storeGroup(tx, p.pollId, g, actorData, membersByGroup);
+        await storeGroup(tx, p.pollId, g, actorData, membersByGroup, {
+          date: scrutinDate,
+          takenSeats,
+        });
       }
     });
     filled++;
