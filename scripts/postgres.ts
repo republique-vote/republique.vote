@@ -45,7 +45,7 @@ async function main() {
   console.log("◇ Pushing schema...");
   execSync("pnpm db:push", { stdio: "ignore" });
   console.log("◇ Seeding...");
-  execSync("pnpm seed", { stdio: "ignore" });
+  execSync("pnpm seed && pnpm seed:referendums", { stdio: "ignore" });
 
   console.log("");
   console.log(

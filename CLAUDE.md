@@ -20,7 +20,7 @@ pnpm workspaces. Root app (Next.js) + shared packages.
 # Web app (run from root)
 pnpm db:dev       # Start Postgres + Redis in-memory (background)
 pnpm db:push      # Push schema to database (drizzle-kit push)
-pnpm seed         # Seed database with test polls
+pnpm seed         # Remove the polls of the first demo from existing databases (also run by prestart)
 pnpm sync:assembly # Import bills and votes from the Assemblée nationale open data (also runs every 6h when CRON_SECRET is set)
 pnpm sync:journeys # Refresh the path of each bill in Parliament (readings, joint committee, Constitutional Council, promulgation), also part of sync:assembly
 pnpm import:congress # Import past constitutional revisions voted by the Congrès (list in the script), with every vote on them
