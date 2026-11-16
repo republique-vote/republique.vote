@@ -10,15 +10,14 @@ const sql = postgres(env.DATABASE_URL);
 const DEMO_POLLS = ["poll-1", "poll-2", "poll-3"];
 
 async function seed() {
-  await sql.begin(async (tx) => {
-    await tx`DELETE FROM vote_record WHERE poll_id IN ${tx(DEMO_POLLS)}`;
-    await tx`DELETE FROM rekor_entry WHERE poll_id IN ${tx(DEMO_POLLS)}`;
-    await tx`DELETE FROM blind_signature_request WHERE poll_id IN ${tx(DEMO_POLLS)}`;
-    await tx`DELETE FROM poll_key_pair WHERE poll_id IN ${tx(DEMO_POLLS)}`;
-    await tx`DELETE FROM option WHERE poll_id IN ${tx(DEMO_POLLS)}`;
-    const removed = await tx`DELETE FROM poll WHERE id IN ${tx(DEMO_POLLS)}`;
-    console.log(`Seed: ${removed.count} demo polls removed`);
-  });
+  // Children first; rerunning after a failure finishes the job
+  await sql`DELETE FROM vote_record WHERE poll_id IN ${sql(DEMO_POLLS)}`;
+  await sql`DELETE FROM rekor_entry WHERE poll_id IN ${sql(DEMO_POLLS)}`;
+  await sql`DELETE FROM blind_signature_request WHERE poll_id IN ${sql(DEMO_POLLS)}`;
+  await sql`DELETE FROM poll_key_pair WHERE poll_id IN ${sql(DEMO_POLLS)}`;
+  await sql`DELETE FROM option WHERE poll_id IN ${sql(DEMO_POLLS)}`;
+  const removed = await sql`DELETE FROM poll WHERE id IN ${sql(DEMO_POLLS)}`;
+  console.log(`Seed: ${removed.count} demo polls removed`);
   await sql.end();
 }
 
