@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         hostname: "www2.assemblee-nationale.fr",
         pathname: "/static/tribun/**",
       },
+      {
+        protocol: "https",
+        hostname: "www.senat.fr",
+        pathname: "/senimg/**",
+      },
     ],
   },
 };

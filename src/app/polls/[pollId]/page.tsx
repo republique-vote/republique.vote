@@ -3,7 +3,7 @@ import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { DeputyHemicycle } from "@/components/polls/poll-detail/deputy-hemicycle";
+import { Hemicycle } from "@/components/polls/poll-detail/hemicycle";
 import {
   type ChamberVote,
   OfficialResult,
@@ -25,9 +25,11 @@ import {
 } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
 import { findPollAuthors } from "@/services/assembly/authors";
+import { deputyPhotoUrl } from "@/services/assembly/photo";
 import { findScrutinVotes } from "@/services/assembly/votes";
 import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
+import { findSenateVotes } from "@/services/senate/votes";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +115,10 @@ export default async function PollDetailPage({
   });
 
   const authors = await findPollAuthors(pollId);
-  const scrutinVotes = await findScrutinVotes(pollId);
+  const [scrutinVotes, senateVotes] = await Promise.all([
+    findScrutinVotes(pollId),
+    findSenateVotes(pollId),
+  ]);
 
   const options = await db
     .select()
@@ -240,9 +245,20 @@ export default async function PollDetailPage({
             })()
           }
           {scrutinVotes.groups.length > 0 ? (
-            <DeputyHemicycle
+            <Hemicycle
+              chamber="assembly"
               groups={scrutinVotes.groups}
-              votes={scrutinVotes.votes}
+              votes={scrutinVotes.votes.map((v) => ({
+                ...v,
+                photoUrl: deputyPhotoUrl(v.id, v.photoLegislature),
+              }))}
+            />
+          ) : null}
+          {senateVotes.votes.length > 0 ? (
+            <Hemicycle
+              chamber="senate"
+              groups={senateVotes.groups}
+              votes={senateVotes.votes}
             />
           ) : null}
         </div>
