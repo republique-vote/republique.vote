@@ -1,9 +1,11 @@
-import { count, desc, eq, sql } from "drizzle-orm";
 import { PollListClient } from "@/components/polls/poll-list-client";
+import {
+  parsePollListParams,
+  tabStatus,
+} from "@/components/polls/poll-list-params";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { db } from "@/db";
-import { poll, pollSummary, voteRecord } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
+import { countPolls, listPolls } from "@/services/poll/list";
 
 export const dynamic = "force-dynamic";
 
@@ -15,40 +17,23 @@ export const metadata = constructMetadata({
 
 const PAGE_SIZE = 20;
 
-export default async function PollsPage() {
-  const [counts] = await db
-    .select({
-      open: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} = 'open')`,
-      closed: sql<number>`COUNT(*) FILTER (WHERE ${poll.status} IN ('closed', 'tallied'))`,
-      all: sql<number>`COUNT(*)`,
-    })
-    .from(poll);
-
-  const openCount = Number(counts.open);
-
-  const initialPolls = await db
-    .select({
-      id: poll.id,
-      title: poll.title,
-      description: poll.description,
-      type: poll.type,
-      status: poll.status,
-      startDate: poll.startDate,
-      endDate: poll.endDate,
-      createdAt: poll.createdAt,
-      voteCount: count(voteRecord.id),
-      simpleSentence: pollSummary.simpleSentence,
-    })
-    .from(poll)
-    .leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
-    .leftJoin(pollSummary, eq(pollSummary.pollId, poll.id))
-    .where(eq(poll.status, "open"))
-    .groupBy(poll.id, pollSummary.simpleSentence)
-    .orderBy(
-      sql`CASE WHEN ${poll.endDate} IS NOT NULL THEN 0 ELSE 1 END`,
-      desc(poll.createdAt)
-    )
-    .limit(PAGE_SIZE);
+export default async function PollsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Filters and page come from the URL, so a shared link shows the same list
+  const filters = parsePollListParams(await searchParams);
+  const [counts, initialData] = await Promise.all([
+    countPolls(filters.type),
+    listPolls({
+      status: tabStatus(filters.tab),
+      type: filters.type,
+      sort: filters.sort,
+      page: filters.page,
+      limit: PAGE_SIZE,
+    }),
+  ]);
 
   return (
     <>
@@ -61,21 +46,9 @@ export default async function PollsPage() {
         terminés.
       </p>
       <PollListClient
-        counts={{
-          open: openCount,
-          closed: Number(counts.closed),
-          all: Number(counts.all),
-        }}
-        initialData={{
-          items: initialPolls.map((p) => ({
-            ...p,
-            voteCount: Number(p.voteCount),
-          })),
-          currentPage: 1,
-          pageCount: Math.ceil(openCount / PAGE_SIZE),
-          itemCount: openCount,
-          itemLimit: PAGE_SIZE,
-        }}
+        counts={counts}
+        initialData={initialData}
+        initialFilters={filters}
       />
     </>
   );

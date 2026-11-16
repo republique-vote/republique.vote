@@ -13,9 +13,16 @@ import {
   Vote,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import removeMarkdown from "remove-markdown";
 import useSWR from "swr";
+import {
+  type PollListFilters,
+  type PollTabValue,
+  parsePollListParams,
+  pollListQuery,
+  tabStatus,
+} from "@/components/polls/poll-list-params";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -153,73 +160,37 @@ function PollCard({ poll: p }: { poll: PollListItem }) {
 
 const PAGE_SIZE = 20;
 
-function buildPollKey(
-  status: string | null,
-  sort: string,
-  type: string | null,
-  page: number
-) {
+function buildPollKey(filters: PollListFilters) {
   const params = new URLSearchParams({
-    page: page.toString(),
+    page: filters.page.toString(),
     limit: PAGE_SIZE.toString(),
-    sort,
+    sort: filters.sort,
   });
+  const status = tabStatus(filters.tab);
   if (status) {
     params.set("status", status);
   }
-  if (type) {
-    params.set("type", type);
+  if (filters.type) {
+    params.set("type", filters.type);
   }
   return `/api/poll?${params}`;
 }
 
-function usePolls(
-  status: string | null,
-  sort: string,
-  type: string | null,
-  fallbackData?: PaginatedData<PollListItem>
-) {
-  const [page, setPage] = useState(1);
-  const [prevFilters, setPrevFilters] = useState({ status, sort, type });
-
-  if (
-    prevFilters.status !== status ||
-    prevFilters.sort !== sort ||
-    prevFilters.type !== type
-  ) {
-    setPrevFilters({ status, sort, type });
-    setPage(1);
-  }
-
-  const key = buildPollKey(status, sort, type, page);
-  const { data, isLoading } = useSWR<PaginatedData<PollListItem>>(key, {
-    keepPreviousData: true,
-    fallbackData:
-      status === "open" && sort === "recent" && !type && page === 1
-        ? fallbackData
-        : undefined,
-  });
-
-  return { data: data ?? null, loading: isLoading, page, goToPage: setPage };
-}
-
 function PollTab({
-  status,
-  sort,
-  type,
+  filters,
   fallbackData,
+  onPageChange,
 }: {
-  status: string | null;
-  sort: string;
-  type: string | null;
+  filters: PollListFilters;
+  // Server-rendered page, only for the filters it was rendered with
   fallbackData?: PaginatedData<PollListItem>;
+  onPageChange: (page: number) => void;
 }) {
-  const { data, loading, page, goToPage } = usePolls(
-    status,
-    sort,
-    type,
-    fallbackData
+  const { data, isLoading: loading } = useSWR<PaginatedData<PollListItem>>(
+    buildPollKey(filters),
+    { keepPreviousData: true, fallbackData }
   );
+  const page = filters.page;
 
   if (loading && !data) {
     return (
@@ -251,16 +222,18 @@ function PollTab({
           </p>
           <div className="flex items-center gap-1">
             <Button
+              aria-label="Page précédente"
               disabled={page <= 1 || loading}
-              onClick={() => goToPage(page - 1)}
+              onClick={() => onPageChange(page - 1)}
               size="icon"
               variant="outline"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
+              aria-label="Page suivante"
               disabled={page >= data.pageCount || loading}
-              onClick={() => goToPage(page + 1)}
+              onClick={() => onPageChange(page + 1)}
               size="icon"
               variant="outline"
             >
@@ -289,25 +262,59 @@ const TYPE_FILTERS = [
 export function PollListClient({
   counts: initialCounts,
   initialData,
+  initialFilters,
 }: {
   counts: PollCounts;
-  initialData?: PaginatedData<PollListItem>;
+  initialData: PaginatedData<PollListItem>;
+  // Filters the server rendered the list with
+  initialFilters: PollListFilters;
 }) {
-  const [sort, setSort] = useState("recent");
-  const [type, setType] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const filters = parsePollListParams(Object.fromEntries(searchParams));
+  const { sort, type } = filters;
+
+  // A new filter starts again at page 1 and replaces the history entry; a new
+  // page adds one, so the back button returns to the previous page
+  const navigate = (next: Partial<PollListFilters>) => {
+    const isPageChange = Object.keys(next).every((key) => key === "page");
+    const url = `/polls${pollListQuery({
+      ...filters,
+      page: 1,
+      ...next,
+    })}`;
+    if (isPageChange) {
+      router.push(url, { scroll: false });
+    } else {
+      router.replace(url, { scroll: false });
+    }
+  };
 
   const { data: fetchedCounts } = useSWR<PollCounts>(
-    type ? `/api/poll/counts?type=${type}` : null,
+    type === initialFilters.type
+      ? null
+      : `/api/poll/counts${type ? `?type=${type}` : ""}`,
     { keepPreviousData: true }
   );
-  const counts = type ? (fetchedCounts ?? initialCounts) : initialCounts;
+  const counts =
+    type === initialFilters.type
+      ? initialCounts
+      : (fetchedCounts ?? initialCounts);
+  const fallbackData =
+    pollListQuery(filters) === pollListQuery(initialFilters)
+      ? initialData
+      : undefined;
 
   const openLabel = `En cours (${counts.open})`;
   const closedLabel = `Terminés (${counts.closed})`;
   const allLabel = `Tous (${counts.all})`;
 
   return (
-    <Tabs className="mt-8" defaultValue="open">
+    <Tabs
+      className="mt-8"
+      onValueChange={(tab) => navigate({ tab: tab as PollTabValue })}
+      value={filters.tab}
+    >
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-2">
           {TYPE_FILTERS.map((f) => {
@@ -317,7 +324,7 @@ export function PollListClient({
             const btn = (
               <Button
                 key={f.label}
-                onClick={() => setType(f.value)}
+                onClick={() => navigate({ type: f.value })}
                 size="sm"
                 variant={type === f.value ? "default" : "outline"}
               >
@@ -341,7 +348,7 @@ export function PollListClient({
         <div className="ml-auto flex items-center gap-2">
           <span className="text-muted-foreground text-xs">Trier par</span>
           <Button
-            onClick={() => setSort("recent")}
+            onClick={() => navigate({ sort: "recent" })}
             size="sm"
             variant={sort === "recent" ? "default" : "outline"}
           >
@@ -349,7 +356,7 @@ export function PollListClient({
             Récents
           </Button>
           <Button
-            onClick={() => setSort("votes")}
+            onClick={() => navigate({ sort: "votes" })}
             size="sm"
             variant={sort === "votes" ? "default" : "outline"}
           >
@@ -363,20 +370,15 @@ export function PollListClient({
         <TabsTrigger value="closed">{closedLabel}</TabsTrigger>
         <TabsTrigger value="all">{allLabel}</TabsTrigger>
       </TabsList>
-      <TabsContent value="open" variant="framed">
-        <PollTab
-          fallbackData={initialData}
-          sort={sort}
-          status="open"
-          type={type}
-        />
-      </TabsContent>
-      <TabsContent value="closed" variant="framed">
-        <PollTab sort={sort} status="closed" type={type} />
-      </TabsContent>
-      <TabsContent value="all" variant="framed">
-        <PollTab sort={sort} status={null} type={type} />
-      </TabsContent>
+      {(["open", "closed", "all"] as const).map((tab) => (
+        <TabsContent key={tab} value={tab} variant="framed">
+          <PollTab
+            fallbackData={fallbackData}
+            filters={filters}
+            onPageChange={(page) => navigate({ page })}
+          />
+        </TabsContent>
+      ))}
     </Tabs>
   );
 }
