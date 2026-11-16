@@ -146,3 +146,19 @@ export const pollSummary = pgTable("poll_summary", {
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
 });
+
+// Readers flag summaries that are wrong, unclear or biased. The prompt
+// version tells which instructions produced the flagged summary.
+export const summaryReport = pgTable("summary_report", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  pollId: text("poll_id")
+    .notNull()
+    .references(() => poll.id, { onDelete: "cascade" }),
+  promptVersion: text("prompt_version").notNull(),
+  message: text("message").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});

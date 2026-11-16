@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { OfficialResult } from "@/components/polls/poll-detail/official-result";
+import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -15,6 +16,7 @@ import {
   legislativeFile,
   option,
   poll,
+  pollSummary,
 } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
 import { auth } from "@/services/auth";
@@ -52,6 +54,10 @@ export default async function PollDetailPage({
   if (!p) {
     notFound();
   }
+
+  const summary = await db.query.pollSummary.findFirst({
+    where: eq(pollSummary.pollId, pollId),
+  });
 
   const options = await db
     .select()
@@ -102,7 +108,17 @@ export default async function PollDetailPage({
           {isOpen ? "En cours" : "Terminé"}
         </Badge>
         <h1 className="font-bold text-3xl tracking-tight">{p.title}</h1>
-        <div className="mt-2">
+        {summary ? (
+          <div className="mt-4">
+            <PollSummary pollId={p.id} summary={summary} />
+          </div>
+        ) : null}
+        <div className="mt-4">
+          {summary ? (
+            <h2 className="mb-1 font-medium text-sm">
+              Le texte des auteurs (exposé des motifs)
+            </h2>
+          ) : null}
           <Markdown collapsible>{p.description}</Markdown>
         </div>
         {p.sourceUrl && (

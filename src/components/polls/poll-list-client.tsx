@@ -29,6 +29,8 @@ interface PollListItem {
   description: string;
   endDate: string | null;
   id: string;
+  // Plain-language sentence from the AI summary, when one exists
+  simpleSentence: string | null;
   startDate: string;
   status: string;
   title: string;
@@ -139,7 +141,7 @@ function PollCard({ poll: p }: { poll: PollListItem }) {
           {p.title}
         </h3>
         <p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-relaxed">
-          {removeMarkdown(p.description)}
+          {p.simpleSentence ?? removeMarkdown(p.description)}
         </p>
       </div>
       <div className="flex justify-end border-border border-t px-5 py-3">

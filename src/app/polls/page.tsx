@@ -2,7 +2,7 @@ import { count, desc, eq, sql } from "drizzle-orm";
 import { PollListClient } from "@/components/polls/poll-list-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { db } from "@/db";
-import { poll, voteRecord } from "@/db/schema";
+import { poll, pollSummary, voteRecord } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
@@ -37,11 +37,13 @@ export default async function PollsPage() {
       endDate: poll.endDate,
       createdAt: poll.createdAt,
       voteCount: count(voteRecord.id),
+      simpleSentence: pollSummary.simpleSentence,
     })
     .from(poll)
     .leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
+    .leftJoin(pollSummary, eq(pollSummary.pollId, poll.id))
     .where(eq(poll.status, "open"))
-    .groupBy(poll.id)
+    .groupBy(poll.id, pollSummary.simpleSentence)
     .orderBy(
       sql`CASE WHEN ${poll.endDate} IS NOT NULL THEN 0 ELSE 1 END`,
       desc(poll.createdAt)

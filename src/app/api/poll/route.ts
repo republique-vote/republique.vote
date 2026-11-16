@@ -1,7 +1,7 @@
 import { and, count, desc, eq, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { poll, voteRecord } from "@/db/schema";
+import { poll, pollSummary, voteRecord } from "@/db/schema";
 import {
   getPaginationParams,
   paginatedSuccessResponse,
@@ -51,11 +51,13 @@ export async function GET(request: NextRequest) {
       endDate: poll.endDate,
       createdAt: poll.createdAt,
       voteCount: count(voteRecord.id),
+      simpleSentence: pollSummary.simpleSentence,
     })
     .from(poll)
     .leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
+    .leftJoin(pollSummary, eq(pollSummary.pollId, poll.id))
     .where(filters)
-    .groupBy(poll.id)
+    .groupBy(poll.id, pollSummary.simpleSentence)
     .orderBy(
       ...(request.nextUrl.searchParams.get("sort") === "votes"
         ? [desc(count(voteRecord.id)), desc(poll.createdAt)]
