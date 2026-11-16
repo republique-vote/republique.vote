@@ -13,7 +13,10 @@ export interface PrototypeEntry {
   previous?: {
     promptVersion: string;
     summary:
-      | (Omit<BillSummary, "simpleSentence"> & { simpleSentence?: string })
+      | (Omit<BillSummary, "simpleSentence" | "context"> & {
+          context?: string;
+          simpleSentence?: string;
+        })
       | null;
   };
   sourceUrl: string | null;

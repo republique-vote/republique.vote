@@ -124,7 +124,8 @@ function EntryRow({ entry }: { entry: PrototypeEntry }) {
   );
 }
 
-type AnySummary = Omit<BillSummary, "simpleSentence"> & {
+type AnySummary = Omit<BillSummary, "simpleSentence" | "context"> & {
+  context?: string;
   simpleSentence?: string;
 };
 
@@ -142,6 +143,12 @@ function SummaryView({ summary }: { summary: AnySummary }) {
       ) : null}
       <h2 className="font-semibold">{summary.plainTitle}</h2>
       <p className="text-sm">{summary.summary}</p>
+      {summary.context ? (
+        <>
+          <p className="font-medium text-sm">Pour comprendre</p>
+          <p className="text-sm">{summary.context}</p>
+        </>
+      ) : null}
       <p className="font-medium text-sm">Ce que ça changerait concrètement</p>
       <ul className="list-disc space-y-1 pl-5 text-sm">
         {summary.changes.map((change) => (

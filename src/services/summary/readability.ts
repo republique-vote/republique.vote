@@ -50,10 +50,16 @@ export function readabilityLabel(score: number) {
 // change without final punctuation still counts as its own sentence.
 export function summaryReadability(summary: {
   changes: string[];
+  context?: string;
   simpleSentence?: string;
   summary: string;
 }) {
-  const parts = [summary.simpleSentence, summary.summary, ...summary.changes];
+  const parts = [
+    summary.simpleSentence,
+    summary.summary,
+    summary.context,
+    ...summary.changes,
+  ];
   return readabilityScore(
     parts.filter((part): part is string => Boolean(part)).join(". ")
   );

@@ -137,6 +137,8 @@ export const pollSummary = pgTable("poll_summary", {
   simpleSentence: text("simple_sentence").notNull(),
   plainTitle: text("plain_title").notNull(),
   summary: text("summary").notNull(),
+  // Empty when the model was not sure about the current situation
+  context: text("context"),
   changes: jsonb("changes").$type<string[]>().notNull(),
   model: text("model").notNull(),
   promptVersion: text("prompt_version").notNull(),

@@ -65,6 +65,7 @@ export async function summarizePendingPolls({
       });
       const values = {
         ...summary,
+        context: summary.context.trim() || null,
         model: DEFAULT_SUMMARY_MODEL,
         promptVersion: SUMMARY_PROMPT_VERSION,
         generatedAt: new Date().toISOString(),

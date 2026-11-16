@@ -22,6 +22,11 @@ export const billSummarySchema = z.object({
     .describe(
       "3 à 5 phrases courtes en FALC : ce que propose le texte, puis pourquoi selon ses auteurs"
     ),
+  context: z
+    .string()
+    .describe(
+      "Pour comprendre : 2 ou 3 phrases simples sur comment ça marche aujourd'hui et ce qui manque selon le texte. Chaîne vide si la situation actuelle n'est pas sûre"
+    ),
   changes: z
     .array(z.string())
     .min(1)
