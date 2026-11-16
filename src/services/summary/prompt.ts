@@ -1,6 +1,6 @@
 // Published with the code on purpose: anyone can check how summaries are
 // written. Bump the version whenever the instructions change.
-export const SUMMARY_PROMPT_VERSION = "2026-11-16.8";
+export const SUMMARY_PROMPT_VERSION = "2026-11-16.9";
 
 // Long explanatory memorandums are cut: the opening states the intent
 const MAX_DESCRIPTION_CHARS = 12_000;
@@ -29,7 +29,7 @@ L'explication est affichée sur une plateforme de vote : elle aide à comprendre
 
 <OUTPUT_FIELDS>
 - simpleSentence : une phrase de 20 mots maximum qui dit ce que le texte veut changer. Aucun nom d'institution, aucun sigle, aucun mot technique.
-- plainTitle : 80 caractères maximum, commence par un verbe à l'infinitif, décrit le mécanisme sans verbe chargé (pas de « punir », « sauver », « lutter contre »).
+- plainTitle : 80 caractères maximum, commence par un verbe à l'infinitif, décrit le mécanisme sans verbe chargé (pas de « sauver », « lutter contre »). « Punir » ou « sanctionner » sont autorisés seulement quand le texte crée ou modifie réellement une punition (amende, prison, interdiction), car c'est alors le mécanisme lui-même.
 - summary : 3 à 5 phrases courtes. D'abord ce que propose le texte, puis pourquoi selon les auteurs.
 - context (« Pour comprendre ») : 2 ou 3 phrases sur comment ça marche aujourd'hui, puis ce qui manque selon les auteurs. Appuie-toi d'abord sur le texte. Tu peux ajouter une notion générale et sûre que tout le monde devrait connaître (« la violence est déjà punie par la loi »), jamais un chiffre, une date, un nom de loi ou un fait précis absent du texte. Si tu n'es pas sûr de la situation actuelle, laisse ce champ vide.
 - changes : 2 ou 3 éléments. Chacun commence par un verbe à l'infinitif et dit seulement ce que le texte modifie, jamais pourquoi (pas de « pour... », « afin de... »).
