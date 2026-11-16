@@ -1,6 +1,6 @@
 // Published with the code on purpose: anyone can check how summaries are
 // written. Bump the version whenever the instructions change.
-export const SUMMARY_PROMPT_VERSION = "2026-11-16.6";
+export const SUMMARY_PROMPT_VERSION = "2026-11-16.7";
 
 // Long explanatory memorandums are cut: the opening states the intent
 const MAX_DESCRIPTION_CHARS = 12_000;
@@ -41,4 +41,26 @@ export function buildSummaryUserPrompt(title: string, description: string) {
       : description;
 
   return `Titre officiel : ${title}\n\nExposé des motifs :\n${excerpt}`;
+}
+
+// Second pass: the writer sometimes slips (an authors' claim stated as a
+// fact). A reviewer checks the draft against the source and fixes only that.
+export const REVIEW_SYSTEM_PROMPT = `Tu relis l'explication d'un texte déposé à l'Assemblée nationale, avant sa publication sur une plateforme de vote. Elle doit aider à comprendre, jamais orienter le vote.
+
+Tu reçois le texte source (titre officiel et exposé des motifs, écrit par les auteurs pour défendre leur proposition) et un brouillon d'explication. Vérifie chaque phrase du brouillon et corrige uniquement ce qui enfreint une de ces règles :
+1. Une affirmation, une opinion ou un constat des auteurs présenté comme un fait. Corrige en l'attribuant : « Selon les auteurs, ... ». Exemple : « une grande partie de la population n'a pas assez d'argent » devient « Selon les auteurs, beaucoup de personnes n'ont pas assez d'argent ».
+2. Un mot ou un adjectif qui juge, dramatise ou prend parti. Remplace-le par une formulation neutre.
+3. Un fait, un chiffre, une date ou un nom absent du texte source. Supprime-le. Seule tolérance : dans « Pour comprendre », une notion générale et sûre que tout le monde devrait connaître.
+4. Un mot technique, un sigle ou un nom d'institution sans explication. Remplace-le par des mots simples ou ajoute une courte explication.
+5. Dans la liste des changements, une raison ou un but (« pour... », « afin de... »). Retire-la : la liste dit seulement ce qui change.
+6. Un tiret long (—). Remplace-le.
+
+Ne réécris pas ce qui respecte déjà les règles. Garde le même style simple (une idée par phrase, des mots de tous les jours) et les mêmes limites de longueur. Réponds avec l'explication complète, corrigée.`;
+
+export function buildReviewUserPrompt(
+  title: string,
+  description: string,
+  draft: unknown
+) {
+  return `${buildSummaryUserPrompt(title, description)}\n\nBrouillon à relire :\n${JSON.stringify(draft, null, 2)}`;
 }

@@ -32,7 +32,7 @@ function readPreviousRun(): PrototypeFile | null {
   return JSON.parse(readFileSync(PROTOTYPE_FILE, "utf8")) as PrototypeFile;
 }
 // Spaces requests out to stay under the free tier rate limit
-const DELAY_MS = 1200;
+const DELAY_MS = 6000;
 
 async function main() {
   if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {

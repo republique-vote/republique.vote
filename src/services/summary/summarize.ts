@@ -2,7 +2,9 @@ import { google } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import { z } from "zod/v4";
 import {
+  buildReviewUserPrompt,
   buildSummaryUserPrompt,
+  REVIEW_SYSTEM_PROMPT,
   SUMMARY_SYSTEM_PROMPT,
 } from "@/services/summary/prompt";
 
@@ -52,15 +54,25 @@ export async function summarizeBill({
   title: string;
   description: string;
 }): Promise<BillSummary> {
-  const { output } = await generateText({
-    model: google(model),
-    system: SUMMARY_SYSTEM_PROMPT,
-    prompt: buildSummaryUserPrompt(title, description),
-    output: Output.object({ schema: billSummarySchema }),
-    temperature: 0.2,
-    // Retries with backoff, which also covers the free tier rate limit
-    maxRetries: 5,
-  });
+  const generate = (system: string, prompt: string) =>
+    generateText({
+      model: google(model),
+      system,
+      prompt,
+      output: Output.object({ schema: billSummarySchema }),
+      temperature: 0.2,
+      // Retries with backoff, which also covers the free tier rate limit
+      maxRetries: 5,
+    });
 
-  return output;
+  const { output: draft } = await generate(
+    SUMMARY_SYSTEM_PROMPT,
+    buildSummaryUserPrompt(title, description)
+  );
+  const { output: reviewed } = await generate(
+    REVIEW_SYSTEM_PROMPT,
+    buildReviewUserPrompt(title, description, draft)
+  );
+
+  return reviewed;
 }

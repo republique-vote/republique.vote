@@ -9,8 +9,9 @@ import {
 
 // Below this, the memorandum is too thin: a summary would mostly be invented
 const MIN_DESCRIPTION_CHARS = 300;
-// The Gemini free tier allows about 15 requests per minute
-const DEFAULT_DELAY_MS = 4500;
+// The Gemini free tier allows about 15 requests per minute, and each poll
+// takes two (draft, then review)
+const DEFAULT_DELAY_MS = 8000;
 
 function isRateLimited(err: unknown) {
   const error = err as {
