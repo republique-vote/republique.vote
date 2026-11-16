@@ -1,4 +1,4 @@
-import { formatDate } from "@republique/core";
+import { formatDay } from "@republique/core";
 import { ExternalLink } from "lucide-react";
 
 interface OfficialResultProps {
@@ -57,8 +57,9 @@ export function OfficialResult({
               total={officialTotal}
             />
           </div>
+          {/* The open data gives the day of the vote, not the time */}
           <p className="mt-3 text-muted-foreground text-xs">
-            {adopted ? "Adopté" : "Rejeté"} le {formatDate(scrutinDate)} (
+            {adopted ? "Adopté" : "Rejeté"} le {formatDay(scrutinDate)} (
             {officialTotal} votants)
           </p>
           {scrutinUrl && (
