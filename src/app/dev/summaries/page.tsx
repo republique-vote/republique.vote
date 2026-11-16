@@ -7,6 +7,7 @@ import {
   type PrototypeEntry,
   type PrototypeFile,
 } from "@/services/summary/prototype";
+import type { BillSummary } from "@/services/summary/summarize";
 
 export const dynamic = "force-dynamic";
 
@@ -96,22 +97,36 @@ function EntryRow({ entry }: { entry: PrototypeEntry }) {
           </Badge>
         </p>
         {entry.summary ? (
-          <>
-            <h2 className="font-semibold">{entry.summary.plainTitle}</h2>
-            <p className="text-sm">{entry.summary.summary}</p>
-            <p className="font-medium text-sm">
-              Ce que ça changerait concrètement
-            </p>
-            <ul className="list-disc space-y-1 pl-5 text-sm">
-              {entry.summary.changes.map((change) => (
-                <li key={change}>{change}</li>
-              ))}
-            </ul>
-          </>
+          <SummaryView summary={entry.summary} />
         ) : (
           <p className="text-destructive text-sm">{entry.error}</p>
         )}
+        {entry.previous?.summary ? (
+          <details className="border-border border-t pt-2 text-muted-foreground">
+            <summary className="cursor-pointer text-sm">
+              Version précédente (consignes du {entry.previous.promptVersion})
+            </summary>
+            <div className="mt-2 space-y-2">
+              <SummaryView summary={entry.previous.summary} />
+            </div>
+          </details>
+        ) : null}
       </section>
     </div>
+  );
+}
+
+function SummaryView({ summary }: { summary: BillSummary }) {
+  return (
+    <>
+      <h2 className="font-semibold">{summary.plainTitle}</h2>
+      <p className="text-sm">{summary.summary}</p>
+      <p className="font-medium text-sm">Ce que ça changerait concrètement</p>
+      <ul className="list-disc space-y-1 pl-5 text-sm">
+        {summary.changes.map((change) => (
+          <li key={change}>{change}</li>
+        ))}
+      </ul>
+    </>
   );
 }

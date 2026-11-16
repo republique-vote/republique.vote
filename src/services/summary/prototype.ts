@@ -9,6 +9,8 @@ export interface PrototypeEntry {
   durationMs: number;
   error: string | null;
   pollId: string;
+  // Summary from the previous run on the same bill, to compare prompt versions
+  previous?: { promptVersion: string; summary: BillSummary | null };
   sourceUrl: string | null;
   summary: BillSummary | null;
   title: string;

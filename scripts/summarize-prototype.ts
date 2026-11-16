@@ -1,5 +1,5 @@
 import "dotenv-flow/config";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import postgres from "postgres";
 import { env } from "../env";
@@ -7,10 +7,23 @@ import { SUMMARY_PROMPT_VERSION } from "../src/services/summary/prompt";
 import {
   PROTOTYPE_FILE,
   type PrototypeEntry,
+  type PrototypeFile,
 } from "../src/services/summary/prototype";
 import { summarizeBill } from "../src/services/summary/summarize";
 
-const SAMPLE_SIZE = Number(process.argv[2] ?? 20);
+const NUMBER_ARG = /^\d+$/;
+// --same reruns the bills of the previous run, to compare prompt versions
+const SAME_BILLS = process.argv.includes("--same");
+const SAMPLE_SIZE = Number(
+  process.argv.find((arg) => NUMBER_ARG.test(arg)) ?? 20
+);
+
+function readPreviousRun(): PrototypeFile | null {
+  if (!existsSync(PROTOTYPE_FILE)) {
+    return null;
+  }
+  return JSON.parse(readFileSync(PROTOTYPE_FILE, "utf8")) as PrototypeFile;
+}
 // Spaces requests out to stay under the free tier rate limit
 const DELAY_MS = 1200;
 
@@ -20,16 +33,39 @@ async function main() {
   }
   const model = process.env.SUMMARY_MODEL ?? "gemini-flash-lite-latest";
 
+  const previousRun = SAME_BILLS ? readPreviousRun() : null;
+  if (SAME_BILLS && !previousRun) {
+    throw new Error(`--same needs a previous run in ${PROTOTYPE_FILE}`);
+  }
+  const previousById = new Map(
+    (previousRun?.entries ?? []).map((e) => [e.pollId, e])
+  );
+
   const sql = postgres(env.DATABASE_URL);
-  // Random bills with a real explanatory memorandum, short and long alike
-  const polls = await sql<
-    { id: string; title: string; description: string; source_url: string }[]
-  >`
-    select id, title, description, source_url from poll
-    where type = 'law' and length(description) > 500
-    order by random() limit ${SAMPLE_SIZE}
-  `;
+  interface Row {
+    description: string;
+    id: string;
+    source_url: string;
+    title: string;
+  }
+  const polls = previousRun
+    ? await sql<Row[]>`
+        select id, title, description, source_url from poll
+        where id in ${sql([...previousById.keys()])}
+      `
+    : // Random bills with a real explanatory memorandum, short and long alike
+      await sql<Row[]>`
+        select id, title, description, source_url from poll
+        where type = 'law' and length(description) > 500
+        order by random() limit ${SAMPLE_SIZE}
+      `;
   await sql.end();
+  const previousFor = (pollId: string) => {
+    const previous = previousById.get(pollId);
+    return previous && previousRun
+      ? { promptVersion: previousRun.promptVersion, summary: previous.summary }
+      : undefined;
+  };
 
   console.log(`[summary] ${polls.length} bills, model ${model}`);
   const entries: PrototypeEntry[] = [];
@@ -48,6 +84,7 @@ async function main() {
         description: p.description,
         sourceUrl: p.source_url,
         summary,
+        previous: previousFor(p.id),
         error: null,
         durationMs: Date.now() - start,
       });
@@ -61,6 +98,7 @@ async function main() {
         description: p.description,
         sourceUrl: p.source_url,
         summary: null,
+        previous: previousFor(p.id),
         error: (err as Error).message,
         durationMs: Date.now() - start,
       });
