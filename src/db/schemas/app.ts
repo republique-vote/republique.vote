@@ -327,3 +327,21 @@ export const congressVote = pgTable("congress_vote", {
     enum: ["for", "against", "abstention", "nonVoting"],
   }).notNull(),
 });
+
+// Official result of a past national referendum, as proclaimed
+export const referendumResult = pgTable("referendum_result", {
+  pollId: text("poll_id")
+    .primaryKey()
+    .references(() => poll.id, { onDelete: "cascade" }),
+  date: text("date").notNull(),
+  registered: integer("registered").notNull(),
+  voters: integer("voters").notNull(),
+  blankAndNull: integer("blank_and_null").notNull(),
+  expressed: integer("expressed").notNull(),
+  yes: integer("yes").notNull(),
+  no: integer("no").notNull(),
+  // Territory covered by the totals, when it needs explaining
+  scopeNote: text("scope_note"),
+  // Proclamation of the results
+  sourceUrl: text("source_url").notNull(),
+});

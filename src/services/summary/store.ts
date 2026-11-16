@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { poll, pollSummary } from "@/db/schema";
+import { poll, pollSummary, referendumResult } from "@/db/schema";
 import { SUMMARY_PROMPT_VERSION } from "@/services/summary/prompt";
 import {
   DEFAULT_SUMMARY_MODEL,
@@ -32,9 +32,13 @@ function findPendingPolls(limit: number) {
       })
       .from(poll)
       .leftJoin(pollSummary, eq(pollSummary.pollId, poll.id))
+      .leftJoin(referendumResult, eq(referendumResult.pollId, poll.id))
       .where(
         and(
           sql`length(${poll.description}) >= ${MIN_DESCRIPTION_CHARS}`,
+          // Past referendums show their official question, the prompt is
+          // written for bills
+          isNull(referendumResult.pollId),
           or(
             isNull(pollSummary.pollId),
             ne(pollSummary.promptVersion, SUMMARY_PROMPT_VERSION)

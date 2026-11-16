@@ -24,6 +24,7 @@ pnpm seed         # Seed database with test polls
 pnpm sync:assembly # Import bills and votes from the Assemblée nationale open data (also runs every 6h when CRON_SECRET is set)
 pnpm sync:journeys # Refresh the path of each bill in Parliament (readings, joint committee, Constitutional Council, promulgation), also part of sync:assembly
 pnpm import:congress # Import past constitutional revisions voted by the Congrès (list in the script), with every vote on them
+pnpm seed:referendums # Create or update the national referendums of the Fifth Republic with their official results (also run by prestart)
 pnpm sync:senate   # Add the Senate's public vote on the whole text and each senator's vote to the bills (data.senat.fr, also part of sync:assembly)
 pnpm extract:hemicycle # Regenerate the seat plans of both hemicycles from the Assemblée and Senate websites
 pnpm summarize    # Generate missing plain-language summaries with Gemini (needs GOOGLE_GENERATIVE_AI_API_KEY, also runs after each 6h sync)

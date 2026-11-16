@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "pnpm --filter @republique/core build && next build",
-    "prestart": "npx drizzle-kit push --force && tsx scripts/seed.ts",
+    "prestart": "npx drizzle-kit push --force && tsx scripts/seed.ts && tsx scripts/seed-referendums.ts",
     "start": "next start",
     "lint": "ultracite check",
     "lint:fix": "ultracite fix",
@@ -16,6 +16,7 @@
     "sync:senate": "tsx scripts/sync-senate.ts",
     "sync:journeys": "tsx scripts/sync-journeys.ts",
     "import:congress": "tsx scripts/import-congress-history.ts",
+    "seed:referendums": "tsx scripts/seed-referendums.ts",
     "extract:hemicycle": "tsx scripts/extract-hemicycle.ts && tsx scripts/extract-senate-hemicycle.ts",
     "summarize": "tsx scripts/summarize.ts",
     "summarize:prototype": "tsx scripts/summarize-prototype.ts",
