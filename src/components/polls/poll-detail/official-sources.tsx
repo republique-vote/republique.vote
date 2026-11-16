@@ -28,7 +28,12 @@ export function OfficialSources({
     <section className="mt-4 space-y-2 border border-border p-4">
       <h2 className="font-medium text-sm">Sources officielles</h2>
       {links.map((link) => (
-        <Button asChild className="w-full" key={link.href} variant="outline">
+        <Button
+          asChild
+          className="w-full justify-start"
+          key={link.href}
+          variant="outline"
+        >
           <a href={link.href} rel="noopener noreferrer" target="_blank">
             <ExternalLink className="mr-1.5 h-4 w-4" />
             {link.label}
