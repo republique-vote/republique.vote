@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type SeatPosition = "for" | "against" | "abstention" | "nonVoting" | "absent";
 
@@ -232,19 +237,28 @@ export function DeputyHemicycle({
             />
           ))}
         </svg>
+        {/* One tooltip for the whole chart, anchored on the active seat: a
+            tooltip per seat would mean hundreds of instances */}
         {activeSeat ? (
-          <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap border border-border bg-popover px-2.5 py-1.5 text-popover-foreground text-xs shadow-md"
-            style={{
-              left: `${((activeSeat.x - viewBox.x) / viewBox.width) * 100}%`,
-              top: `calc(${((activeSeat.y - viewBox.y) / viewBox.height) * 100}% - ${seatRadius + 4}px)`,
-            }}
-          >
-            <p className="font-medium">{activeSeat.label}</p>
-            <p className="text-muted-foreground">
-              {activeSeat.groupName} · {POSITION_LABELS[activeSeat.position]}
-            </p>
-          </div>
+          <Tooltip key={active} open>
+            <TooltipTrigger asChild>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute size-0"
+                style={{
+                  left: `${((activeSeat.x - viewBox.x) / viewBox.width) * 100}%`,
+                  top: `${((activeSeat.y - viewBox.y - seatRadius) / viewBox.height) * 100}%`,
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent className="pointer-events-none" sideOffset={4}>
+              <p>
+                <span className="font-medium">{activeSeat.label}</span>
+                <br />
+                {activeSeat.groupName} · {POSITION_LABELS[activeSeat.position]}
+              </p>
+            </TooltipContent>
+          </Tooltip>
         ) : null}
       </div>
 
