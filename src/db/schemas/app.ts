@@ -134,6 +134,7 @@ export const pollSummary = pgTable("poll_summary", {
   pollId: text("poll_id")
     .primaryKey()
     .references(() => poll.id, { onDelete: "cascade" }),
+  simpleSentence: text("simple_sentence").notNull(),
   plainTitle: text("plain_title").notNull(),
   summary: text("summary").notNull(),
   changes: jsonb("changes").$type<string[]>().notNull(),

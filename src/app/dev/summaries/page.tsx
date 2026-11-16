@@ -7,6 +7,11 @@ import {
   type PrototypeEntry,
   type PrototypeFile,
 } from "@/services/summary/prototype";
+import {
+  readabilityLabel,
+  readabilityScore,
+  summaryReadability,
+} from "@/services/summary/readability";
 import type { BillSummary } from "@/services/summary/summarize";
 
 export const dynamic = "force-dynamic";
@@ -73,6 +78,9 @@ function EntryRow({ entry }: { entry: PrototypeEntry }) {
           <Badge variant="outline">
             {entry.description.length.toLocaleString("fr-FR")} caractères
           </Badge>
+          <Badge variant="outline">
+            Lisibilité {readabilityScore(entry.description.slice(0, 3000))}
+          </Badge>
         </p>
         <h2 className="font-semibold">{entry.title}</h2>
         <p className="whitespace-pre-line text-muted-foreground text-sm">
@@ -116,9 +124,22 @@ function EntryRow({ entry }: { entry: PrototypeEntry }) {
   );
 }
 
-function SummaryView({ summary }: { summary: BillSummary }) {
+type AnySummary = Omit<BillSummary, "simpleSentence"> & {
+  simpleSentence?: string;
+};
+
+function SummaryView({ summary }: { summary: AnySummary }) {
+  const score = summaryReadability(summary);
   return (
     <>
+      <Badge variant="outline">
+        Lisibilité {score} ({readabilityLabel(score)})
+      </Badge>
+      {summary.simpleSentence ? (
+        <p className="border-primary border-l-2 pl-3 font-medium">
+          {summary.simpleSentence}
+        </p>
+      ) : null}
       <h2 className="font-semibold">{summary.plainTitle}</h2>
       <p className="text-sm">{summary.summary}</p>
       <p className="font-medium text-sm">Ce que ça changerait concrètement</p>

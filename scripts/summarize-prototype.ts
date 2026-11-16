@@ -10,6 +10,10 @@ import {
   type PrototypeFile,
 } from "../src/services/summary/prototype";
 import {
+  readabilityScore,
+  summaryReadability,
+} from "../src/services/summary/readability";
+import {
   DEFAULT_SUMMARY_MODEL,
   summarizeBill,
 } from "../src/services/summary/summarize";
@@ -125,6 +129,20 @@ async function main() {
     )
   );
   console.log(`[summary] Written to ${PROTOTYPE_FILE}`);
+
+  const average = (scores: number[]) =>
+    scores.length
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : null;
+  const current = entries.flatMap((e) =>
+    e.summary ? [summaryReadability(e.summary)] : []
+  );
+  const previous = entries.flatMap((e) =>
+    e.previous?.summary ? [summaryReadability(e.previous.summary)] : []
+  );
+  console.log(
+    `[summary] Average readability: ${average(current)} (previous run: ${average(previous) ?? "none"}), original memorandums: ${average(entries.map((e) => readabilityScore(e.description.slice(0, 3000))))}`
+  );
 }
 
 main().catch((err) => {

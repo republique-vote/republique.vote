@@ -7,6 +7,11 @@ import {
 } from "@/services/summary/prompt";
 
 export const billSummarySchema = z.object({
+  simpleSentence: z
+    .string()
+    .describe(
+      "Une seule phrase très simple, 20 mots maximum, qu'un enfant de 10 ans comprend, qui dit ce que le texte veut changer"
+    ),
   plainTitle: z
     .string()
     .describe(
@@ -15,14 +20,14 @@ export const billSummarySchema = z.object({
   summary: z
     .string()
     .describe(
-      "3 ou 4 phrases qui expliquent ce que propose le texte et pourquoi selon ses auteurs"
+      "3 à 5 phrases courtes en FALC : ce que propose le texte, puis pourquoi selon ses auteurs"
     ),
   changes: z
     .array(z.string())
     .min(1)
     .max(5)
     .describe(
-      "2 ou 3 phrases courtes, chacune décrivant un changement concret que le texte propose"
+      "2 ou 3 phrases courtes commençant par un verbe à l'infinitif, chacune décrivant un changement concret que le texte propose"
     ),
 });
 

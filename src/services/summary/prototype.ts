@@ -10,7 +10,12 @@ export interface PrototypeEntry {
   error: string | null;
   pollId: string;
   // Summary from the previous run on the same bill, to compare prompt versions
-  previous?: { promptVersion: string; summary: BillSummary | null };
+  previous?: {
+    promptVersion: string;
+    summary:
+      | (Omit<BillSummary, "simpleSentence"> & { simpleSentence?: string })
+      | null;
+  };
   sourceUrl: string | null;
   summary: BillSummary | null;
   title: string;
