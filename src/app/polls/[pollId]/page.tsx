@@ -4,7 +4,10 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { DeputyHemicycle } from "@/components/polls/poll-detail/deputy-hemicycle";
-import { OfficialResult } from "@/components/polls/poll-detail/official-result";
+import {
+  type ChamberVote,
+  OfficialResult,
+} from "@/components/polls/poll-detail/official-result";
 import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
 import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
@@ -36,6 +39,42 @@ function scrutinPageUrl(uid: string | null) {
   return match
     ? `https://www.assemblee-nationale.fr/dyn/${match[1]}/scrutins/${match[2]}`
     : null;
+}
+
+// "2025-95" → page of the 95th public vote of the 2025-2026 session
+function senateScrutinUrl(ref: string | null) {
+  const [session, number] = ref?.split("-") ?? [];
+  return session && number
+    ? `https://www.senat.fr/scrutin-public/${session}/scr${session}-${number}.html`
+    : null;
+}
+
+type LegislativeFile = typeof legislativeFile.$inferSelect;
+
+function deputiesVote(lf: LegislativeFile): ChamberVote | null {
+  if (lf.officialFor === null) {
+    return null;
+  }
+  return {
+    for: lf.officialFor,
+    against: lf.officialAgainst ?? 0,
+    abstentions: lf.officialAbstentions ?? 0,
+    date: lf.scrutinDate ?? "",
+    url: scrutinPageUrl(lf.scrutinUid),
+  };
+}
+
+function senatorsVote(lf: LegislativeFile): ChamberVote | null {
+  if (lf.senateFor === null) {
+    return null;
+  }
+  return {
+    for: lf.senateFor,
+    against: lf.senateAgainst ?? 0,
+    abstentions: lf.senateAbstentions ?? 0,
+    date: lf.senateScrutinDate ?? "",
+    url: senateScrutinUrl(lf.senateScrutinRef),
+  };
 }
 
 export async function generateMetadata({
@@ -168,7 +207,9 @@ export default async function PollDetailPage({
               const lf = await db.query.legislativeFile.findFirst({
                 where: eq(legislativeFile.pollId, pollId),
               });
-              if (!lf || lf.officialFor === null) {
+              const deputies = lf ? deputiesVote(lf) : null;
+              const senators = lf ? senatorsVote(lf) : null;
+              if (!(deputies || senators)) {
                 return null;
               }
               const citizenFor = results?.results.find(
@@ -192,11 +233,8 @@ export default async function PollDetailPage({
                         }
                       : null
                   }
-                  officialAbstentions={lf.officialAbstentions || 0}
-                  officialAgainst={lf.officialAgainst || 0}
-                  officialFor={lf.officialFor}
-                  scrutinDate={lf.scrutinDate || ""}
-                  scrutinUrl={scrutinPageUrl(lf.scrutinUid)}
+                  deputies={deputies}
+                  senators={senators}
                 />
               );
             })()
