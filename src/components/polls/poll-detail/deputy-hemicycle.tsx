@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 
-type Position = "for" | "against" | "abstention" | "nonVoting";
+type SeatPosition = "for" | "against" | "abstention" | "nonVoting" | "absent";
 
 export interface HemicycleGroup {
   abbrev: string | null;
@@ -23,10 +23,8 @@ export interface HemicycleVote {
   groupRef: string;
   id: string;
   lastName: string;
-  position: Position;
+  position: SeatPosition;
 }
-
-type SeatPosition = Position | "absent";
 
 interface Seat {
   groupName: string;
@@ -51,6 +49,14 @@ const POSITION_LABELS: Record<SeatPosition, string> = {
   abstention: "Abstention",
   nonVoting: "Non votant",
   absent: "Absent",
+};
+
+const SEARCH_RESULTS: Record<SeatPosition, string> = {
+  for: " a voté pour",
+  against: " a voté contre",
+  abstention: " s'est abstenu",
+  nonVoting: " n'a pas pris part au vote",
+  absent: " était absent",
 };
 
 const POSITION_CLASSES: Record<SeatPosition, string> = {
@@ -134,7 +140,7 @@ export function DeputyHemicycle({
       const members = votes
         .filter((v) => v.groupRef === group.groupRef)
         .map((v) => ({
-          position: v.position as SeatPosition,
+          position: v.position,
           voterId: v.id,
           label: fullName(v),
         }));
@@ -144,7 +150,8 @@ export function DeputyHemicycle({
         ...Array.from({ length: absent }, () => ({
           position: "absent" as const,
           voterId: null,
-          label: "Absent",
+          // The group roster could not be matched: no name rather than a wrong one
+          label: "Député absent",
         })),
       ]
         .sort(
@@ -258,6 +265,11 @@ export function DeputyHemicycle({
         ))}
       </div>
 
+      <p className="text-muted-foreground text-xs leading-relaxed">
+        Un député absent n'est pas forcément inactif : il peut être en
+        commission, en circonscription ou en déplacement au moment du vote.
+      </p>
+
       <div className="space-y-2">
         <Input
           aria-label="Chercher un député"
@@ -268,15 +280,12 @@ export function DeputyHemicycle({
         {matches.slice(0, 5).map((m) => (
           <p className="text-sm" key={m.id}>
             <span className="font-medium">{fullName(m)}</span>
-            {" a voté "}
-            <span className="font-medium">
-              {POSITION_LABELS[m.position].toLowerCase()}
-            </span>
+            {SEARCH_RESULTS[m.position]}
           </p>
         ))}
         {normalizedQuery.length >= 2 && matches.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            Aucun député de ce nom n'a pris part au vote.
+            Aucun député de ce nom dans l'hémicycle ce jour-là.
           </p>
         ) : null}
       </div>

@@ -224,7 +224,9 @@ export const scrutinGroup = pgTable(
 );
 
 // Each member's position on the official scrutin, as published by the
-// Assemblée nationale
+// Assemblée nationale. "absent" is deduced: group members on the scrutin date
+// who are not listed, stored only when the deduced group size matches the
+// published one
 export const scrutinVote = pgTable(
   "scrutin_vote",
   {
@@ -236,7 +238,7 @@ export const scrutinVote = pgTable(
       .references(() => deputy.id),
     groupRef: text("group_ref").notNull(),
     position: text("position", {
-      enum: ["for", "against", "abstention", "nonVoting"],
+      enum: ["for", "against", "abstention", "nonVoting", "absent"],
     }).notNull(),
     seat: integer("seat"),
   },

@@ -13,6 +13,26 @@ import { detectLegislature } from "./legislature";
 import { extractScrutinsArchive } from "./scrutins";
 
 type Position = "for" | "against" | "abstention" | "nonVoting";
+type Actors = Awaited<ReturnType<typeof loadActors>>["actors"];
+
+// Members of each political group on a given day, from the dated group
+// mandates of the actors dataset
+function groupMembersAt(actors: Actors, date: string) {
+  const day = date.slice(0, 10);
+  const members = new Map<string, string[]>();
+  for (const [id, actor] of actors) {
+    const mandate = actor.groups.find(
+      (m) => m.start <= day && (m.end === null || m.end >= day)
+    );
+    if (mandate) {
+      members.set(mandate.organeRef, [
+        ...(members.get(mandate.organeRef) ?? []),
+        id,
+      ]);
+    }
+  }
+  return members;
+}
 
 // Keys of the open data nominative count, mapped to our positions
 const POSITION_KEYS: [string, Position][] = [
@@ -50,6 +70,90 @@ function seatNumber(voter: RawVoter) {
   return Number.isFinite(seat) && seat > 0 ? seat : null;
 }
 
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+// One political group of a scrutin: its counts, its listed members, then its
+// absent members when they can be named reliably
+async function storeGroup(
+  tx: Transaction,
+  pollId: string,
+  g: RawGroup,
+  { actors, groups }: Awaited<ReturnType<typeof loadActors>>,
+  membersByGroup: Map<string, string[]>
+) {
+  const voters = POSITION_KEYS.flatMap(([key, position]) =>
+    asArray(g.vote.decompteNominatif[key]?.votant).map((voter) => ({
+      voter,
+      position,
+    }))
+  );
+  const seats = voters
+    .map(({ voter }) => seatNumber(voter))
+    .filter((seat): seat is number => seat !== null);
+  const count = (position: Position) =>
+    voters.filter((v) => v.position === position).length;
+  const group = groups.get(g.organeRef);
+
+  await tx.insert(scrutinGroup).values({
+    pollId,
+    groupRef: g.organeRef,
+    name: group?.name ?? "Groupe inconnu",
+    abbrev: group?.abbrev ?? null,
+    color: group?.color ?? null,
+    seatOrder: seats.length
+      ? Math.round(seats.reduce((a, b) => a + b, 0) / seats.length)
+      : 0,
+    members: Number(g.nombreMembresGroupe) || voters.length,
+    forCount: count("for"),
+    againstCount: count("against"),
+    abstentionCount: count("abstention"),
+    nonVotingCount: count("nonVoting"),
+  });
+
+  for (const { voter, position } of voters) {
+    const actor = actors.get(voter.acteurRef);
+    if (!actor) {
+      continue;
+    }
+    await upsertDeputy(tx, voter.acteurRef, actor);
+    await tx
+      .insert(scrutinVote)
+      .values({
+        pollId,
+        deputyId: voter.acteurRef,
+        groupRef: g.organeRef,
+        position,
+        seat: seatNumber(voter),
+      })
+      .onConflictDoNothing();
+  }
+
+  // Name the absent only when the deduced group matches the published
+  // size: otherwise a wrong name could be shown as absent
+  const listed = new Set(voters.map(({ voter }) => voter.acteurRef));
+  const groupMembers = membersByGroup.get(g.organeRef) ?? [];
+  if (groupMembers.length !== Number(g.nombreMembresGroupe)) {
+    return;
+  }
+  for (const id of groupMembers) {
+    const actor = actors.get(id);
+    if (listed.has(id) || !actor) {
+      continue;
+    }
+    await upsertDeputy(tx, id, actor);
+    await tx
+      .insert(scrutinVote)
+      .values({
+        pollId,
+        deputyId: id,
+        groupRef: g.organeRef,
+        position: "absent",
+        seat: null,
+      })
+      .onConflictDoNothing();
+  }
+}
+
 // Stores every member's position on the official scrutin of the polls that
 // have one and no nominative votes yet
 export async function syncScrutinVotes(): Promise<number> {
@@ -73,11 +177,13 @@ export async function syncScrutinVotes(): Promise<number> {
 
   const legislature = await detectLegislature();
   const scrutinsDir = await extractScrutinsArchive(legislature);
-  const { actors, groups } = await loadActors(legislature);
+  const actorData = await loadActors(legislature);
+  const { actors } = actorData;
 
   let filled = 0;
   for (const p of polls) {
     let rawGroups: RawGroup[];
+    let scrutinDate: string;
     try {
       const { scrutin } = JSON.parse(
         await readFile(join(scrutinsDir, `${p.scrutinUid}.json`), "utf-8")
@@ -85,6 +191,7 @@ export async function syncScrutinVotes(): Promise<number> {
       rawGroups = asArray<RawGroup>(
         scrutin.ventilationVotes?.organe?.groupes?.groupe
       );
+      scrutinDate = scrutin.dateScrutin;
     } catch {
       // Scrutin from another legislature, not in this archive
       continue;
@@ -93,54 +200,11 @@ export async function syncScrutinVotes(): Promise<number> {
       continue;
     }
 
+    const membersByGroup = groupMembersAt(actors, scrutinDate);
+
     await db.transaction(async (tx) => {
       for (const g of rawGroups) {
-        const voters = POSITION_KEYS.flatMap(([key, position]) =>
-          asArray(g.vote.decompteNominatif[key]?.votant).map((voter) => ({
-            voter,
-            position,
-          }))
-        );
-        const seats = voters
-          .map(({ voter }) => seatNumber(voter))
-          .filter((seat): seat is number => seat !== null);
-        const count = (position: Position) =>
-          voters.filter((v) => v.position === position).length;
-        const group = groups.get(g.organeRef);
-
-        await tx.insert(scrutinGroup).values({
-          pollId: p.pollId,
-          groupRef: g.organeRef,
-          name: group?.name ?? "Groupe inconnu",
-          abbrev: group?.abbrev ?? null,
-          color: group?.color ?? null,
-          seatOrder: seats.length
-            ? Math.round(seats.reduce((a, b) => a + b, 0) / seats.length)
-            : 0,
-          members: Number(g.nombreMembresGroupe) || voters.length,
-          forCount: count("for"),
-          againstCount: count("against"),
-          abstentionCount: count("abstention"),
-          nonVotingCount: count("nonVoting"),
-        });
-
-        for (const { voter, position } of voters) {
-          const actor = actors.get(voter.acteurRef);
-          if (!actor) {
-            continue;
-          }
-          await upsertDeputy(tx, voter.acteurRef, actor);
-          await tx
-            .insert(scrutinVote)
-            .values({
-              pollId: p.pollId,
-              deputyId: voter.acteurRef,
-              groupRef: g.organeRef,
-              position,
-              seat: seatNumber(voter),
-            })
-            .onConflictDoNothing();
-        }
+        await storeGroup(tx, p.pollId, g, actorData, membersByGroup);
       }
     });
     filled++;
