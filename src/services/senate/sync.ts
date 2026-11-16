@@ -16,9 +16,11 @@ const TABLES = new Set(["loi", "lecture", "lecass", "date_seance", "scr"]);
 const COPY_HEADER = /^COPY (\w+) \(([^)]+)\) FROM stdin;$/;
 const ESCAPE = /\\(.)/g;
 const ESCAPES: Record<string, string> = { t: "\t", n: "\n", r: "\r" };
-// "Sur l'ensemble du projet de loi…", but not "sur l'ensemble de la troisième
-// partie" of a budget bill
-const WHOLE_TEXT = /^sur l['’]ensemble/i;
+// "Sur l'ensemble du projet de loi…", or for a single-article text "sur
+// l'article unique constituant l'ensemble…", but not "sur l'ensemble de la
+// troisième partie" of a budget bill
+const WHOLE_TEXT =
+  /^sur l['’](ensemble|article unique constituant l['’]ensemble)/i;
 const PART_OF_TEXT = /^sur l['’]ensemble de la [a-zé]+ partie/i;
 
 // Both URL forms exist: /dossier-legislatif/ and the older /dossierleg/
