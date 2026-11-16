@@ -1,5 +1,6 @@
 import "dotenv-flow/config";
 import { syncAuthors } from "../src/services/assembly/authors";
+import { syncCongress } from "../src/services/assembly/congress";
 import { syncJourneys } from "../src/services/assembly/journey";
 import { syncScrutins } from "../src/services/assembly/scrutins";
 import { syncDossiers } from "../src/services/assembly/sync";
@@ -18,6 +19,9 @@ async function main() {
 
   const updatedJourneys = await syncJourneys();
   console.log(`[assembly] Path updated for ${updatedJourneys} bills`);
+
+  const congressVotes = await syncCongress();
+  console.log(`[assembly] Congrès vote added to ${congressVotes} bills`);
 
   const pollsWithAuthors = await syncAuthors();
   console.log(`[assembly] Authors added to ${pollsWithAuthors} polls`);

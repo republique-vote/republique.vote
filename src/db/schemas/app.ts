@@ -118,6 +118,14 @@ export const legislativeFile = pgTable("legislative_file", {
   senateScrutinDate: text("senate_scrutin_date"),
   // Session and number of the scrutin, e.g. "2025-95"
   senateScrutinRef: text("senate_scrutin_ref"),
+  // Vote of the Congrès (both chambers at Versailles) on a constitutional
+  // revision, which needs three fifths of the votes cast
+  congressFor: integer("congress_for"),
+  congressAgainst: integer("congress_against"),
+  congressAbstentions: integer("congress_abstentions"),
+  congressRequired: integer("congress_required"),
+  congressScrutinDate: text("congress_scrutin_date"),
+  congressScrutinUid: text("congress_scrutin_uid"),
   syncedAt: text("synced_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
@@ -212,27 +220,23 @@ export const pollAuthor = pgTable(
 
 // How each political group voted on the official scrutin of a poll. Absent
 // members are the group size minus everyone listed.
-export const scrutinGroup = pgTable(
-  "scrutin_group",
-  {
-    pollId: text("poll_id")
-      .notNull()
-      .references(() => poll.id, { onDelete: "cascade" }),
-    groupRef: text("group_ref").notNull(),
-    name: text("name").notNull(),
-    abbrev: text("abbrev"),
-    color: text("color"),
-    // Mean seat number: seats are numbered from the right of the hemicycle,
-    // so sorting by it descending gives the real left-to-right placement
-    seatOrder: integer("seat_order").notNull(),
-    members: integer("members").notNull(),
-    forCount: integer("for_count").notNull(),
-    againstCount: integer("against_count").notNull(),
-    abstentionCount: integer("abstention_count").notNull(),
-    nonVotingCount: integer("non_voting_count").notNull(),
-  },
-  (t) => [unique().on(t.pollId, t.groupRef)]
-);
+export const scrutinGroup = pgTable("scrutin_group", {
+  pollId: text("poll_id")
+    .notNull()
+    .references(() => poll.id, { onDelete: "cascade" }),
+  groupRef: text("group_ref").notNull(),
+  name: text("name").notNull(),
+  abbrev: text("abbrev"),
+  color: text("color"),
+  // Mean seat number: seats are numbered from the right of the hemicycle,
+  // so sorting by it descending gives the real left-to-right placement
+  seatOrder: integer("seat_order").notNull(),
+  members: integer("members").notNull(),
+  forCount: integer("for_count").notNull(),
+  againstCount: integer("against_count").notNull(),
+  abstentionCount: integer("abstention_count").notNull(),
+  nonVotingCount: integer("non_voting_count").notNull(),
+});
 
 // Each member's position on the official scrutin, as published by the
 // Assemblée nationale. "absent" is deduced: group members on the scrutin date
@@ -270,23 +274,56 @@ export const senator = pgTable("senator", {
 
 // How each senator voted on the latest public vote of the Senate on the whole
 // text, with their political group on that day and their seat when published
-export const senateVote = pgTable(
-  "senate_vote",
-  {
-    pollId: text("poll_id")
-      .notNull()
-      .references(() => poll.id, { onDelete: "cascade" }),
-    // Scrutin the rows come from, e.g. "2025-95": a later reading replaces them
-    scrutinRef: text("scrutin_ref").notNull(),
-    senatorId: text("senator_id")
-      .notNull()
-      .references(() => senator.id),
-    groupCode: text("group_code").notNull(),
-    groupName: text("group_name").notNull(),
-    position: text("position", {
-      enum: ["for", "against", "abstention", "nonVoting"],
-    }).notNull(),
-    seat: integer("seat"),
-  },
-  (t) => [unique().on(t.pollId, t.senatorId)]
-);
+export const senateVote = pgTable("senate_vote", {
+  // "pollId:senatorId": a single-column key, as drizzle-kit push reads
+  // two-column unique constraints in a varying column order and recreates them
+  id: text("id").primaryKey(),
+  pollId: text("poll_id")
+    .notNull()
+    .references(() => poll.id, { onDelete: "cascade" }),
+  // Scrutin the rows come from, e.g. "2025-95": a later reading replaces them
+  scrutinRef: text("scrutin_ref").notNull(),
+  senatorId: text("senator_id")
+    .notNull()
+    .references(() => senator.id),
+  groupCode: text("group_code").notNull(),
+  groupName: text("group_name").notNull(),
+  position: text("position", {
+    enum: ["for", "against", "abstention", "nonVoting"],
+  }).notNull(),
+  seat: integer("seat"),
+});
+
+// Political groups of deputies and senators on a vote of the Congrès
+export const congressGroup = pgTable("congress_group", {
+  // "pollId:groupRef", see senateVote
+  id: text("id").primaryKey(),
+  pollId: text("poll_id")
+    .notNull()
+    .references(() => poll.id, { onDelete: "cascade" }),
+  groupRef: text("group_ref").notNull(),
+  name: text("name").notNull(),
+  color: text("color"),
+  members: integer("members").notNull(),
+  forCount: integer("for_count").notNull(),
+  againstCount: integer("against_count").notNull(),
+  abstentionCount: integer("abstention_count").notNull(),
+  nonVotingCount: integer("non_voting_count").notNull(),
+});
+
+// How each member of parliament voted at the Congrès. Deputies and senators
+// share the actors of the Assemblée open data, stored in the deputy table
+export const congressVote = pgTable("congress_vote", {
+  // "pollId:actorId", see senateVote
+  id: text("id").primaryKey(),
+  pollId: text("poll_id")
+    .notNull()
+    .references(() => poll.id, { onDelete: "cascade" }),
+  actorId: text("actor_id")
+    .notNull()
+    .references(() => deputy.id),
+  groupRef: text("group_ref").notNull(),
+  position: text("position", {
+    enum: ["for", "against", "abstention", "nonVoting"],
+  }).notNull(),
+});

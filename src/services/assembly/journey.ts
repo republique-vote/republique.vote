@@ -42,6 +42,8 @@ const OTHER_STAGES: Record<string, string> = {
   CC: "Conseil constitutionnel",
   PROM: "Promulgation",
 };
+// The Congrès stage carries a year: "CG22"
+const CONGRESS_CODE = /^CG\d*$/;
 // "adopté, dans les conditions prévues à l'article 45, alinéa 3, de la
 // Constitution" only says the text comes from a joint committee
 const DECISION_CODE = /-(DEBATS-DEC|DEC|CONCLUSION)$/;
@@ -72,6 +74,7 @@ const EVENTS: [suffix: RegExp, label: string][] = [
   [/-DEBATS(-AN|-SN)?-SEANCE$/, "Débat en séance"],
   [/^CMP-SAISIE$/, "Convocation de la commission"],
   [/^CC-SAISIE/, "Saisine"],
+  [/^CG\d*-CONV$/, "Convocation par le Président de la République"],
   [/-RTRINI$/, "Texte retiré par son auteur"],
 ];
 
@@ -80,6 +83,9 @@ function stageTitle(code: string, act: RawAct) {
   if (reading) {
     const chamber = reading[1] === "AN" ? "Assemblée nationale" : "Sénat";
     return `${chamber} · ${READINGS[reading[2]]}`;
+  }
+  if (CONGRESS_CODE.test(code)) {
+    return "Congrès du Parlement";
   }
   return OTHER_STAGES[code] ?? act.libelleActe?.nomCanonique ?? code;
 }
@@ -109,7 +115,12 @@ function stageOutcome(code: string, acts: RawAct[]) {
 // Council and promulgation, in the order the open data lists them
 export function readJourney(stages: RawAct[]): JourneyStep[] {
   return stages
-    .filter((s) => READING_CODE.test(s.codeActe) || s.codeActe in OTHER_STAGES)
+    .filter(
+      (s) =>
+        READING_CODE.test(s.codeActe) ||
+        CONGRESS_CODE.test(s.codeActe) ||
+        s.codeActe in OTHER_STAGES
+    )
     .map((stage) => {
       const acts = descendants(stage);
       const events = EVENTS.flatMap(([pattern, label]) => {
@@ -165,10 +176,9 @@ function stableJson(value: unknown): string {
 }
 
 // Refreshes the path of every imported bill: stages move on between syncs
-export async function syncJourneys(): Promise<number> {
-  const legislature = await detectLegislature();
+export async function syncJourneys(legislature?: string): Promise<number> {
   const dir = join(
-    await extractDossiersArchive(legislature),
+    await extractDossiersArchive(legislature ?? (await detectLegislature())),
     "json",
     "dossierParlementaire"
   );

@@ -308,10 +308,34 @@ export async function unzipTo(zipPath: string, name: string) {
 }
 
 // Bills (dossiers) and their documents, which also list authors
+// One folder per legislature: an older one must never mix with the current
+// one, whose every votable dossier gets imported
 export async function extractDossiersArchive(legislature: string) {
   const url = `${BASE_URL}/${legislature}/loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip`;
-  const zipPath = await downloadAndExtractZip(url);
-  return unzipTo(zipPath, "dossiers");
+  const zipPath = await downloadAndExtractZip(
+    url,
+    `dossiers-${legislature}.zip`
+  );
+  return unzipTo(zipPath, `dossiers-${legislature}`);
+}
+
+// Imports one dossier of any legislature, e.g. a past constitutional revision
+export async function importDossierById(legislature: string, uid: string) {
+  const existing = await db.query.legislativeFile.findFirst({
+    where: eq(legislativeFile.id, uid),
+  });
+  if (existing) {
+    return false;
+  }
+  const extractDir = await extractDossiersArchive(legislature);
+  const { readFile } = await import("node:fs/promises");
+  const data: DossierData = JSON.parse(
+    await readFile(
+      join(extractDir, "json", "dossierParlementaire", `${uid}.json`),
+      "utf-8"
+    )
+  );
+  return importDossier({ data, legislature, extractDir });
 }
 
 export async function syncDossiers(): Promise<number> {

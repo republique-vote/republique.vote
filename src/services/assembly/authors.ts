@@ -84,9 +84,10 @@ export function loadActors(legislature: string) {
 // Every member of parliament and government since 1958, with their mandates
 async function downloadActors(legislature: string) {
   const url = `${BASE_URL}/${legislature}/amo/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip`;
+  // One folder per legislature, like the other archives
   const dir = await unzipTo(
-    await downloadAndExtractZip(url, "actors.zip"),
-    "actors"
+    await downloadAndExtractZip(url, `actors-${legislature}.zip`),
+    `actors-${legislature}`
   );
 
   const actors = new Map<string, Actor>();
@@ -145,9 +146,15 @@ async function downloadActors(legislature: string) {
     const { organe } = JSON.parse(
       await readFile(join(dir, "json", "organe", file), "utf-8")
     );
-    if (organe.codeType === "GP") {
+    // Groups of the Senate too, for the votes of the Congrès
+    if (organe.codeType === "GP" || organe.codeType === "GROUPESENAT") {
       groups.set(organe.uid, {
-        name: organe.libelle,
+        // Both chambers have a "Les Républicains" group, side by side at the
+        // Congrès
+        name:
+          organe.codeType === "GROUPESENAT"
+            ? `${organe.libelle} (Sénat)`
+            : organe.libelle,
         abbrev: organe.libelleAbrev ?? null,
         color: organe.couleurAssociee ?? null,
       });

@@ -124,7 +124,8 @@ async function storeGroup(
         deputyId: voter.acteurRef,
         groupRef: g.organeRef,
         position,
-        seat: seatNumber(voter),
+        // Older scrutins give no seat: fall back to the assigned one
+        seat: seatNumber(voter) ?? seatAt(actor, date),
       })
       .onConflictDoNothing();
   }
@@ -160,7 +161,7 @@ async function storeGroup(
 
 // Stores every member's position on the official scrutin of the polls that
 // have one and no nominative votes yet
-export async function syncScrutinVotes(): Promise<number> {
+export async function syncScrutinVotes(legislature?: string): Promise<number> {
   const pending = await db
     .selectDistinct({
       pollId: legislativeFile.pollId,
@@ -179,9 +180,9 @@ export async function syncScrutinVotes(): Promise<number> {
     return 0;
   }
 
-  const legislature = await detectLegislature();
-  const scrutinsDir = await extractScrutinsArchive(legislature);
-  const actorData = await loadActors(legislature);
+  const scrutinsLegislature = legislature ?? (await detectLegislature());
+  const scrutinsDir = await extractScrutinsArchive(scrutinsLegislature);
+  const actorData = await loadActors(scrutinsLegislature);
   const { actors } = actorData;
 
   let filled = 0;

@@ -12,10 +12,11 @@ const exec = promisify(execCb);
 const BASE_URL =
   "https://data.assemblee-nationale.fr/static/openData/repository";
 
-interface ScrutinData {
+export interface ScrutinData {
   scrutin: {
     uid: string;
     dateScrutin: string;
+    lieuVote?: string;
     titre: string;
     sort: { code: string };
     syntheseVote: {
@@ -33,7 +34,7 @@ interface ScrutinData {
   };
 }
 
-function normalizeTitle(title: string): string {
+export function normalizeTitle(title: string): string {
   return title
     .toLowerCase()
     .normalize("NFD")
@@ -43,9 +44,9 @@ function normalizeTitle(title: string): string {
     .trim();
 }
 
-type FileRecord = typeof legislativeFile.$inferSelect;
+export type FileRecord = typeof legislativeFile.$inferSelect;
 
-function findMatchingFile(
+export function findMatchingFile(
   scrutin: ScrutinData["scrutin"],
   byRef: Map<string, FileRecord>,
   byTitle: Map<string, FileRecord>
@@ -77,7 +78,7 @@ export async function extractScrutinsArchive(legislature: string) {
   const dir = join(tmpdir(), "republique-vote-sync");
   await mkdir(dir, { recursive: true });
 
-  const zipPath = join(dir, "scrutins.zip");
+  const zipPath = join(dir, `scrutins-${legislature}.zip`);
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to download scrutins: ${res.status}`);
@@ -85,20 +86,27 @@ export async function extractScrutinsArchive(legislature: string) {
 
   await writeFile(zipPath, Buffer.from(await res.arrayBuffer()));
 
-  const extractDir = join(dir, "scrutins");
+  const extractDir = join(dir, `scrutins-${legislature}`);
   await mkdir(extractDir, { recursive: true });
   await exec(`unzip -o -q "${zipPath}" -d "${extractDir}"`);
 
   return join(extractDir, "json");
 }
 
-export async function syncScrutins(): Promise<number> {
-  const legislature = await detectLegislature();
-  const jsonDir = await extractScrutinsArchive(legislature);
+// Matches the final vote on the whole text of each bill. A past legislature
+// can be read for a few bills only, e.g. an imported constitutional revision
+export async function syncScrutins(
+  legislature?: string,
+  onlyFileIds?: Set<string>
+): Promise<number> {
+  const scrutinsLegislature = legislature ?? (await detectLegislature());
+  const jsonDir = await extractScrutinsArchive(scrutinsLegislature);
   const files = await readdir(jsonDir);
 
   // Load all legislative files with their poll IDs
-  const allFiles = await db.select().from(legislativeFile);
+  const allFiles = (await db.select().from(legislativeFile)).filter(
+    (f) => !onlyFileIds || onlyFileIds.has(f.id)
+  );
   const filesByRef = new Map(allFiles.map((f) => [f.id, f]));
   const filesByTitle = new Map(
     allFiles.map((f) => [normalizeTitle(f.title), f])
@@ -115,8 +123,12 @@ export async function syncScrutins(): Promise<number> {
     const data: ScrutinData = JSON.parse(raw);
     const s = data.scrutin;
 
-    // Only final votes ("l'ensemble")
-    if (!s.titre.toLowerCase().includes("ensemble")) {
+    // Only final votes ("l'ensemble") of the Assemblée: the Congrès votes in
+    // the same archive are handled by syncCongress
+    if (
+      s.lieuVote === "Congrès" ||
+      !s.titre.toLowerCase().includes("ensemble")
+    ) {
       continue;
     }
 

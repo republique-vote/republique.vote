@@ -187,6 +187,7 @@ export async function syncSenateNominativeVotes(): Promise<number> {
           });
         const group = groupAt(data, date);
         await tx.insert(senateVote).values({
+          id: `${pollId}:${vote.matricule}`,
           pollId,
           scrutinRef: file.ref ?? "",
           senatorId: vote.matricule,
