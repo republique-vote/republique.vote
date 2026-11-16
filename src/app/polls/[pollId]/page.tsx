@@ -3,11 +3,11 @@ import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { Hemicycle } from "@/components/polls/poll-detail/hemicycle";
 import {
   type ChamberVote,
   OfficialResult,
 } from "@/components/polls/poll-detail/official-result";
+import { ParliamentVotes } from "@/components/polls/poll-detail/parliament-votes";
 import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
 import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
@@ -244,23 +244,20 @@ export default async function PollDetailPage({
               );
             })()
           }
-          {scrutinVotes.groups.length > 0 ? (
-            <Hemicycle
-              chamber="assembly"
-              groups={scrutinVotes.groups}
-              votes={scrutinVotes.votes.map((v) => ({
-                ...v,
-                photoUrl: deputyPhotoUrl(v.id, v.photoLegislature),
-              }))}
-            />
-          ) : null}
-          {senateVotes.votes.length > 0 ? (
-            <Hemicycle
-              chamber="senate"
-              groups={senateVotes.groups}
-              votes={senateVotes.votes}
-            />
-          ) : null}
+          <ParliamentVotes
+            deputies={
+              scrutinVotes.groups.length > 0
+                ? {
+                    groups: scrutinVotes.groups,
+                    votes: scrutinVotes.votes.map((v) => ({
+                      ...v,
+                      photoUrl: deputyPhotoUrl(v.id, v.photoLegislature),
+                    })),
+                  }
+                : null
+            }
+            senators={senateVotes.votes.length > 0 ? senateVotes : null}
+          />
         </div>
 
         <aside className="lg:sticky lg:top-6" id="vote">

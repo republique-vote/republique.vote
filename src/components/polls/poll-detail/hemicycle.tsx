@@ -136,10 +136,13 @@ function fullName(vote: HemicycleVote) {
 
 export function Hemicycle({
   chamber,
+  embedded = false,
   groups,
   votes,
 }: {
   chamber: Chamber;
+  // Inside a tab, which already gives the frame and the title
+  embedded?: boolean;
   groups: HemicycleGroup[];
   votes: HemicycleVote[];
 }) {
@@ -217,8 +220,14 @@ export function Hemicycle({
   );
 
   return (
-    <section className="mt-6 space-y-4 border border-border p-4">
-      <h2 className="font-medium text-sm">{config.title}</h2>
+    <section
+      className={
+        embedded ? "space-y-4" : "mt-6 space-y-4 border border-border p-4"
+      }
+    >
+      {embedded ? null : (
+        <h2 className="font-medium text-sm">{config.title}</h2>
+      )}
 
       {/* Older scrutins of the Senate do not give the seats */}
       <div className={placed === 0 ? "hidden" : "relative"}>
