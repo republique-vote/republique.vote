@@ -1,4 +1,4 @@
-import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { poll, pollSummary } from "@/db/schema";
 import { SUMMARY_PROMPT_VERSION } from "@/services/summary/prompt";
@@ -23,24 +23,32 @@ function isRateLimited(err: unknown) {
 
 // Polls with no summary yet, or one written with older instructions
 function findPendingPolls(limit: number) {
-  return db
-    .select({
-      id: poll.id,
-      title: poll.title,
-      description: poll.description,
-    })
-    .from(poll)
-    .leftJoin(pollSummary, eq(pollSummary.pollId, poll.id))
-    .where(
-      and(
-        sql`length(${poll.description}) >= ${MIN_DESCRIPTION_CHARS}`,
-        or(
-          isNull(pollSummary.pollId),
-          ne(pollSummary.promptVersion, SUMMARY_PROMPT_VERSION)
+  return (
+    db
+      .select({
+        id: poll.id,
+        title: poll.title,
+        description: poll.description,
+      })
+      .from(poll)
+      .leftJoin(pollSummary, eq(pollSummary.pollId, poll.id))
+      .where(
+        and(
+          sql`length(${poll.description}) >= ${MIN_DESCRIPTION_CHARS}`,
+          or(
+            isNull(pollSummary.pollId),
+            ne(pollSummary.promptVersion, SUMMARY_PROMPT_VERSION)
+          )
         )
       )
-    )
-    .limit(limit);
+      // Same order as the poll list, so the most visible polls come first
+      .orderBy(
+        sql`CASE WHEN ${poll.status} = 'open' THEN 0 ELSE 1 END`,
+        sql`CASE WHEN ${poll.endDate} IS NOT NULL THEN 0 ELSE 1 END`,
+        desc(poll.createdAt)
+      )
+      .limit(limit)
+  );
 }
 
 export async function summarizePendingPolls({
