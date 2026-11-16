@@ -247,10 +247,9 @@ export function PollDetailClient({
       className="scroll-mt-6 border border-border bg-card p-4"
       ref={voteBlockRef}
     >
-      <h2 className="mb-1 font-semibold text-lg">Voter</h2>
-      <p className="mb-6 text-muted-foreground text-sm">
-        {totalVotes} vote{totalVotes === 1 ? "" : "s"} enregistré
-        {totalVotes === 1 ? "" : "s"}
+      <h2 className="font-medium text-sm">Voter</h2>
+      <p className="mt-1 mb-4 text-muted-foreground text-xs">
+        {voteCountLabel}
         {" · "}
         {(() => {
           if (isOpen && poll.endDate) {
@@ -332,7 +331,7 @@ export function PollDetailClient({
       />
 
       {merkleRoot && (
-        <div className="mt-8 border-t pt-4">
+        <div className="mt-4 border-t pt-4">
           <CopyableHash
             label="Empreinte du cahier de vote"
             tooltip="Ce code est calculé mathématiquement à partir de tous les votes. Il évolue à chaque nouveau vote. Si quelqu'un modifie ou supprime un ancien vote, le calcul ne tombe plus juste et tout le monde peut le vérifier."
