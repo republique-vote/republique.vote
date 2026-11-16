@@ -1,5 +1,4 @@
 import { and, eq, sql } from "drizzle-orm";
-import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -7,6 +6,7 @@ import {
   type ChamberVote,
   OfficialResult,
 } from "@/components/polls/poll-detail/official-result";
+import { OfficialSources } from "@/components/polls/poll-detail/official-sources";
 import { ParliamentVotes } from "@/components/polls/poll-detail/parliament-votes";
 import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
 import { PollJourney } from "@/components/polls/poll-detail/poll-journey";
@@ -14,7 +14,6 @@ import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { db } from "@/db";
 import {
@@ -201,15 +200,6 @@ export default async function PollDetailPage({
               ) : null}
               <Markdown collapsible>{p.description}</Markdown>
             </div>
-            {p.sourceUrl && (
-              <Button asChild className="mt-3" variant="outline">
-                <a href={p.sourceUrl} rel="noopener noreferrer" target="_blank">
-                  <ExternalLink className="mr-1.5 h-4 w-4" />
-                  Voir sur assemblee-nationale.fr
-                </a>
-              </Button>
-            )}
-            {lf?.journey ? <PollJourney steps={lf.journey} /> : null}
           </div>
 
           {
@@ -260,6 +250,7 @@ export default async function PollDetailPage({
             }
             senators={senateVotes.votes.length > 0 ? senateVotes : null}
           />
+          {lf?.journey ? <PollJourney steps={lf.journey} /> : null}
         </div>
 
         <aside className="lg:sticky lg:top-6" id="vote">
@@ -279,6 +270,10 @@ export default async function PollDetailPage({
               startDate: p.startDate,
               endDate: p.endDate,
             }}
+          />
+          <OfficialSources
+            assemblyUrl={p.sourceUrl}
+            senateUrl={lf?.senateUrl ?? null}
           />
         </aside>
       </div>
