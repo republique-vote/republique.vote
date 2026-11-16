@@ -3,6 +3,7 @@ import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { DeputyHemicycle } from "@/components/polls/poll-detail/deputy-hemicycle";
 import { OfficialResult } from "@/components/polls/poll-detail/official-result";
 import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
 import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
@@ -21,6 +22,7 @@ import {
 } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
 import { findPollAuthors } from "@/services/assembly/authors";
+import { findScrutinVotes } from "@/services/assembly/votes";
 import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
 
@@ -62,6 +64,7 @@ export default async function PollDetailPage({
   });
 
   const authors = await findPollAuthors(pollId);
+  const scrutinVotes = await findScrutinVotes(pollId);
   const legislative = await db.query.legislativeFile.findFirst({
     where: eq(legislativeFile.pollId, pollId),
   });
@@ -191,6 +194,12 @@ export default async function PollDetailPage({
               );
             })()
           }
+          {scrutinVotes.groups.length > 0 ? (
+            <DeputyHemicycle
+              groups={scrutinVotes.groups}
+              votes={scrutinVotes.votes}
+            />
+          ) : null}
         </div>
 
         <aside className="lg:sticky lg:top-6" id="vote">
