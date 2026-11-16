@@ -4,10 +4,11 @@ import type { PollOption, ResultsResponse } from "@republique/core";
 import { formatDate } from "@republique/core";
 import { ScrollText } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import type { SWRSubscriptionOptions } from "swr/subscription";
 import useSWRSubscription from "swr/subscription";
+import { MobileVoteBar } from "@/components/polls/poll-detail/mobile-vote-bar";
 import { VoteDialog } from "@/components/polls/poll-detail/vote-dialog";
 import { VoteOptions } from "@/components/polls/poll-detail/vote-options";
 import {
@@ -142,6 +143,8 @@ export function PollDetailClient({
   const canVote =
     isOpen && isAuthenticated && !hasVoted && voteState !== "success";
 
+  const voteBlockRef = useRef<HTMLElement>(null);
+
   const results = sseResults?.results || [];
   const totalVotes = sseResults?.totalVotes || initialVoteCount;
 
@@ -225,8 +228,26 @@ export function PollDetailClient({
     }
   }, [selectedOption, poll.id]);
 
+  const voteCountLabel = `${totalVotes} vote${totalVotes === 1 ? "" : "s"}`;
+  const mobileBarLabel = (() => {
+    if (!isOpen) {
+      return `Vote terminé · ${voteCountLabel}`;
+    }
+    if (hasVoted || voteState === "success") {
+      return `Vous avez voté · ${voteCountLabel}`;
+    }
+    if (!isAuthenticated) {
+      return `Connectez-vous pour voter · ${voteCountLabel}`;
+    }
+    return `Votre avis sur ce texte ? · ${voteCountLabel}`;
+  })();
+
   return (
-    <>
+    <section
+      className="scroll-mt-6 border border-border bg-card p-4"
+      ref={voteBlockRef}
+    >
+      <h2 className="mb-1 font-semibold text-lg">Voter</h2>
       <p className="mb-6 text-muted-foreground text-sm">
         {totalVotes} vote{totalVotes === 1 ? "" : "s"} enregistré
         {totalVotes === 1 ? "" : "s"}
@@ -325,6 +346,11 @@ export function PollDetailClient({
           </Button>
         </div>
       )}
-    </>
+      <MobileVoteBar
+        canVote={canVote}
+        label={mobileBarLabel}
+        targetRef={voteBlockRef}
+      />
+    </section>
   );
 }

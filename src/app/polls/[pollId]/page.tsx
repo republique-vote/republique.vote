@@ -109,93 +109,102 @@ export default async function PollDetailPage({
         ]}
       />
 
-      <div className="mb-6">
-        <Badge className="mb-3" variant={isOpen ? "success" : "info"}>
-          {isOpen ? "En cours" : "Terminé"}
-        </Badge>
-        <h1 className="font-bold text-3xl tracking-tight">{p.title}</h1>
-        {summary ? (
-          <div className="mt-4">
-            <PollSummary pollId={p.id} summary={summary} />
+      {/* Two columns on desktop: the vote stays in view while reading */}
+      <div className="pb-24 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-10 lg:pb-0">
+        <div className="min-w-0">
+          <div className="mb-6">
+            <Badge className="mb-3" variant={isOpen ? "success" : "info"}>
+              {isOpen ? "En cours" : "Terminé"}
+            </Badge>
+            <h1 className="font-bold text-3xl tracking-tight">{p.title}</h1>
+            {summary ? (
+              <div className="mt-4">
+                <PollSummary pollId={p.id} summary={summary} />
+              </div>
+            ) : null}
+            {authors.length > 0 ? (
+              <div className="mt-4">
+                <PollAuthors authors={authors} />
+              </div>
+            ) : null}
+            <div className="mt-4">
+              {summary ? (
+                <h2 className="mb-1 font-medium text-sm">
+                  Le texte des auteurs (exposé des motifs)
+                </h2>
+              ) : null}
+              <Markdown collapsible>{p.description}</Markdown>
+            </div>
+            {p.sourceUrl && (
+              <Button asChild className="mt-3" variant="outline">
+                <a href={p.sourceUrl} rel="noopener noreferrer" target="_blank">
+                  <ExternalLink className="mr-1.5 h-4 w-4" />
+                  Voir sur assemblee-nationale.fr
+                </a>
+              </Button>
+            )}
           </div>
-        ) : null}
-        {authors.length > 0 ? (
-          <div className="mt-4">
-            <PollAuthors authors={authors} />
-          </div>
-        ) : null}
-        <div className="mt-4">
-          {summary ? (
-            <h2 className="mb-1 font-medium text-sm">
-              Le texte des auteurs (exposé des motifs)
-            </h2>
-          ) : null}
-          <Markdown collapsible>{p.description}</Markdown>
-        </div>
-        {p.sourceUrl && (
-          <Button asChild className="mt-3" variant="outline">
-            <a href={p.sourceUrl} rel="noopener noreferrer" target="_blank">
-              <ExternalLink className="mr-1.5 h-4 w-4" />
-              Voir sur assemblee-nationale.fr
-            </a>
-          </Button>
-        )}
-      </div>
 
-      <PollDetailClient
-        initialHasVoted={hasVoted}
-        initialIsAuthenticated={isAuthenticated}
-        initialMerkleRoot={p.merkleRoot}
-        initialResults={results}
-        initialVoteCount={count}
-        options={options}
-        poll={{
-          id: p.id,
-          title: p.title,
-          description: p.description,
-          type: p.type,
-          status: p.status,
-          startDate: p.startDate,
-          endDate: p.endDate,
-        }}
-      />
-
-      {
-        await (async () => {
-          const lf = await db.query.legislativeFile.findFirst({
-            where: eq(legislativeFile.pollId, pollId),
-          });
-          if (!lf || lf.officialFor === null) {
-            return null;
-          }
-          const citizenFor = results?.results.find((r) => r.label === "Pour");
-          const citizenAgainst = results?.results.find(
-            (r) => r.label === "Contre"
-          );
-          const citizenAbst = results?.results.find(
-            (r) => r.label === "Abstention"
-          );
-          return (
-            <OfficialResult
-              citizenResults={
-                results
-                  ? {
-                      forPercentage: citizenFor?.percentage || 0,
-                      againstPercentage: citizenAgainst?.percentage || 0,
-                      abstentionPercentage: citizenAbst?.percentage || 0,
-                      totalVotes: results.totalVotes,
-                    }
-                  : null
+          {
+            await (async () => {
+              const lf = await db.query.legislativeFile.findFirst({
+                where: eq(legislativeFile.pollId, pollId),
+              });
+              if (!lf || lf.officialFor === null) {
+                return null;
               }
-              officialAbstentions={lf.officialAbstentions || 0}
-              officialAgainst={lf.officialAgainst || 0}
-              officialFor={lf.officialFor}
-              scrutinDate={lf.scrutinDate || ""}
-              sourceUrl={lf.sourceUrl}
-            />
-          );
-        })()
-      }
+              const citizenFor = results?.results.find(
+                (r) => r.label === "Pour"
+              );
+              const citizenAgainst = results?.results.find(
+                (r) => r.label === "Contre"
+              );
+              const citizenAbst = results?.results.find(
+                (r) => r.label === "Abstention"
+              );
+              return (
+                <OfficialResult
+                  citizenResults={
+                    results
+                      ? {
+                          forPercentage: citizenFor?.percentage || 0,
+                          againstPercentage: citizenAgainst?.percentage || 0,
+                          abstentionPercentage: citizenAbst?.percentage || 0,
+                          totalVotes: results.totalVotes,
+                        }
+                      : null
+                  }
+                  officialAbstentions={lf.officialAbstentions || 0}
+                  officialAgainst={lf.officialAgainst || 0}
+                  officialFor={lf.officialFor}
+                  scrutinDate={lf.scrutinDate || ""}
+                  sourceUrl={lf.sourceUrl}
+                />
+              );
+            })()
+          }
+        </div>
+
+        <aside className="lg:sticky lg:top-6" id="vote">
+          <PollDetailClient
+            initialHasVoted={hasVoted}
+            initialIsAuthenticated={isAuthenticated}
+            initialMerkleRoot={p.merkleRoot}
+            initialResults={results}
+            initialVoteCount={count}
+            options={options}
+            poll={{
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              type: p.type,
+              status: p.status,
+              startDate: p.startDate,
+              endDate: p.endDate,
+            }}
+          />
+        </aside>
+      </div>
     </>
   );
 }
