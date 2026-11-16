@@ -107,6 +107,14 @@ export const legislativeFile = pgTable("legislative_file", {
   officialAbstentions: integer("official_abstentions"),
   scrutinDate: text("scrutin_date"),
   scrutinUid: text("scrutin_uid"),
+  // Latest public vote of the Senate on the whole text, null when the Senate
+  // has not voted it by public ballot (show of hands, or not examined yet)
+  senateFor: integer("senate_for"),
+  senateAgainst: integer("senate_against"),
+  senateAbstentions: integer("senate_abstentions"),
+  senateScrutinDate: text("senate_scrutin_date"),
+  // Session and number of the scrutin, e.g. "2025-95"
+  senateScrutinRef: text("senate_scrutin_ref"),
   syncedAt: text("synced_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

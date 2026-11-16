@@ -5,6 +5,7 @@ import { syncAuthors } from "@/services/assembly/authors";
 import { syncScrutins } from "@/services/assembly/scrutins";
 import { syncDossiers } from "@/services/assembly/sync";
 import { syncScrutinVotes } from "@/services/assembly/votes";
+import { syncSenateVotes } from "@/services/senate/sync";
 
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get("secret");
@@ -17,9 +18,10 @@ export async function GET(request: NextRequest) {
   const matchedScrutins = await syncScrutins();
   const pollsWithAuthors = await syncAuthors();
   const pollsWithVotes = await syncScrutinVotes();
+  const billsWithSenateVote = await syncSenateVotes();
 
   console.log(
-    `[assembly] Synchro: ${newDossiers} nouveaux dossiers, ${matchedScrutins} scrutins matchés, auteurs ajoutés à ${pollsWithAuthors} votes, votes nominatifs ajoutés à ${pollsWithVotes} votes (${new Date().toISOString()})`
+    `[assembly] Synchro: ${newDossiers} nouveaux dossiers, ${matchedScrutins} scrutins matchés, auteurs ajoutés à ${pollsWithAuthors} votes, votes nominatifs ajoutés à ${pollsWithVotes} votes, vote du Sénat sur ${billsWithSenateVote} textes (${new Date().toISOString()})`
   );
 
   return successResponse({
@@ -27,5 +29,6 @@ export async function GET(request: NextRequest) {
     matchedScrutins,
     pollsWithAuthors,
     pollsWithVotes,
+    billsWithSenateVote,
   });
 }

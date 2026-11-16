@@ -22,6 +22,7 @@ pnpm db:dev       # Start Postgres + Redis in-memory (background)
 pnpm db:push      # Push schema to database (drizzle-kit push)
 pnpm seed         # Seed database with test polls
 pnpm sync:assembly # Import bills and votes from the Assemblée nationale open data (also runs every 6h when CRON_SECRET is set)
+pnpm sync:senate   # Add the Senate's public vote on the whole text to the bills (data.senat.fr Dosleg dump, also part of sync:assembly)
 pnpm summarize    # Generate missing plain-language summaries with Gemini (needs GOOGLE_GENERATIVE_AI_API_KEY, also runs after each 6h sync)
 pnpm dev          # Start dev server (http://localhost:3000)
 pnpm build        # Production build

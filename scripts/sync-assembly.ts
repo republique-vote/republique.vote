@@ -3,6 +3,7 @@ import { syncAuthors } from "../src/services/assembly/authors";
 import { syncScrutins } from "../src/services/assembly/scrutins";
 import { syncDossiers } from "../src/services/assembly/sync";
 import { syncScrutinVotes } from "../src/services/assembly/votes";
+import { syncSenateVotes } from "../src/services/senate/sync";
 
 async function main() {
   console.log("[assembly] Starting manual sync...");
@@ -18,6 +19,9 @@ async function main() {
 
   const pollsWithVotes = await syncScrutinVotes();
   console.log(`[assembly] Nominative votes added to ${pollsWithVotes} polls`);
+
+  const billsWithSenateVote = await syncSenateVotes();
+  console.log(`[senate] Senate vote added to ${billsWithSenateVote} bills`);
 
   console.log("[assembly] Sync complete");
   process.exit(0);
