@@ -193,6 +193,8 @@ export const pollAuthor = pgTable(
     groupName: text("group_name"),
     groupAbbrev: text("group_abbrev"),
     groupColor: text("group_color"),
+    // Government role when signing ("Premier ministre", "Ministre de ...")
+    functionTitle: text("function_title"),
   },
   (t) => [unique().on(t.pollId, t.deputyId)]
 );

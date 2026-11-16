@@ -62,6 +62,9 @@ export default async function PollDetailPage({
   });
 
   const authors = await findPollAuthors(pollId);
+  const legislative = await db.query.legislativeFile.findFirst({
+    where: eq(legislativeFile.pollId, pollId),
+  });
 
   const options = await db
     .select()
@@ -124,7 +127,12 @@ export default async function PollDetailPage({
             ) : null}
             {authors.length > 0 ? (
               <div className="mt-4">
-                <PollAuthors authors={authors} />
+                <PollAuthors
+                  authors={authors}
+                  byGovernment={
+                    legislative?.procedureType.startsWith("Projet") ?? false
+                  }
+                />
               </div>
             ) : null}
             <div className="mt-4">

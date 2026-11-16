@@ -10,6 +10,7 @@ import { deputyPhotoUrl } from "@/services/assembly/photo";
 
 export interface PollAuthorData {
   firstName: string;
+  functionTitle: string | null;
   groupAbbrev: string | null;
   groupColor: string | null;
   groupName: string | null;
@@ -29,7 +30,15 @@ function fullName(person: PollAuthorData) {
   return `${person.firstName} ${person.lastName.toUpperCase()}`;
 }
 
+// Government members show their role, members of parliament their group
 function GroupLabel({ person }: { person: PollAuthorData }) {
+  if (person.functionTitle) {
+    return (
+      <span className="text-muted-foreground text-xs">
+        {person.functionTitle}
+      </span>
+    );
+  }
   if (!person.groupName) {
     return null;
   }
@@ -45,12 +54,33 @@ function GroupLabel({ person }: { person: PollAuthorData }) {
   );
 }
 
-export function PollAuthors({ authors }: { authors: PollAuthorData[] }) {
+export function PollAuthors({
+  authors,
+  byGovernment,
+}: {
+  authors: PollAuthorData[];
+  // Bills from the government (projets de loi) are presented by its members,
+  // not proposed and cosigned by members of parliament
+  byGovernment: boolean;
+}) {
   const leads = authors.filter((a) => a.role === "author");
   const cosignatories = authors.filter((a) => a.role === "cosignatory");
 
   if (authors.length === 0) {
     return null;
+  }
+
+  if (byGovernment) {
+    return (
+      <section className="space-y-3 border border-border p-4">
+        <h2 className="font-medium text-sm">Présenté par le gouvernement</h2>
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          {authors.map((person) => (
+            <PersonRow key={person.id} person={person} size={44} />
+          ))}
+        </div>
+      </section>
+    );
   }
 
   return (

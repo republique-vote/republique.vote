@@ -18,10 +18,15 @@ interface GroupMandate {
   start: string;
 }
 
+interface MinistryMandate extends GroupMandate {
+  quality: string;
+}
+
 interface Actor {
   firstName: string;
   groups: GroupMandate[];
   lastName: string;
+  ministries: MinistryMandate[];
   photoLegislature: string | null;
 }
 
@@ -48,6 +53,7 @@ function asArray<T>(value: T | T[] | null | undefined): T[] {
 interface RawMandate {
   dateDebut: string;
   dateFin: string | null;
+  infosQualite?: { libQualite?: string };
   legislature: string | null;
   organes: { organeRef: string };
   typeOrgane: string;
@@ -84,10 +90,20 @@ async function loadActors(legislature: string) {
           start: m.dateDebut,
           end: m.dateFin,
         })),
+      ministries: mandates
+        .filter((m) => m.typeOrgane === "MINISTERE")
+        .map((m) => ({
+          organeRef: m.organes.organeRef,
+          start: m.dateDebut,
+          end: m.dateFin,
+          quality: m.infosQualite?.libQualite ?? "Ministre",
+        })),
     });
   }
 
   const groups = new Map<string, Group>();
+  // "de la ville et du logement", to build "Ministre de la ville et du logement"
+  const ministries = new Map<string, string | null>();
   for (const file of await readdir(join(dir, "json", "organe"))) {
     const { organe } = JSON.parse(
       await readFile(join(dir, "json", "organe", file), "utf-8")
@@ -99,16 +115,40 @@ async function loadActors(legislature: string) {
         color: organe.couleurAssociee ?? null,
       });
     }
+    if (organe.codeType === "MINISTERE") {
+      ministries.set(organe.uid, organe.libelleEdition ?? null);
+    }
   }
 
-  return { actors, groups };
+  return { actors, groups, ministries };
+}
+
+function activeAt<T extends GroupMandate>(mandates: T[], date: string) {
+  const day = date.slice(0, 10);
+  return mandates.find(
+    (m) => m.start <= day && (m.end === null || m.end >= day)
+  );
+}
+
+// Government role when signing, e.g. "Premier ministre" or "Ministre de la
+// ville et du logement"; null for members of parliament
+function functionAt(
+  actor: Actor,
+  ministries: Map<string, string | null>,
+  date: string
+) {
+  const mandate = activeAt(actor.ministries, date);
+  if (!mandate) {
+    return null;
+  }
+  const edition = ministries.get(mandate.organeRef);
+  return edition && mandate.quality !== "Premier ministre"
+    ? `${mandate.quality} ${edition}`
+    : mandate.quality;
 }
 
 function groupAt(actor: Actor, groups: Map<string, Group>, date: string) {
-  const day = date.slice(0, 10);
-  const mandate = actor.groups.find(
-    (m) => m.start <= day && (m.end === null || m.end >= day)
-  );
+  const mandate = activeAt(actor.groups, date);
   return mandate ? (groups.get(mandate.organeRef) ?? null) : null;
 }
 
@@ -185,7 +225,7 @@ export async function syncAuthors(): Promise<number> {
 
   const legislature = await detectLegislature();
   const dossiersDir = await extractDossiersArchive(legislature);
-  const { actors, groups } = await loadActors(legislature);
+  const { actors, groups, ministries } = await loadActors(legislature);
 
   let filled = 0;
   for (const p of polls) {
@@ -217,11 +257,9 @@ export async function syncAuthors(): Promise<number> {
               syncedAt: new Date().toISOString(),
             },
           });
-        const group = groupAt(
-          actor,
-          groups,
-          s.signedAt ?? result?.depositDate ?? new Date().toISOString()
-        );
+        const date =
+          s.signedAt ?? result?.depositDate ?? new Date().toISOString();
+        const group = groupAt(actor, groups, date);
         await tx
           .insert(pollAuthor)
           .values({
@@ -233,6 +271,7 @@ export async function syncAuthors(): Promise<number> {
             groupName: group?.name ?? null,
             groupAbbrev: group?.abbrev ?? null,
             groupColor: group?.color ?? null,
+            functionTitle: functionAt(actor, ministries, date),
           })
           .onConflictDoNothing();
       }
@@ -252,6 +291,7 @@ export function findPollAuthors(pollId: string) {
       photoLegislature: deputy.photoLegislature,
       role: pollAuthor.role,
       groupName: pollAuthor.groupName,
+      functionTitle: pollAuthor.functionTitle,
       groupAbbrev: pollAuthor.groupAbbrev,
       groupColor: pollAuthor.groupColor,
     })
