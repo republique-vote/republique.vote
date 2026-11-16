@@ -11,6 +11,7 @@ import { ParliamentVotes } from "@/components/polls/poll-detail/parliament-votes
 import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
 import { PollJourney } from "@/components/polls/poll-detail/poll-journey";
 import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
+import { ReferendumResult } from "@/components/polls/poll-detail/referendum-result";
 import { SharedInitiativeNotice } from "@/components/polls/poll-detail/shared-initiative-notice";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import {
   option,
   poll,
   pollSummary,
+  referendumResult,
 } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
 import { findPollAuthors } from "@/services/assembly/authors";
@@ -137,6 +139,9 @@ export default async function PollDetailPage({
   const lf = await db.query.legislativeFile.findFirst({
     where: eq(legislativeFile.pollId, pollId),
   });
+  const pastReferendum = await db.query.referendumResult.findFirst({
+    where: eq(referendumResult.pollId, pollId),
+  });
   const [scrutinVotes, senateVotes, congressVotes] = await Promise.all([
     findScrutinVotes(pollId),
     findSenateVotes(pollId),
@@ -193,9 +198,14 @@ export default async function PollDetailPage({
       <div className="pb-24 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6 lg:pb-0">
         <div className="min-w-0">
           <div className="mb-6">
-            <Badge className="mb-3" variant={isOpen ? "success" : "info"}>
-              {isOpen ? "En cours" : "Terminé"}
-            </Badge>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <Badge variant={isOpen ? "success" : "info"}>
+                {isOpen ? "En cours" : "Terminé"}
+              </Badge>
+              {pastReferendum ? (
+                <Badge variant="outline">Référendum historique</Badge>
+              ) : null}
+            </div>
             <h1 className="font-bold text-3xl tracking-tight">{p.title}</h1>
             {lf?.procedureType === SHARED_INITIATIVE_PROCEDURE ? (
               <div className="mt-4">
@@ -263,6 +273,12 @@ export default async function PollDetailPage({
               );
             })()
           }
+          {pastReferendum ? (
+            <ReferendumResult
+              citizenResults={results?.results ?? null}
+              result={pastReferendum}
+            />
+          ) : null}
           <ParliamentVotes
             congress={
               congressVotes.votes.length > 0
