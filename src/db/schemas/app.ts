@@ -198,3 +198,47 @@ export const pollAuthor = pgTable(
   },
   (t) => [unique().on(t.pollId, t.deputyId)]
 );
+
+// How each political group voted on the official scrutin of a poll. Absent
+// members are the group size minus everyone listed.
+export const scrutinGroup = pgTable(
+  "scrutin_group",
+  {
+    pollId: text("poll_id")
+      .notNull()
+      .references(() => poll.id, { onDelete: "cascade" }),
+    groupRef: text("group_ref").notNull(),
+    name: text("name").notNull(),
+    abbrev: text("abbrev"),
+    color: text("color"),
+    // Mean seat number: seats are numbered from the right of the hemicycle,
+    // so sorting by it descending gives the real left-to-right placement
+    seatOrder: integer("seat_order").notNull(),
+    members: integer("members").notNull(),
+    forCount: integer("for_count").notNull(),
+    againstCount: integer("against_count").notNull(),
+    abstentionCount: integer("abstention_count").notNull(),
+    nonVotingCount: integer("non_voting_count").notNull(),
+  },
+  (t) => [unique().on(t.pollId, t.groupRef)]
+);
+
+// Each member's position on the official scrutin, as published by the
+// Assemblée nationale
+export const scrutinVote = pgTable(
+  "scrutin_vote",
+  {
+    pollId: text("poll_id")
+      .notNull()
+      .references(() => poll.id, { onDelete: "cascade" }),
+    deputyId: text("deputy_id")
+      .notNull()
+      .references(() => deputy.id),
+    groupRef: text("group_ref").notNull(),
+    position: text("position", {
+      enum: ["for", "against", "abstention", "nonVoting"],
+    }).notNull(),
+    seat: integer("seat"),
+  },
+  (t) => [unique().on(t.pollId, t.deputyId)]
+);

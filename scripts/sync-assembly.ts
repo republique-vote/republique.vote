@@ -2,6 +2,7 @@ import "dotenv-flow/config";
 import { syncAuthors } from "../src/services/assembly/authors";
 import { syncScrutins } from "../src/services/assembly/scrutins";
 import { syncDossiers } from "../src/services/assembly/sync";
+import { syncScrutinVotes } from "../src/services/assembly/votes";
 
 async function main() {
   console.log("[assembly] Starting manual sync...");
@@ -14,6 +15,9 @@ async function main() {
 
   const pollsWithAuthors = await syncAuthors();
   console.log(`[assembly] Authors added to ${pollsWithAuthors} polls`);
+
+  const pollsWithVotes = await syncScrutinVotes();
+  console.log(`[assembly] Nominative votes added to ${pollsWithVotes} polls`);
 
   console.log("[assembly] Sync complete");
   process.exit(0);

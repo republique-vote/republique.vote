@@ -59,8 +59,23 @@ interface RawMandate {
   typeOrgane: string;
 }
 
+export type ActorData = Awaited<ReturnType<typeof downloadActors>>;
+export type { Actor };
+
+// The archive is large: download it once per process run
+const actorsCache = new Map<string, Promise<ActorData>>();
+
+export function loadActors(legislature: string) {
+  let cached = actorsCache.get(legislature);
+  if (!cached) {
+    cached = downloadActors(legislature);
+    actorsCache.set(legislature, cached);
+  }
+  return cached;
+}
+
 // Every member of parliament and government since 1958, with their mandates
-async function loadActors(legislature: string) {
+async function downloadActors(legislature: string) {
   const url = `${BASE_URL}/${legislature}/amo/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip`;
   const dir = await unzipTo(
     await downloadAndExtractZip(url, "actors.zip"),
@@ -209,6 +224,33 @@ async function readSignatures(
   }
 }
 
+type Executor = Pick<typeof db, "insert">;
+
+// Keeps names and photo folder current every time someone shows up again
+export async function upsertDeputy(
+  executor: Executor,
+  id: string,
+  actor: Actor
+) {
+  await executor
+    .insert(deputy)
+    .values({
+      id,
+      firstName: actor.firstName,
+      lastName: actor.lastName,
+      photoLegislature: actor.photoLegislature,
+    })
+    .onConflictDoUpdate({
+      target: deputy.id,
+      set: {
+        firstName: actor.firstName,
+        lastName: actor.lastName,
+        photoLegislature: actor.photoLegislature,
+        syncedAt: new Date().toISOString(),
+      },
+    });
+}
+
 // Fills authors and cosignatories for the polls that have none yet
 export async function syncAuthors(): Promise<number> {
   const pending = await db
@@ -240,23 +282,7 @@ export async function syncAuthors(): Promise<number> {
     await db.transaction(async (tx) => {
       for (const [position, s] of known.entries()) {
         const actor = actors.get(s.actorRef) as Actor;
-        await tx
-          .insert(deputy)
-          .values({
-            id: s.actorRef,
-            firstName: actor.firstName,
-            lastName: actor.lastName,
-            photoLegislature: actor.photoLegislature,
-          })
-          .onConflictDoUpdate({
-            target: deputy.id,
-            set: {
-              firstName: actor.firstName,
-              lastName: actor.lastName,
-              photoLegislature: actor.photoLegislature,
-              syncedAt: new Date().toISOString(),
-            },
-          });
+        await upsertDeputy(tx, s.actorRef, actor);
         const date =
           s.signedAt ?? result?.depositDate ?? new Date().toISOString();
         const group = groupAt(actor, groups, date);

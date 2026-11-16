@@ -70,8 +70,8 @@ function findMatchingFile(
   return undefined;
 }
 
-export async function syncScrutins(): Promise<number> {
-  const legislature = await detectLegislature();
+// Every scrutin of the legislature, one JSON file each, named by its uid
+export async function extractScrutinsArchive(legislature: string) {
   const url = `${BASE_URL}/${legislature}/loi/scrutins/Scrutins.json.zip`;
 
   const dir = join(tmpdir(), "republique-vote-sync");
@@ -89,7 +89,12 @@ export async function syncScrutins(): Promise<number> {
   await mkdir(extractDir, { recursive: true });
   await exec(`unzip -o -q "${zipPath}" -d "${extractDir}"`);
 
-  const jsonDir = join(extractDir, "json");
+  return join(extractDir, "json");
+}
+
+export async function syncScrutins(): Promise<number> {
+  const legislature = await detectLegislature();
+  const jsonDir = await extractScrutinsArchive(legislature);
   const files = await readdir(jsonDir);
 
   // Load all legislative files with their poll IDs
