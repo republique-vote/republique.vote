@@ -3,7 +3,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { legislativeFile, poll } from "@/db/schema";
 import { detectLegislature } from "./legislature";
@@ -148,14 +148,28 @@ export async function syncScrutins(): Promise<number> {
       })
       .where(eq(legislativeFile.id, matchedFile.id));
 
-    // Close the poll
+    // Close the poll on the day the deputies voted
     await db
       .update(poll)
-      .set({ status: "closed" })
+      .set({ status: "closed", endDate: s.dateScrutin })
       .where(eq(poll.id, matchedFile.pollId));
 
     matched++;
   }
+
+  // Polls closed before the end date was recorded
+  await db
+    .update(poll)
+    .set({ endDate: legislativeFile.scrutinDate })
+    .from(legislativeFile)
+    .where(
+      and(
+        eq(legislativeFile.pollId, poll.id),
+        eq(poll.status, "closed"),
+        isNull(poll.endDate),
+        isNotNull(legislativeFile.scrutinDate)
+      )
+    );
 
   return matched;
 }
