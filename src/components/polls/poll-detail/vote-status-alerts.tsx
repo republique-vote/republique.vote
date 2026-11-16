@@ -21,37 +21,43 @@ export function VoteSuccessAlert({
   onVerify: () => void;
 }) {
   return (
-    <div className="mb-6">
-      <Alert className="mb-3" variant="success">
+    <div className="mb-4 space-y-2">
+      <Alert variant="success">
         <CheckCircle className="h-4 w-4" />
         <AlertTitle>Vote enregistré</AlertTitle>
-        <AlertDescription>
-          Votre vote a été enregistré de manière anonyme et vérifiable.
-        </AlertDescription>
+        <AlertDescription>De manière anonyme et vérifiable.</AlertDescription>
       </Alert>
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={onShowProof} variant="outline">
-          <Download className="mr-1.5 h-4 w-4" />
-          Ma preuve de vote
+      <div className="grid grid-cols-2 gap-2">
+        <Button onClick={onShowProof} size="sm" variant="outline">
+          <Download />
+          Ma preuve
         </Button>
-        <Button onClick={onVerify} variant="outline">
-          <Search className="mr-1.5 h-4 w-4" />
-          Vérifier mon vote
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/polls">
-            <ArrowLeft className="mr-1.5 h-4 w-4" />
-            Voir les autres votes
-          </Link>
+        <Button onClick={onVerify} size="sm" variant="outline">
+          <Search />
+          Vérifier
         </Button>
       </div>
+      <OtherPollsLink />
     </div>
+  );
+}
+
+// Secondary action, kept as a link so the vote actions stand out
+function OtherPollsLink() {
+  return (
+    <Link
+      className="inline-flex items-center gap-1.5 text-muted-foreground text-xs hover:text-foreground"
+      href="/polls"
+    >
+      <ArrowLeft className="h-3.5 w-3.5" />
+      Voir les autres votes
+    </Link>
   );
 }
 
 export function VoteErrorAlert({ message }: { message: string }) {
   return (
-    <Alert className="mb-6" variant="destructive">
+    <Alert className="mb-4" variant="destructive">
       <XCircle className="h-4 w-4" />
       <AlertTitle>Erreur</AlertTitle>
       <AlertDescription>{message}</AlertDescription>
@@ -61,39 +67,31 @@ export function VoteErrorAlert({ message }: { message: string }) {
 
 export function AlreadyVotedAlert({ onVerify }: { onVerify: () => void }) {
   return (
-    <div className="mb-6">
-      <Alert className="mb-3" variant="info">
+    <div className="mb-4 space-y-2">
+      <Alert variant="info">
         <Info className="h-4 w-4" />
         <AlertTitle>Vous avez déjà voté</AlertTitle>
-        <AlertDescription>Vous avez déjà participé à ce vote.</AlertDescription>
       </Alert>
-      <div className="flex gap-2">
-        <Button asChild variant="outline">
-          <Link href="/polls">
-            <ArrowLeft className="mr-1.5 h-4 w-4" />
-            Voir les autres votes
-          </Link>
-        </Button>
-        <Button onClick={onVerify} variant="outline">
-          <Search className="mr-1.5 h-4 w-4" />
-          Vérifier mon vote
-        </Button>
-      </div>
+      <Button className="w-full" onClick={onVerify} size="sm" variant="outline">
+        <Search />
+        Vérifier mon vote
+      </Button>
+      <OtherPollsLink />
     </div>
   );
 }
 
 export function LoginRequiredAlert({ continueUrl }: { continueUrl: string }) {
   return (
-    <div className="mb-6">
-      <Alert className="mb-3" variant="warning">
+    <div className="mb-4 space-y-2">
+      <Alert variant="warning">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Connexion requise</AlertTitle>
         <AlertDescription>
           Vous devez vous identifier avec votre carte d'identité pour voter.
         </AlertDescription>
       </Alert>
-      <Button asChild>
+      <Button asChild className="w-full">
         <Link href={`/login?continue=${encodeURIComponent(continueUrl)}`}>
           Se connecter
         </Link>

@@ -337,9 +337,9 @@ export function PollDetailClient({
             tooltip="Ce code est calculé mathématiquement à partir de tous les votes. Il évolue à chaque nouveau vote. Si quelqu'un modifie ou supprime un ancien vote, le calcul ne tombe plus juste et tout le monde peut le vérifier."
             value={merkleRoot}
           />
-          <Button asChild className="mt-3" variant="outline">
+          <Button asChild className="mt-3 w-full" size="sm" variant="outline">
             <Link href={`/polls/${poll.id}/board`}>
-              <ScrollText className="mr-1.5 h-4 w-4" />
+              <ScrollText />
               Consulter le cahier de vote
             </Link>
           </Button>

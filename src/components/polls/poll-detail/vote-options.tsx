@@ -32,7 +32,9 @@ export function VoteOptions({
           return (
             <button
               className={`relative overflow-hidden rounded-lg border px-3 py-2.5 text-left transition-colors ${
-                isSelected ? "border-2 border-primary" : "border-border"
+                isSelected
+                  ? "border-primary ring-1 ring-primary"
+                  : "border-border"
               } ${canVote ? "cursor-pointer hover:border-primary/50" : "cursor-default"}`}
               disabled={!canVote}
               key={opt.id}
