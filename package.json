@@ -11,6 +11,7 @@
     "lint:fix": "ultracite fix",
     "seed": "tsx scripts/seed.ts",
     "sync:assembly": "tsx scripts/sync-assembly.ts",
+    "sync:authors": "tsx scripts/sync-authors.ts",
     "summarize": "tsx scripts/summarize.ts",
     "summarize:prototype": "tsx scripts/summarize-prototype.ts",
     "db:push": "npx drizzle-kit push",

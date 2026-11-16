@@ -25,7 +25,7 @@ function cleanMarkdown(md: string): string {
   );
 }
 
-const BASE_URL =
+export const BASE_URL =
   "https://data.assemblee-nationale.fr/static/openData/repository";
 
 interface ActeLegislatif {
@@ -55,7 +55,7 @@ interface DossierData {
   };
 }
 
-function findTexteAssocie(obj: unknown): string | null {
+export function findTexteAssocie(obj: unknown): string | null {
   if (typeof obj !== "object" || obj === null) {
     return null;
   }
@@ -94,11 +94,14 @@ function extractDepositDate(dossier: DossierData): string {
   return date ? new Date(date).toISOString() : new Date().toISOString();
 }
 
-async function downloadAndExtractZip(url: string): Promise<string> {
+export async function downloadAndExtractZip(
+  url: string,
+  fileName = "data.zip"
+): Promise<string> {
   const dir = join(tmpdir(), "republique-vote-sync");
   await mkdir(dir, { recursive: true });
 
-  const zipPath = join(dir, "data.zip");
+  const zipPath = join(dir, fileName);
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to download ${url}: ${res.status}`);
@@ -256,19 +259,27 @@ async function importDossier(pending: PendingDossier): Promise<boolean> {
   return true;
 }
 
-export async function syncDossiers(): Promise<number> {
-  const legislature = await detectLegislature();
-  const url = `${BASE_URL}/${legislature}/loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip`;
-
-  const zipPath = await downloadAndExtractZip(url);
-
+export async function unzipTo(zipPath: string, name: string) {
   const { exec } = await import("node:child_process");
   const { promisify } = await import("node:util");
   const execAsync = promisify(exec);
 
-  const extractDir = join(tmpdir(), "republique-vote-sync", "dossiers");
+  const extractDir = join(tmpdir(), "republique-vote-sync", name);
   await mkdir(extractDir, { recursive: true });
   await execAsync(`unzip -o -q "${zipPath}" -d "${extractDir}"`);
+  return extractDir;
+}
+
+// Bills (dossiers) and their documents, which also list authors
+export async function extractDossiersArchive(legislature: string) {
+  const url = `${BASE_URL}/${legislature}/loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip`;
+  const zipPath = await downloadAndExtractZip(url);
+  return unzipTo(zipPath, "dossiers");
+}
+
+export async function syncDossiers(): Promise<number> {
+  const legislature = await detectLegislature();
+  const extractDir = await extractDossiersArchive(legislature);
 
   const { readdir, readFile } = await import("node:fs/promises");
   const dossierDir = join(extractDir, "json", "dossierParlementaire");

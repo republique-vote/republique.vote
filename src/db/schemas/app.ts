@@ -162,3 +162,37 @@ export const summaryReport = pgTable("summary_report", {
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
 });
+
+// Members of parliament and government, from the Assemblée nationale open
+// data (AMO). Only what the poll page shows is kept.
+export const deputy = pgTable("deputy", {
+  id: text("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  // Legislature folder holding the official photo, null when none exists
+  photoLegislature: text("photo_legislature"),
+  syncedAt: text("synced_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
+// Who proposed and cosigned each bill. The political group is the one the
+// person belonged to when signing, not their current one.
+export const pollAuthor = pgTable(
+  "poll_author",
+  {
+    pollId: text("poll_id")
+      .notNull()
+      .references(() => poll.id, { onDelete: "cascade" }),
+    deputyId: text("deputy_id")
+      .notNull()
+      .references(() => deputy.id),
+    role: text("role", { enum: ["author", "cosignatory"] }).notNull(),
+    position: integer("position").notNull(),
+    signedAt: text("signed_at"),
+    groupName: text("group_name"),
+    groupAbbrev: text("group_abbrev"),
+    groupColor: text("group_color"),
+  },
+  (t) => [unique().on(t.pollId, t.deputyId)]
+);
