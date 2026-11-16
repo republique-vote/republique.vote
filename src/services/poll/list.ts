@@ -16,6 +16,10 @@ const CLOSED = sql`(${poll.status} IN ('closed', 'tallied') OR (${poll.status} =
 const DEPUTY_VOTERS = sql<
   number | null
 >`${legislativeFile.officialFor} + ${legislativeFile.officialAgainst} + ${legislativeFile.officialAbstentions}`;
+// Same for the Senate's public vote on the whole text
+const SENATOR_VOTERS = sql<
+  number | null
+>`${legislativeFile.senateFor} + ${legislativeFile.senateAgainst} + ${legislativeFile.senateAbstentions}`;
 
 function statusFilter(status: PollListStatus) {
   if (status === "open") {
@@ -64,6 +68,7 @@ export async function listPolls({
       voteCount: count(voteRecord.id),
       simpleSentence: pollSummary.simpleSentence,
       deputyVoters: DEPUTY_VOTERS,
+      senatorVoters: SENATOR_VOTERS,
     })
     .from(poll)
     .leftJoin(voteRecord, eq(voteRecord.pollId, poll.id))
@@ -72,12 +77,12 @@ export async function listPolls({
     .where(filters)
     .groupBy(poll.id, pollSummary.simpleSentence, legislativeFile.id)
     .orderBy(
-      // Citizen votes first, then turnout at the Assemblée: until citizens
-      // vote, the texts most voted by deputies come first
+      // Citizen votes first, then members of parliament who voted: until
+      // citizens vote, the texts most voted in Parliament come first
       ...(sort === "votes"
         ? [
             desc(count(voteRecord.id)),
-            sql`${DEPUTY_VOTERS} DESC NULLS LAST`,
+            sql`COALESCE(${DEPUTY_VOTERS}, 0) + COALESCE(${SENATOR_VOTERS}, 0) DESC`,
             desc(poll.createdAt),
           ]
         : [
@@ -93,6 +98,7 @@ export async function listPolls({
       ...p,
       voteCount: Number(p.voteCount),
       deputyVoters: p.deputyVoters === null ? null : Number(p.deputyVoters),
+      senatorVoters: p.senatorVoters === null ? null : Number(p.senatorVoters),
     })),
     currentPage: page,
     pageCount: Math.ceil(itemCount / limit),

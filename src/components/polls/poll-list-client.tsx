@@ -38,6 +38,8 @@ interface PollListItem {
   description: string;
   endDate: string | null;
   id: string;
+  // Senators who voted on the text by public ballot, null when not voted so
+  senatorVoters: number | null;
   // Plain-language sentence from the AI summary, when one exists
   simpleSentence: string | null;
   startDate: string;
@@ -142,6 +144,9 @@ function PollCard({ poll: p }: { poll: PollListItem }) {
             {p.deputyVoters === null
               ? ""
               : ` · ${p.deputyVoters} député${p.deputyVoters > 1 ? "s" : ""}`}
+            {p.senatorVoters === null
+              ? ""
+              : ` · ${p.senatorVoters} sénateur${p.senatorVoters > 1 ? "s" : ""}`}
           </span>
           {getTimeLabel(p) && (
             <span className="text-muted-foreground text-xs">
