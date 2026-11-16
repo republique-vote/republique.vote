@@ -20,6 +20,13 @@ import {
 import { VerifyVoteDialog } from "@/components/polls/verify-vote-dialog";
 import { Button } from "@/components/ui/button";
 import { CopyableHash } from "@/components/ui/copyable-hash";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { useHydrated } from "@/lib/use-hydrated";
 import { useSession } from "@/services/auth/client";
 import {
@@ -132,6 +139,7 @@ export function PollDetailClient({
     createdAt: string;
   } | null>(null);
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const isOpen =
     poll.status === "open" &&
     (!poll.endDate || new Date(poll.endDate).getTime() > Date.now());
@@ -242,68 +250,90 @@ export function PollDetailClient({
     return `Votre avis sur ce texte ? · ${voteCountLabel}`;
   })();
 
+  // On phones the vote block sits at the bottom of the page: the bar opens
+  // the same block in a drawer. Dialogs open once the drawer is closed, so the
+  // two never fight over focus
+  const fromDrawer = (action: () => void) => () => {
+    setDrawerOpen(false);
+    action();
+  };
+
+  const voteSummary = (
+    <>
+      {voteCountLabel}
+      {" · "}
+      {(() => {
+        if (isOpen && poll.endDate) {
+          return (
+            <>
+              Jusqu&apos;au {formatDate(poll.endDate)} ·{" "}
+              {countdown || "Vote terminé"}
+            </>
+          );
+        }
+        if (isOpen) {
+          return <>Depuis le {formatDate(poll.startDate)}</>;
+        }
+        return (
+          <>
+            Du {formatDate(poll.startDate)}
+            {poll.endDate ? <> au {formatDate(poll.endDate)}</> : null}
+          </>
+        );
+      })()}
+    </>
+  );
+
+  const voteBody = (inDrawer: boolean) => {
+    const wrap = (action: () => void) =>
+      inDrawer ? fromDrawer(action) : action;
+    return (
+      <>
+        {voteState === "success" && (
+          <VoteSuccessAlert
+            onShowProof={wrap(() => setConfirmOpen(true))}
+            onVerify={wrap(() => setVerifyOpen(true))}
+          />
+        )}
+
+        {voteState === "error" && <VoteErrorAlert message={errorMessage} />}
+
+        {isAuthenticated && hasVoted && voteState !== "success" && (
+          <AlreadyVotedAlert onVerify={wrap(() => setVerifyOpen(true))} />
+        )}
+
+        {isOpen && !isAuthenticated && (
+          <LoginRequiredAlert continueUrl={`/polls/${poll.id}`} />
+        )}
+
+        <VoteOptions
+          canVote={canVote}
+          onSelect={setSelectedOption}
+          onVote={wrap(() => setConfirmOpen(true))}
+          options={options}
+          results={results}
+          selectedOption={selectedOption}
+          voting={voteState === "voting"}
+        />
+      </>
+    );
+  };
+
   return (
     <section
       className="scroll-mt-6 border border-border bg-card p-4"
       ref={voteBlockRef}
     >
       <h2 className="font-medium text-sm">Voter</h2>
-      <p className="mt-1 mb-4 text-muted-foreground text-xs">
-        {voteCountLabel}
-        {" · "}
-        {(() => {
-          if (isOpen && poll.endDate) {
-            return (
-              <>
-                Jusqu&apos;au {formatDate(poll.endDate)} ·{" "}
-                {countdown || "Vote terminé"}
-              </>
-            );
-          }
-          if (isOpen) {
-            return <>Depuis le {formatDate(poll.startDate)}</>;
-          }
-          return (
-            <>
-              Du {formatDate(poll.startDate)}
-              {poll.endDate ? <> au {formatDate(poll.endDate)}</> : null}
-            </>
-          );
-        })()}
-      </p>
+      <p className="mt-1 mb-4 text-muted-foreground text-xs">{voteSummary}</p>
 
-      {voteState === "success" && (
-        <VoteSuccessAlert
-          onShowProof={() => setConfirmOpen(true)}
-          onVerify={() => setVerifyOpen(true)}
-        />
-      )}
-
-      {voteState === "error" && <VoteErrorAlert message={errorMessage} />}
-
-      {isAuthenticated && hasVoted && voteState !== "success" && (
-        <AlreadyVotedAlert onVerify={() => setVerifyOpen(true)} />
-      )}
+      {voteBody(false)}
 
       <VerifyVoteDialog
         initialToken={voteToken}
         onOpenChange={setVerifyOpen}
         open={verifyOpen}
         pollId={poll.id}
-      />
-
-      {isOpen && !isAuthenticated && (
-        <LoginRequiredAlert continueUrl={`/polls/${poll.id}`} />
-      )}
-
-      <VoteOptions
-        canVote={canVote}
-        onSelect={setSelectedOption}
-        onVote={() => setConfirmOpen(true)}
-        options={options}
-        results={results}
-        selectedOption={selectedOption}
-        voting={voteState === "voting"}
       />
 
       <VoteDialog
@@ -348,8 +378,18 @@ export function PollDetailClient({
       <MobileVoteBar
         canVote={canVote}
         label={mobileBarLabel}
+        onOpen={() => setDrawerOpen(true)}
         targetRef={voteBlockRef}
       />
+      <Drawer onOpenChange={setDrawerOpen} open={drawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Voter</DrawerTitle>
+            <DrawerDescription>{voteSummary}</DrawerDescription>
+          </DrawerHeader>
+          <div className="overflow-y-auto px-4 pb-6">{voteBody(true)}</div>
+        </DrawerContent>
+      </Drawer>
     </section>
   );
 }

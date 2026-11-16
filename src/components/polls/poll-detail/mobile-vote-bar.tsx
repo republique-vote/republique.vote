@@ -3,15 +3,17 @@
 import { type RefObject, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-// On phones the vote block sits at the bottom of the page: this bar keeps it
-// one tap away, and hides itself once the block is on screen
+// On phones the vote block sits at the bottom of the page: this bar opens it
+// in a drawer, and hides itself once the block is on screen
 export function MobileVoteBar({
   canVote,
   label,
+  onOpen,
   targetRef,
 }: {
   canVote: boolean;
   label: string;
+  onOpen: () => void;
   targetRef: RefObject<HTMLElement | null>;
 }) {
   const [targetVisible, setTargetVisible] = useState(false);
@@ -37,12 +39,7 @@ export function MobileVoteBar({
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3">
         <p className="text-muted-foreground text-sm">{label}</p>
         <Button
-          onClick={() =>
-            targetRef.current?.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            })
-          }
+          onClick={onOpen}
           type="button"
           variant={canVote ? "default" : "outline"}
         >
