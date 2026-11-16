@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { DeputyAvatar } from "@/components/polls/poll-detail/deputy-avatar";
+import { HEMICYCLE_PLAN } from "@/components/polls/poll-detail/hemicycle-plan";
 import { VOTE_FILL_CLASSES } from "@/components/polls/poll-detail/vote-colors";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,6 +34,8 @@ export interface HemicycleVote {
   lastName: string;
   photoLegislature: string | null;
   position: SeatPosition;
+  // Seat number in the hemicycle, null when unknown
+  seat: number | null;
 }
 
 interface Seat {
@@ -40,7 +43,7 @@ interface Seat {
   label: string;
   photoUrl: string | null;
   position: SeatPosition;
-  voterId: string | null;
+  voterId: string;
   x: number;
   y: number;
 }
@@ -75,44 +78,22 @@ const POSITION_CLASSES: Record<SeatPosition, string> = {
   absent: "fill-muted stroke-border",
 };
 
-const ROWS = 16;
-const INNER_RADIUS = 90;
-const OUTER_RADIUS = 300;
-
-// Math.sin and Math.cos can differ in the last digits between the server and
-// the browser, which breaks hydration: keep two decimals
-function round(value: number) {
-  return Math.round(value * 100) / 100;
-}
-
-// Parliament chart: rows of seats on concentric half circles, each row holding
-// seats in proportion to its length, then every seat sorted from left to right
-function layoutSeats(total: number) {
-  const radii = Array.from(
-    { length: ROWS },
-    (_, i) => INNER_RADIUS + (i * (OUTER_RADIUS - INNER_RADIUS)) / (ROWS - 1)
-  );
-  const radiusSum = radii.reduce((a, b) => a + b, 0);
-  const perRow = radii.map((r) => Math.round((total * r) / radiusSum));
-  perRow[ROWS - 1] += total - perRow.reduce((a, b) => a + b, 0);
-
-  const seats = radii.flatMap((radius, row) =>
-    Array.from({ length: perRow[row] }, (_, i) => {
-      const angle = Math.PI * (1 - i / Math.max(perRow[row] - 1, 1));
-      return {
-        angle,
-        x: round(OUTER_RADIUS + radius * Math.cos(angle)),
-        y: round(OUTER_RADIUS - radius * Math.sin(angle)),
-      };
-    })
-  );
-  // Proportional rows give every row the same distance between seats
-  const spacing = Math.min(
-    (Math.PI * radiusSum) / Math.max(total, 1),
-    (OUTER_RADIUS - INNER_RADIUS) / (ROWS - 1)
-  );
-  return { seats: seats.sort((a, b) => b.angle - a.angle), spacing };
-}
+// Seats of the real room, numbered as in the Assemblée, with its aisles
+const PLAN = Object.entries(HEMICYCLE_PLAN).map(([seat, [x, y]]) => ({
+  seat: Number(seat),
+  x,
+  y,
+}));
+const SEAT_RADIUS = 6;
+const MARGIN = SEAT_RADIUS + 2;
+const xs = PLAN.map((p) => p.x);
+const ys = PLAN.map((p) => p.y);
+const VIEW_BOX = {
+  x: Math.min(...xs) - MARGIN,
+  y: Math.min(...ys) - MARGIN,
+  width: Math.max(...xs) - Math.min(...xs) + MARGIN * 2,
+  height: Math.max(...ys) - Math.min(...ys) + MARGIN * 2,
+};
 
 // Thicker outline on the active seat, thin one on empty (absent) seats
 function seatStroke(seat: Seat, isActive: boolean) {
@@ -143,42 +124,28 @@ export function DeputyHemicycle({
     [groups]
   );
 
+  // Each member at their own seat; seats nobody holds stay empty
   const seats = useMemo(() => {
-    const occupants = ordered.flatMap((group) => {
-      const members = votes
-        .filter((v) => v.groupRef === group.groupRef)
-        .map((v) => ({
-          position: v.position,
-          voterId: v.id,
-          label: fullName(v),
-          photoUrl: deputyPhotoUrl(v.id, v.photoLegislature),
-        }));
-      const absent = Math.max(group.members - members.length, 0);
-      return [
-        ...members,
-        ...Array.from({ length: absent }, () => ({
-          position: "absent" as const,
-          voterId: null,
-          photoUrl: null,
-          // The group roster could not be matched: no name rather than a wrong one
-          label: "Député absent",
-        })),
-      ]
-        .sort(
-          (a, b) =>
-            POSITION_ORDER.indexOf(a.position) -
-            POSITION_ORDER.indexOf(b.position)
-        )
-        .map((occupant) => ({ ...occupant, groupName: group.name }));
+    const groupNames = new Map(groups.map((g) => [g.groupRef, g.name]));
+    const bySeat = new Map(
+      votes.filter((v) => v.seat !== null).map((v) => [v.seat, v])
+    );
+    return PLAN.map((place): Seat | null => {
+      const vote = bySeat.get(place.seat);
+      if (!vote) {
+        return null;
+      }
+      return {
+        groupName: groupNames.get(vote.groupRef) ?? "",
+        label: fullName(vote),
+        photoUrl: deputyPhotoUrl(vote.id, vote.photoLegislature),
+        position: vote.position,
+        voterId: vote.id,
+        x: place.x,
+        y: place.y,
+      };
     });
-    const layout = layoutSeats(occupants.length);
-    return {
-      list: occupants.map(
-        (occupant, i): Seat => ({ ...occupant, ...layout.seats[i] })
-      ),
-      spacing: layout.spacing,
-    };
-  }, [ordered, votes]);
+  }, [groups, votes]);
 
   const normalizedQuery = query
     .trim()
@@ -196,15 +163,13 @@ export function DeputyHemicycle({
         )
       : [];
   const highlighted = new Set(matches.map((m) => m.id));
-  // Leaves a visible gap between neighbouring seats
-  const seatRadius = round(seats.spacing * 0.4);
-  const viewBox = {
-    x: -seatRadius - 1,
-    y: -seatRadius - 1,
-    width: OUTER_RADIUS * 2 + seatRadius * 2 + 2,
-    height: OUTER_RADIUS + seatRadius * 2 + 2,
-  };
-  const activeSeat = active === null ? null : seats.list[active];
+  const viewBox = VIEW_BOX;
+  const seatRadius = SEAT_RADIUS;
+  const activeSeat = active === null ? null : seats[active];
+  // Members counted by their group but missing from the chart
+  const unplaced =
+    groups.reduce((sum, g) => sum + g.members, 0) -
+    seats.filter((seat) => seat !== null).length;
 
   return (
     <section className="mt-6 space-y-4 border border-border p-4">
@@ -212,7 +177,7 @@ export function DeputyHemicycle({
 
       <div className="relative">
         <svg
-          aria-label="Hémicycle : vote de chaque député, groupes placés de gauche à droite comme dans l'Assemblée"
+          aria-label="Hémicycle : vote de chaque député, à sa place dans l'Assemblée"
           className="w-full"
           onPointerLeave={() => setActive(null)}
           onPointerOver={(event) => {
@@ -224,23 +189,32 @@ export function DeputyHemicycle({
           role="img"
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
         >
-          {seats.list.map((seat, i) => (
-            <circle
-              className={`${POSITION_CLASSES[seat.position]} ${
-                highlighted.size > 0 &&
-                !(seat.voterId && highlighted.has(seat.voterId))
-                  ? "opacity-20"
-                  : ""
-              } ${active === i ? "stroke-foreground" : ""}`}
-              cx={seat.x}
-              cy={seat.y}
-              data-seat={i}
-              // biome-ignore lint/suspicious/noArrayIndexKey: seats have no identity beyond their place
-              key={i}
-              r={seatRadius}
-              strokeWidth={seatStroke(seat, active === i)}
-            />
-          ))}
+          {seats.map((seat, i) =>
+            seat ? (
+              <circle
+                className={`${POSITION_CLASSES[seat.position]} ${
+                  highlighted.size > 0 && !highlighted.has(seat.voterId)
+                    ? "opacity-20"
+                    : ""
+                } ${active === i ? "stroke-foreground" : ""}`}
+                cx={seat.x}
+                cy={seat.y}
+                data-seat={i}
+                key={PLAN[i].seat}
+                r={seatRadius}
+                strokeWidth={seatStroke(seat, active === i)}
+              />
+            ) : (
+              <circle
+                className="fill-none stroke-border"
+                cx={PLAN[i].x}
+                cy={PLAN[i].y}
+                key={PLAN[i].seat}
+                r={seatRadius}
+                strokeWidth={0.75}
+              />
+            )
+          )}
         </svg>
         {/* One tooltip for the whole chart, anchored on the active seat: a
             tooltip per seat would mean hundreds of instances */}
@@ -261,13 +235,11 @@ export function DeputyHemicycle({
               collisionPadding={8}
               sideOffset={4}
             >
-              {activeSeat.voterId ? (
-                <DeputyAvatar
-                  name={activeSeat.label}
-                  photoUrl={activeSeat.photoUrl}
-                  size={32}
-                />
-              ) : null}
+              <DeputyAvatar
+                name={activeSeat.label}
+                photoUrl={activeSeat.photoUrl}
+                size={32}
+              />
               <p>
                 <span className="font-medium">{activeSeat.label}</span>
                 <br />
@@ -298,6 +270,9 @@ export function DeputyHemicycle({
       <p className="text-muted-foreground text-xs leading-relaxed">
         Un député absent n'est pas forcément inactif : il peut être en
         commission, en circonscription ou en déplacement au moment du vote.
+        {unplaced > 0
+          ? ` ${unplaced} député${unplaced > 1 ? "s" : ""} dont la place n'est pas connue ${unplaced > 1 ? "sont comptés" : "est compté"} seulement dans le détail par groupe.`
+          : ""}
       </p>
 
       <div className="space-y-2">

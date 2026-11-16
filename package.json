@@ -13,6 +13,7 @@
     "sync:assembly": "tsx scripts/sync-assembly.ts",
     "sync:authors": "tsx scripts/sync-authors.ts",
     "sync:votes": "tsx scripts/sync-votes.ts",
+    "extract:hemicycle": "tsx scripts/extract-hemicycle.ts",
     "summarize": "tsx scripts/summarize.ts",
     "summarize:prototype": "tsx scripts/summarize-prototype.ts",
     "db:push": "npx drizzle-kit push",
