@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { VOTE_FILL_CLASSES } from "@/components/polls/poll-detail/vote-colors";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
@@ -65,9 +66,7 @@ const SEARCH_RESULTS: Record<SeatPosition, string> = {
 };
 
 const POSITION_CLASSES: Record<SeatPosition, string> = {
-  for: "fill-[#18753c] dark:fill-[#27a658]",
-  against: "fill-[#ce0500] dark:fill-[#ff5655]",
-  abstention: "fill-[#b34000] dark:fill-[#fc5d00]",
+  ...VOTE_FILL_CLASSES,
   nonVoting: "fill-muted-foreground",
   absent: "fill-muted stroke-border",
 };

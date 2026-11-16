@@ -1,5 +1,6 @@
 import { formatDay } from "@republique/core";
 import { ExternalLink } from "lucide-react";
+import { VOTE_BG_CLASSES } from "@/components/polls/poll-detail/vote-colors";
 
 interface OfficialResultProps {
   citizenResults: {
@@ -39,19 +40,19 @@ export function OfficialResult({
           <p className="mb-3 font-medium text-sm">Résultat des députés</p>
           <div className="space-y-2">
             <ResultBar
-              color="bg-green-600"
+              color={VOTE_BG_CLASSES.for}
               count={officialFor}
               label="Pour"
               total={officialTotal}
             />
             <ResultBar
-              color="bg-red-500"
+              color={VOTE_BG_CLASSES.against}
               count={officialAgainst}
               label="Contre"
               total={officialTotal}
             />
             <ResultBar
-              color="bg-muted-foreground"
+              color={VOTE_BG_CLASSES.abstention}
               count={officialAbstentions}
               label="Abstention"
               total={officialTotal}
@@ -82,17 +83,17 @@ export function OfficialResult({
             <>
               <div className="space-y-2">
                 <ResultBar
-                  color="bg-green-600"
+                  color={VOTE_BG_CLASSES.for}
                   label="Pour"
                   percentage={citizenResults.forPercentage}
                 />
                 <ResultBar
-                  color="bg-red-500"
+                  color={VOTE_BG_CLASSES.against}
                   label="Contre"
                   percentage={citizenResults.againstPercentage}
                 />
                 <ResultBar
-                  color="bg-muted-foreground"
+                  color={VOTE_BG_CLASSES.abstention}
                   label="Abstention"
                   percentage={citizenResults.abstentionPercentage}
                 />
