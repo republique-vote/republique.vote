@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { OfficialResult } from "@/components/polls/poll-detail/official-result";
+import { PollAuthors } from "@/components/polls/poll-detail/poll-authors";
 import { PollSummary } from "@/components/polls/poll-detail/poll-summary";
 import { PollDetailClient } from "@/components/polls/poll-detail-client";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import {
   pollSummary,
 } from "@/db/schema";
 import { constructMetadata } from "@/lib/metadata";
+import { findPollAuthors } from "@/services/assembly/authors";
 import { auth } from "@/services/auth";
 import { getPollResults } from "@/services/poll/results";
 
@@ -58,6 +60,8 @@ export default async function PollDetailPage({
   const summary = await db.query.pollSummary.findFirst({
     where: eq(pollSummary.pollId, pollId),
   });
+
+  const authors = await findPollAuthors(pollId);
 
   const options = await db
     .select()
@@ -111,6 +115,11 @@ export default async function PollDetailPage({
         {summary ? (
           <div className="mt-4">
             <PollSummary pollId={p.id} summary={summary} />
+          </div>
+        ) : null}
+        {authors.length > 0 ? (
+          <div className="mt-4">
+            <PollAuthors authors={authors} />
           </div>
         ) : null}
         <div className="mt-4">
